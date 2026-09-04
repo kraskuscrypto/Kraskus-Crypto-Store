@@ -1,0 +1,198 @@
+services:
+  app_proxy:
+    environment:
+      APP_HOST: compatibility
+      APP_PORT: 18403
+
+  compatibility:
+    image: ghcr.io/kraskuscrypto/kraskus-zec-solo@sha256:9ac6eabf4ebed6b0474b9d37d3cc241a6a0259a26b3b3c88df37d00607976db4
+    restart: unless-stopped
+    entrypoint:
+      - python3
+      - -c
+      - "import os; exec(os.environ['COMPAT_SCRIPT'])"
+    environment:
+      PORT: "18403"
+      COMPAT_SCRIPT: |
+        import json, os, shutil, subprocess, time
+        from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+        from pathlib import Path
+
+        CLI = Path('/host/5tratumos')
+        STORE = Path('/host/store.json')
+        DATA = Path('/data')
+        PORT = int(os.environ.get('PORT', '18403'))
+        D = chr(36)
+        MARK_UPDATE = '# KRASKUS_DYNAMIC_CUSTOM_UPDATE_V2'
+        MARK_META = '# KRASKUS_DYNAMIC_CUSTOM_META_V2'
+
+        status = {'state':'CHECKING','detail':'Checking this 5tratumOS installation.'}
+
+        def set_status(state, detail, backup=''):
+            status.update(state=state, detail=detail, backup=backup)
+            DATA.mkdir(parents=True, exist_ok=True)
+            (DATA/'status.json').write_text(json.dumps(status, indent=2), encoding='utf-8')
+
+        def configured_store_present():
+            if not STORE.is_file():
+                return False
+            try:
+                cfg = json.loads(STORE.read_text(encoding='utf-8'))
+                custom = cfg.get('custom', {}) if isinstance(cfg, dict) else {}
+                return isinstance(custom, dict) and any(
+                    isinstance(v, dict) and str(v.get('url') or '').strip()
+                    for v in custom.values()
+                )
+            except Exception:
+                return False
+
+        def build_update_replacement(indent):
+            return [
+                indent + MARK_UPDATE + '\n',
+                indent + 'main|dev|global|custom1|custom2)\n',
+                indent + '  ;;\n',
+                indent + 'custom*)\n',
+                indent + '  [[ "' + D + '{ch}" =~ ^custom[-_a-z0-9]{0,48}$ ]] ||\n',
+                indent + '    die "invalid channel: ' + D + '{ch}"\n',
+                indent + '  [ -d "' + D + '{ROOT_DIR}/store/' + D + '{ch}" ] ||\n',
+                indent + '    die "custom channel is not synced: ' + D + '{ch}"\n',
+                indent + '  ;;\n',
+            ]
+
+        def build_meta_replacement(indent):
+            return [
+                indent + MARK_META + '\n',
+                indent + 'main|dev|global|custom1|custom2)\n',
+                indent + '  meta_ch="' + D + '{meta_channel}"\n',
+                indent + '  ;;\n',
+                indent + 'custom*)\n',
+                indent + '  if [[ "' + D + '{meta_channel}" =~ ^custom[-_a-z0-9]{0,48}$ ]] &&\n',
+                indent + '     [ -d "' + D + '{ROOT_DIR}/store/' + D + '{meta_channel}" ]; then\n',
+                indent + '    meta_ch="' + D + '{meta_channel}"\n',
+                indent + '  fi\n',
+                indent + '  ;;\n',
+            ]
+
+        def repair_text(text):
+            if MARK_UPDATE in text and MARK_META in text:
+                return text, 'already'
+
+            lines = text.splitlines(keepends=True)
+            stale_update = 'main|dev|global|custom1|custom2) ;;'
+            stale_meta = 'main|dev|global|custom1|custom2) meta_ch="' + D + '{meta_channel}" ;;'
+
+            update_hits = [i for i, line in enumerate(lines) if line.strip() == stale_update]
+            meta_hits = [i for i, line in enumerate(lines) if line.strip() == stale_meta]
+
+            if len(update_hits) != 1 or len(meta_hits) != 1:
+                raise ValueError(
+                    'expected exactly one stale app-update channel line and one stale metadata-channel line; '
+                    'found update=%d meta=%d' % (len(update_hits), len(meta_hits))
+                )
+
+            ui = update_hits[0]
+            mi = meta_hits[0]
+            if ui >= mi:
+                raise ValueError('unexpected lifecycle validation ordering')
+
+            uindent = lines[ui][:len(lines[ui]) - len(lines[ui].lstrip())]
+            mindent = lines[mi][:len(lines[mi]) - len(lines[mi].lstrip())]
+
+            lines[ui:ui+1] = build_update_replacement(uindent)
+            shift = len(build_update_replacement(uindent)) - 1
+            mi += shift
+            lines[mi:mi+1] = build_meta_replacement(mindent)
+
+            repaired = ''.join(lines)
+            return repaired, 'patched'
+
+        def verified(text):
+            stale_update = 'main|dev|global|custom1|custom2) ;;'
+            stale_meta = 'main|dev|global|custom1|custom2) meta_ch="' + D + '{meta_channel}" ;;'
+            return (
+                MARK_UPDATE in text
+                and MARK_META in text
+                and stale_update not in text
+                and stale_meta not in text
+                and '^custom[-_a-z0-9]{0,48}$' in text
+                and 'custom channel is not synced:' in text
+            )
+
+        def run_fix():
+            try:
+                if not CLI.is_file():
+                    set_status('FAIL', 'The 5tratumOS host CLI was not available. No changes were made.')
+                    return
+
+                text = CLI.read_text(encoding='utf-8')
+                if verified(text):
+                    set_status('READY', 'Compatibility is already installed. Legacy and current Kraskus custom-store channel names are supported.')
+                    return
+
+                if not configured_store_present():
+                    set_status('FAIL', 'Custom store configuration could not be verified. The host was left unchanged.')
+                    return
+
+                try:
+                    repaired, mode = repair_text(text)
+                except Exception as exc:
+                    set_status('FAIL', 'Unsupported or partially compatible 5tratumOS CLI layout. The host was left unchanged: ' + str(exc))
+                    return
+
+                if mode == 'already' and verified(repaired):
+                    set_status('READY', 'Compatibility is already installed.')
+                    return
+
+                DATA.mkdir(parents=True, exist_ok=True)
+                stamp = time.strftime('%Y%m%d-%H%M%S', time.gmtime())
+                backup = DATA / ('5tratumos.pre-kraskus-compat-' + stamp)
+                shutil.copy2(CLI, backup)
+                CLI.write_text(repaired, encoding='utf-8')
+
+                check = subprocess.run(['/bin/bash','-n',str(CLI)], capture_output=True, text=True)
+                if check.returncode != 0:
+                    shutil.copy2(backup, CLI)
+                    set_status('FAIL', 'Validation failed, so the original 5tratumOS CLI was restored automatically.', str(backup))
+                    return
+
+                final = CLI.read_text(encoding='utf-8')
+                if not verified(final):
+                    shutil.copy2(backup, CLI)
+                    set_status('FAIL', 'Post-repair app lifecycle validation failed, so the original 5tratumOS CLI was restored automatically.', str(backup))
+                    return
+
+                set_status('READY', 'Compatibility update completed successfully. Legacy and current Kraskus channel names are supported.', str(backup))
+            except Exception as exc:
+                set_status('FAIL', 'Compatibility setup failed safely: ' + str(exc))
+
+        run_fix()
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                if self.path == '/status.json':
+                    body = json.dumps(status).encode()
+                    self.send_response(200); self.send_header('Content-Type','application/json'); self.send_header('Cache-Control','no-store'); self.send_header('Content-Length',str(len(body))); self.end_headers(); self.wfile.write(body); return
+                ready = status['state'] == 'READY'
+                if ready:
+                    message = 'Thank you for updating. You may now uninstall this app.'
+                    sub = 'Compatibility setup is complete.'
+                    accent = '#3ee98b'
+                else:
+                    message = 'Compatibility setup needs attention.'
+                    sub = status['detail']
+                    accent = '#ffbf5f'
+                page = '''<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kraskus Compatibility</title><style>*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 15%,#102a47 0,#06111e 32%,#02060b 70%);color:#fff;font-family:Inter,system-ui,-apple-system,sans-serif;display:grid;place-items:center}.card{width:min(980px,calc(100% - 40px));padding:42px;border:1px solid #0d72c9;border-radius:26px;background:rgba(2,9,17,.9);box-shadow:0 0 80px rgba(0,138,255,.18);text-align:center}.logo{width:min(310px,55vw);height:auto;filter:drop-shadow(0 0 24px rgba(0,160,255,.35))}.brand{font-size:clamp(28px,5vw,58px);font-weight:900;letter-spacing:.12em;margin:14px 0 0}.compat{font-size:clamp(16px,2.5vw,28px);letter-spacing:.35em;color:#159cff;margin:4px 0 30px}.status{margin:0 auto;max-width:760px;padding:24px;border:1px solid #1769a8;border-radius:18px;background:#06131f}.check{font-size:48px;color:ACCENT}.message{font-size:clamp(22px,3vw,34px);font-weight:800;margin:10px 0}.sub{font-size:18px;color:#9fc2e0;margin:0}</style></head><body><main class="card"><img class="logo" src="https://raw.githubusercontent.com/kraskuscrypto/Kraskus-Crypto-Store/main/kraskus-compatibility/assets/kraskus-compatibility-logo.svg" alt="Kraskus Compatibility"><div class="brand">KRASKUS</div><div class="compat">COMPATIBILITY</div><section class="status"><div class="check">CHECK</div><div class="message">MESSAGE</div><p class="sub">SUB</p></section></main></body></html>'''
+                page = page.replace('ACCENT', accent).replace('CHECK', '✓' if ready else '!').replace('MESSAGE', message).replace('SUB', sub)
+                body = page.encode()
+                self.send_response(200); self.send_header('Content-Type','text/html; charset=utf-8'); self.send_header('Cache-Control','no-store'); self.send_header('Content-Length',str(len(body))); self.end_headers(); self.wfile.write(body)
+            def log_message(self, *args):
+                pass
+
+        print('Kraskus Compatibility UI listening on 0.0.0.0:%d' % PORT, flush=True)
+        ThreadingHTTPServer(('0.0.0.0', PORT), Handler).serve_forever()
+    volumes:
+      - /usr/local/bin/5tratumos:/host/5tratumos
+      - /etc/5tratumos/store.json:/host/store.json:ro
+      - ${APP_DATA_DIR}/data:/data
+    security_opt:
+      - no-new-privileges:true
