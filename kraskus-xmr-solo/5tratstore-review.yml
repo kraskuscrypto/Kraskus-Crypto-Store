@@ -1,0 +1,122 @@
+schemaVersion: 1
+status: approved
+appId: kraskus-xmr-solo
+appVersion: 0.1.9-beta
+reviewedAt: "2026-09-04"
+reviewedBy: "Kraskus Crypto"
+
+upstream:
+  sourceUrl: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
+  license: mixed
+  licenseEvidence: LICENSES.md
+
+rights:
+  packageOriginal: true
+  softwareDistributionCleared: true
+  containerUseCleared: true
+  listingTextCleared: true
+  artworkCleared: true
+  noticesIncluded: true
+
+delivery:
+  mode: immutable-container-appliance
+  storePayload: recipe-only
+  mirrorsThirdPartyPayload: false
+
+compatibility:
+  osVersions:
+    - Debian-13-5tratumOS-clean-room
+  architectures:
+    - amd64
+  installTested: true
+  startTested: true
+  updateTested: true
+  uninstallTested: true
+
+security:
+  privileged: false
+  hostNetwork: false
+  dockerSocket: false
+  hostMountsReviewed: true
+  devicesReviewed: true
+  networkEndpointsReviewed: true
+
+notes: >-
+  Qualified 0.1.9-beta Official Store package for the Kraskus XMR true-solo
+  appliance. Monero P2P TCP 18080 and the restricted miner endpoint TCP
+  1921 are intentionally published. monerod RPC, adapter, wallet RPC, and
+  wallet API remain on application networks. Blockchain, wallet, runtime,
+  and protected credential state remain below APP_DATA_DIR. Runtime images
+  were built from the canonical Kraskus-Crypto-Apps repository and are
+  pinned by immutable GHCR digests. The automatic developer fee remains
+  exactly 1% of successfully mined block rewards after 60-block maturity.
+  Pending or temporarily failed fee settlement does not lock mining or user
+  wallet sends. Ledger integrity, orphan resolution, retry, prepared-
+  transaction recovery, and double-payment prevention remain enforced.
+  GitHub Actions build run 33825587530 passed all source validation and five
+  linux/amd64 image jobs. VM100 live qualification and VM120 clean-install plus reboot-recovery
+  qualification passed before Official Store promotion.
+
+# 0.1.6-beta release qualification
+#
+# Promotes the qualified XMR runtime image set from
+# Kraskus-Mining-Platform-V2 source commit:
+# ca8d5a6c9ced9e1fe8504fa53a44eb50fd1b08c0
+#
+# Runtime services are pinned to immutable GHCR digests.
+# Full-wallet create/restore stores the local wallet password in an
+# appliance-local mode-0600 credential used by the automatic developer-fee
+# settlement worker. Watch-only wallets remain monitoring-only.
+#
+# Kraskus XMR Solo charges a 0.25% developer fee only on successfully mined
+# block rewards. Settlement occurs automatically after maturity. Miner
+# hashrate is never diverted.
+#
+# The adapter also persists last-known-good node telemetry so the UI can
+# remain useful during temporary monerod RPC timeouts.
+
+
+# 0.1.7-beta release qualification
+#
+# Updates only the XMR UI image to source commit:
+# f69435d4898cfabab4d6e3948f78eef524715fda
+#
+# The wallet setup method controls are now explicitly presented as tabs.
+# Selecting Create New Wallet, Restore Existing Wallet, or Watch-Only switches
+# to the corresponding setup panel, updates accessibility state, and focuses
+# the first relevant field. The lower action button remains the operation that
+# actually creates/restores/configures the wallet.
+#
+# Monerod, adapter, miner gateway, and wallet API remain pinned to the same
+# 0.1.6-beta qualified digests. No wallet, fee-settlement, miner-gateway, or
+# daemon behavior changes are introduced by this package revision.
+
+
+# 0.1.8-beta release qualification
+#
+# Updates only the XMR UI image to source commit:
+# 709e92f478ff1981053bd29e4b478e58562b68f0
+#
+# Corrects the stale hard-coded release labels in the sidebar footer and
+# version service card from v0.1.1-beta to v0.1.8-beta. All wallet setup,
+# wallet/API, daemon, miner-gateway, fee-settlement, storage, and networking
+# behavior remains unchanged from the already-qualified 0.1.7-beta release.
+
+# 0.1.9-beta release qualification
+#
+# Canonical source repository:
+# https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
+#
+# Final immutable image build source:
+# 9b371e3ba75f758098d9b1d63445ba37e8577eb7
+#
+# Canonical release metadata commit:
+# 46076d46195ed346c990d0fa336e8227e97f7b95
+#
+# GitHub Actions build run:
+# 33825587530
+#
+# All five linux/amd64 runtime images are pinned by immutable GHCR digest.
+# Automatic 1% developer-fee settlement remains maturity-gated,
+# retryable, orphan-aware, and double-payment-safe. Pending settlement does
+# not block mining or user wallet sends.
