@@ -24,9 +24,9 @@ compatibility:
   - 0.7.7-custom-store-test
   architectures:
   - amd64
-  installTested: false
-  startTested: false
-  updateTested: false
+  installTested: true
+  startTested: true
+  updateTested: true
   uninstallTested: false
 security:
   privileged: false
@@ -50,8 +50,13 @@ notes: Mysterium upstream requires NET_ADMIN and documents host networking for t
   and immutable sha256 digest before installation. Post-update health, version, persistent
   data, and available identity checks are performed. Failed validation triggers restoration
   of the prior image and backup. The portal itself never receives direct Docker socket
-  access. v2.6.0 keeps the upstream TequilAPI bound to localhost and adds a host-network
+  access. v2.6.0 keeps the upstream TequilAPI bound to IPv4 localhost and adds a host-network
   status collector that writes atomic, read-only JSON snapshots into shared app storage.
   Nginx exposes those snapshot files to the portal with GET/HEAD-only access; it does not
   proxy the TequilAPI or expose its port to the LAN. Node-changing actions continue through
-  the official Mysterium Node UI.
+  the official Mysterium Node UI. VM100 upgrade qualification preserved identity
+  0xd81d6fb238fa698fedcf0b9b2643ded8591f14eb and the pinned 1.39.5 runtime. A clean
+  dev-store installation on the 192.168.1.163 tester generated identity
+  0x7fcab4a87784762620198e10d0d589d828c3f036, started all five services, and produced
+  all 27 expected API snapshots. Reboot recovery and clean uninstall remain required
+  before this proposed package can be approved and merged into the client-facing store.
