@@ -1,0 +1,62 @@
+schemaVersion: 1
+status: proposed
+appId: mysterium-node
+appVersion: 2.6.0
+reviewedAt: ''
+reviewedBy: ''
+upstream:
+  sourceUrl: https://github.com/mysteriumnetwork/node
+  license: GPL-3.0
+  licenseEvidence: https://github.com/mysteriumnetwork/node/blob/master/LICENSE
+rights:
+  packageOriginal: true
+  softwareDistributionCleared: true
+  containerUseCleared: true
+  listingTextCleared: true
+  artworkCleared: false
+  noticesIncluded: true
+delivery:
+  mode: direct-upstream-artifact
+  storePayload: recipe-only
+  mirrorsThirdPartyPayload: false
+compatibility:
+  osVersions:
+  - 0.7.7-custom-store-test
+  architectures:
+  - amd64
+  installTested: true
+  startTested: true
+  updateTested: true
+  uninstallTested: false
+security:
+  privileged: false
+  hostNetwork: true
+  dockerSocket: true
+  hostMountsReviewed: true
+  devicesReviewed: true
+  networkEndpointsReviewed: true
+notes: Mysterium upstream requires NET_ADMIN and documents host networking for the
+  Docker node so the VPN service IP can be detected and published correctly. The portal
+  is served by an official nginx image behind 5tratumOS app_proxy. The New User action
+  opens a disclosed Kraskus MystNodes referral URL. Kraskus maintains the 5tratumOS
+  packaging and onboarding experience. The node runtime itself is the official upstream
+  Mysterium Network container. New-user onboarding includes a disclosed Kraskus MystNodes
+  referral URL; existing users can bypass referral signup. v2.5.0 adds a private
+  update-agent sidecar using the pinned Docker CLI image. The update-agent is not exposed
+  through a host port; nginx reaches it only on the private Compose network. It has Docker
+  socket access specifically to pull, stop, recreate, verify, and if necessary roll back
+  the Mysterium service. Before changing the node image it stops the node and creates a
+  persistent backup. The requested upstream image is checked for an exact semantic version
+  and immutable sha256 digest before installation. Post-update health, version, persistent
+  data, and available identity checks are performed. Failed validation triggers restoration
+  of the prior image and backup. The portal itself never receives direct Docker socket
+  access. v2.6.0 keeps the upstream TequilAPI bound to IPv4 localhost and adds a host-network
+  status collector that writes atomic, read-only JSON snapshots into shared app storage.
+  Nginx exposes those snapshot files to the portal with GET/HEAD-only access; it does not
+  proxy the TequilAPI or expose its port to the LAN. Node-changing actions continue through
+  the official Mysterium Node UI. VM100 upgrade qualification preserved identity
+  0xd81d6fb238fa698fedcf0b9b2643ded8591f14eb and the pinned 1.39.5 runtime. A clean
+  dev-store installation on the 192.168.1.163 tester generated identity
+  0x7fcab4a87784762620198e10d0d589d828c3f036, started all five services, and produced
+  all 27 expected API snapshots. Reboot recovery and clean uninstall remain required
+  before this proposed package can be approved and merged into the client-facing store.
