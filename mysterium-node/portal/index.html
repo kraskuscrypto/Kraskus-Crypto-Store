@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090912">
+  <title>MystNodes by Kraskus</title>
+  <meta name="description" content="A premium Mysterium node control center for 5tratumOS.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Application navigation">
+      <div class="brand">
+        <div class="brand-mark"><img src="mystnodes-mark.svg" alt="MystNodes"></div>
+        <div><strong>MystNodes</strong><span>by Kraskus</span></div>
+      </div>
+
+      <nav class="nav-list" role="tablist" aria-label="Node sections">
+        <button class="nav-item active" role="tab" aria-selected="true" data-tab="overview"><span class="nav-icon">◈</span><span>Overview</span></button>
+        <button class="nav-item" role="tab" aria-selected="false" data-tab="node"><span class="nav-icon">⌁</span><span>Node</span></button>
+        <button class="nav-item" role="tab" aria-selected="false" data-tab="identity"><span class="nav-icon">◇</span><span>Identity</span></button>
+        <button class="nav-item" role="tab" aria-selected="false" data-tab="earnings"><span class="nav-icon">◎</span><span>Earnings</span></button>
+        <button class="nav-item" role="tab" aria-selected="false" data-tab="sessions"><span class="nav-icon">≋</span><span>Sessions</span></button>
+        <button class="nav-item" role="tab" aria-selected="false" data-tab="settings"><span class="nav-icon">⚙</span><span>Settings</span></button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="node-mini">
+          <span class="pulse-dot"></span>
+          <div><strong>Node online</strong><span>Official runtime · 1.39.5</span></div>
+        </div>
+        <button class="collapse-button" aria-label="Collapse navigation">‹</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">MYSTERIUM NETWORK</p>
+          <h1 id="pageTitle">Node overview</h1>
+        </div>
+        <div class="top-actions">
+          <button class="icon-button" aria-label="Notifications"><span class="notification-dot"></span>◌</button>
+          <button class="button ghost" data-action="view-logs">View logs <span>→</span></button>
+          <button class="button primary" data-action="new-user">Set up new node <span>→</span></button>
+        </div>
+      </header>
+
+      <section class="tab-panel active" id="overview" role="tabpanel">
+        <article class="hero-card">
+          <div class="hero-copy">
+            <div class="status-pill"><span class="pulse-dot"></span> Everything looks good</div>
+            <h2>Your bandwidth is<br><span>working for you.</span></h2>
+            <p>The node is connected, available, and sharing your residential connection through the Mysterium Network.</p>
+            <div class="hero-actions">
+              <button class="button primary" data-action="existing-user">Manage node <span>↗</span></button>
+              <button class="text-button" data-tab-jump="sessions">View live sessions <span>→</span></button>
+            </div>
+          </div>
+          <div class="network-orb" aria-label="Animated visualization of an active network node">
+            <div class="orbit orbit-one"><i></i><i></i><i></i></div>
+            <div class="orbit orbit-two"><i></i><i></i></div>
+            <div class="orb-core"><img src="mystnodes-mark.svg" alt="Mysterium Network"><small>ONLINE</small></div>
+            <div class="signal signal-a"></div><div class="signal signal-b"></div><div class="signal signal-c"></div>
+          </div>
+        </article>
+
+        <div class="metric-grid">
+          <article class="metric-card accent-purple">
+            <div class="metric-head"><span>Total earnings</span><span class="metric-icon">◉</span></div>
+            <strong>24.82 <small>MYST</small></strong>
+            <p><span class="positive">+12.4%</span> from last 30 days</p>
+          </article>
+          <article class="metric-card accent-cyan">
+            <div class="metric-head"><span>Bandwidth shared</span><span class="metric-icon">⇅</span></div>
+            <strong>186.4 <small>GB</small></strong>
+            <p>38.7 GB this month</p>
+          </article>
+          <article class="metric-card accent-pink">
+            <div class="metric-head"><span>Active sessions</span><span class="metric-icon">⌁</span></div>
+            <strong>3</strong>
+            <p>Across 2 service types</p>
+          </article>
+          <article class="metric-card accent-gold">
+            <div class="metric-head"><span>Uptime</span><span class="metric-icon">◷</span></div>
+            <strong>99.8<small>%</small></strong>
+            <p>14 days, 7 hours</p>
+          </article>
+        </div>
+
+        <div class="content-grid">
+          <article class="panel traffic-panel">
+            <div class="panel-head">
+              <div><p class="eyebrow">NETWORK ACTIVITY</p><h3>Bandwidth traffic</h3></div>
+              <div class="range-switch" aria-label="Chart range"><button class="active">7D</button><button>30D</button><button>90D</button></div>
+            </div>
+            <div class="chart-summary"><strong>38.7 GB</strong><span><i></i> Download</span><span><i class="upload"></i> Upload</span></div>
+            <div class="chart" aria-label="Seven day bandwidth chart">
+              <div class="grid-line g1"></div><div class="grid-line g2"></div><div class="grid-line g3"></div>
+              <svg viewBox="0 0 720 180" preserveAspectRatio="none" role="img" aria-label="Bandwidth rose over the last seven days">
+                <defs><linearGradient id="fillA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a846ff" stop-opacity=".38"/><stop offset="1" stop-color="#a846ff" stop-opacity="0"/></linearGradient></defs>
+                <path class="area" d="M0,151 C55,145 66,106 120,116 C176,126 194,76 248,85 C307,95 320,128 373,106 C428,83 453,42 508,58 C566,75 574,92 627,67 C670,47 693,38 720,31 L720,180 L0,180 Z"/>
+                <path class="line purple" d="M0,151 C55,145 66,106 120,116 C176,126 194,76 248,85 C307,95 320,128 373,106 C428,83 453,42 508,58 C566,75 574,92 627,67 C670,47 693,38 720,31"/>
+                <path class="line cyan" d="M0,164 C62,158 83,140 137,146 C190,151 205,122 267,132 C321,140 352,147 400,127 C449,108 472,93 525,105 C582,117 613,92 659,97 C691,99 704,82 720,78"/>
+              </svg>
+              <div class="chart-labels"><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span></div>
+            </div>
+          </article>
+
+          <article class="panel node-health">
+            <div class="panel-head"><div><p class="eyebrow">NODE HEALTH</p><h3>Live status</h3></div><span class="health-score">Excellent</span></div>
+            <div class="health-ring"><div><strong>98</strong><span>health score</span></div></div>
+            <div class="health-list">
+              <div><span>Node service</span><strong><i class="ok"></i> Running</strong></div>
+              <div><span>Network reach</span><strong><i class="ok"></i> Public</strong></div>
+              <div><span>Identity</span><strong><i class="ok"></i> Secured</strong></div>
+              <div><span>Last heartbeat</span><strong>12 sec ago</strong></div>
+            </div>
+          </article>
+        </div>
+
+        <article class="panel sessions-preview">
+          <div class="panel-head"><div><p class="eyebrow">LIVE CONNECTIONS</p><h3>Recent sessions</h3></div><button class="text-button" data-tab-jump="sessions">View all <span>→</span></button></div>
+          <div class="session-row header"><span>Service</span><span>Location</span><span>Duration</span><span>Traffic</span><span>Earned</span><span>Status</span></div>
+          <div class="session-row"><span><i class="service-icon purple-bg">R</i> Residential</span><span>Amsterdam, NL</span><span>42 min</span><span>1.84 GB</span><span>0.18 MYST</span><span class="live"><i></i> Live</span></div>
+          <div class="session-row"><span><i class="service-icon cyan-bg">D</i> Data transfer</span><span>Frankfurt, DE</span><span>18 min</span><span>642 MB</span><span>0.07 MYST</span><span class="live"><i></i> Live</span></div>
+          <div class="session-row"><span><i class="service-icon pink-bg">R</i> Residential</span><span>London, UK</span><span>11 min</span><span>318 MB</span><span>0.03 MYST</span><span class="live"><i></i> Live</span></div>
+        </article>
+      </section>
+
+      <section class="tab-panel detail-page" id="node" role="tabpanel">
+        <div class="detail-hero"><div><div class="status-pill"><span class="pulse-dot"></span> Node service running</div><h2>Official node console</h2><p>Your local Mysterium controls remain inside 5tratumOS.</p></div><button class="button primary" data-action="existing-user">Launch console <span>↗</span></button></div>
+        <div class="detail-grid thirds"><article class="panel"><p class="eyebrow">RUNTIME</p><h3>mysteriumnetwork/myst</h3><div class="big-stat">1.39.5</div><p class="muted-copy">Official pinned container image</p></article><article class="panel"><p class="eyebrow">AVAILABILITY</p><h3>Accepting sessions</h3><div class="big-stat green-text">Online</div><p class="muted-copy">Last heartbeat 12 seconds ago</p></article><article class="panel"><p class="eyebrow">NETWORK</p><h3>Public reachability</h3><div class="big-stat">Ready</div><p class="muted-copy">NAT traversal is functioning</p></article></div>
+        <article class="panel info-panel"><div class="panel-head"><div><p class="eyebrow">SERVICE STATUS</p><h3>Node components</h3></div><span class="health-score">All systems normal</span></div><div class="status-table"><div><span><i class="ok"></i>Node daemon</span><strong>Running</strong><small>14d 7h uptime</small></div><div><span><i class="ok"></i>Discovery</span><strong>Connected</strong><small>8 peers</small></div><div><span><i class="ok"></i>Session service</span><strong>Available</strong><small>3 active</small></div><div><span><i class="ok"></i>Payments</span><strong>Synced</strong><small>Current block</small></div></div></article>
+      </section>
+      <section class="tab-panel detail-page" id="identity" role="tabpanel">
+        <div class="detail-hero identity-hero"><div><p class="eyebrow">PERSISTENT NODE IDENTITY</p><h2>Your node, securely recognized.</h2><p>This identity stays intact across updates and container recreation.</p></div><div class="identity-seal">◇<span>VERIFIED</span></div></div>
+        <div class="detail-grid two"><article class="panel identity-main"><div class="panel-head"><div><p class="eyebrow">NODE ID</p><h3>Identity address</h3></div><span class="health-score">Secured</span></div><div class="identity-address" data-full-identity="0x71A4C2B8E13F0947D6A19D32F84270A6B93CD17B"><span class="identity-value">0x71A4…CD17B</span><button aria-label="Copy complete node identity">Copy full ID</button></div><div class="identity-meta identity-meta-four"><span>Created<strong>August 8, 2026</strong></span><span>Storage<strong>Persistent volume</strong></span><span>Last verified<strong>12 seconds ago</strong></span><span>Backup state<strong class="green-text">Healthy</strong></span></div></article><article class="panel"><p class="eyebrow">ACCOUNT LINK</p><h3>MystNodes account</h3><div class="account-state"><i class="ok"></i><strong>Account connected</strong><span>Node claim is active</span></div><button class="button ghost wide" data-action="dashboard">Open MystNodes dashboard <span>↗</span></button></article></div>
+        <article class="panel callout"><span class="callout-icon">✓</span><div><strong>Identity protection is active</strong><p>Your identity files are stored outside the container so updates will not reset your node.</p></div></article>
+      </section>
+      <section class="tab-panel detail-page" id="earnings" role="tabpanel">
+        <div class="detail-hero earnings-hero"><div><p class="eyebrow">LIFETIME EARNINGS</p><h2>24.82 <small>MYST</small></h2><p>Balances and withdrawals are managed through your linked MystNodes account.</p></div><button class="button ghost" data-action="dashboard">Open payout dashboard <span>↗</span></button></div>
+        <div class="detail-grid thirds"><article class="metric-card accent-purple"><div class="metric-head"><span>Available balance</span><span class="metric-icon">◉</span></div><strong>5.64 <small>MYST</small></strong><p>Eligible for withdrawal</p></article><article class="metric-card accent-gold"><div class="metric-head"><span>Pending settlement</span><span class="metric-icon">◷</span></div><strong>1.07 <small>MYST</small></strong><p>Settlement in progress</p></article><article class="metric-card accent-pink"><div class="metric-head"><span>Lifetime paid out</span><span class="metric-icon">◎</span></div><strong>18.11 <small>MYST</small></strong><p>Last payout August 29</p></article></div>
+        <article class="panel earnings-chart"><div class="panel-head earnings-head"><div><p class="eyebrow">EARNINGS HISTORY</p><h3 id="earningsRangeTitle">Last 30 days</h3></div><div class="earnings-controls"><div class="range-switch" aria-label="Earnings chart range"><button data-earnings-range="7d">7D</button><button class="active" data-earnings-range="30d">30D</button><button data-earnings-range="90d">90D</button><button data-earnings-range="all">All</button></div><strong id="earningsChange">+12.4%</strong></div></div><div class="bar-chart" id="earningsBars" aria-label="Earnings trend"><i tabindex="0"></i><i tabindex="0"></i><i tabindex="0"></i><i tabindex="0"></i><i tabindex="0"></i><i tabindex="0"></i><i tabindex="0"></i><i tabindex="0"></i><i tabindex="0"></i><i tabindex="0"></i><i tabindex="0"></i><i tabindex="0"></i></div><div class="chart-labels" id="earningsLabels"><span>Aug 6</span><span>Aug 13</span><span>Aug 20</span><span>Aug 27</span><span>Sep 4</span></div><div class="settlement-line"><span><i class="ok"></i> Payments synchronized</span><span>Last settlement: 18 minutes ago</span></div></article>
+      </section>
+      <section class="tab-panel detail-page" id="sessions" role="tabpanel">
+        <div class="detail-hero"><div><div class="status-pill"><span class="pulse-dot"></span> 3 sessions active</div><h2>Live network sessions</h2><p>Monitor traffic moving through your node in real time.</p></div><div class="session-total-grid"><div class="session-total"><span>Transferred in active sessions</span><strong>2.8 GB</strong></div><div class="session-total"><span>Current throughput</span><strong>34.8 <small>Mbps</small></strong></div></div></div>
+        <article class="panel session-detail"><div class="panel-head"><div><p class="eyebrow">CURRENT CONNECTIONS</p><h3>Active now</h3></div><select class="filter-button" id="sessionFilter" aria-label="Filter sessions by service"><option value="all">All services</option><option value="residential">Residential</option><option value="data">Data transfer</option><option value="public">Public VPN</option></select></div><div class="session-row header"><span>Service</span><span>Region</span><span>Duration</span><span>Traffic</span><span>Earned</span><span>Status</span></div><div class="session-record" data-service="residential"><div class="session-row expandable" role="button" tabindex="0" aria-expanded="false"><span><i class="service-icon purple-bg">R</i> Residential</span><span>Amsterdam, NL</span><span>42 min</span><span>1.84 GB</span><span>0.18 MYST</span><span class="live"><i></i> Live ›</span></div><div class="session-expanded"><span>Session ID<strong>7F29…A41C</strong></span><span>Started<strong>11:27 AM</strong></span><span>Download<strong>28.4 Mbps</strong></span><span>Upload<strong>6.4 Mbps</strong></span></div></div><div class="session-record" data-service="data"><div class="session-row expandable" role="button" tabindex="0" aria-expanded="false"><span><i class="service-icon cyan-bg">D</i> Data transfer</span><span>Frankfurt, DE</span><span>18 min</span><span>642 MB</span><span>0.07 MYST</span><span class="live"><i></i> Live ›</span></div><div class="session-expanded"><span>Session ID<strong>C814…09DB</strong></span><span>Started<strong>11:51 AM</strong></span><span>Download<strong>4.7 Mbps</strong></span><span>Upload<strong>1.1 Mbps</strong></span></div></div><div class="session-record" data-service="residential"><div class="session-row expandable" role="button" tabindex="0" aria-expanded="false"><span><i class="service-icon pink-bg">R</i> Residential</span><span>London, UK</span><span>11 min</span><span>318 MB</span><span>0.03 MYST</span><span class="live"><i></i> Live ›</span></div><div class="session-expanded"><span>Session ID<strong>2B66…E7F0</strong></span><span>Started<strong>11:58 AM</strong></span><span>Download<strong>3.4 Mbps</strong></span><span>Upload<strong>0.8 Mbps</strong></span></div></div><div class="session-empty" id="sessionEmpty"><strong>No active sessions</strong><span>No sessions match this service filter.</span></div></article>
+        <div class="detail-grid two"><article class="panel"><p class="eyebrow">TOTAL BANDWIDTH</p><h3>All-time traffic</h3><div class="big-stat">186.4 <small>GB</small></div><p class="muted-copy">38.7 GB shared this month</p></article><article class="panel"><p class="eyebrow">SESSION QUALITY</p><h3>Successful connections</h3><div class="big-stat">99.2<small>%</small></div><p class="muted-copy">Across 318 completed sessions</p></article></div>
+      </section>
+      <section class="tab-panel detail-page" id="settings" role="tabpanel">
+        <div class="detail-hero"><div><p class="eyebrow">APP SETTINGS</p><h2>Node preferences</h2><p>Manage the integration without changing the official Mysterium runtime.</p></div><span class="version-badge">Kraskus App 2.6.0</span></div>
+        <div class="settings-layout"><article class="panel"><div class="panel-head"><div><p class="eyebrow">RUNTIME</p><h3>Node behavior</h3></div><span class="managed-badge">Store managed</span></div><div class="settings-list"><div class="setting-row"><span>Start with 5tratumOS<small>Resume service after a host restart</small></span><button class="toggle active" aria-label="Start with host enabled" aria-pressed="true"><i></i></button></div><div class="setting-row read-only"><span>Runtime updates<small>Installed only through the 5tratumOS Store</small></span><strong>Version pinned</strong></div></div></article><article class="panel"><p class="eyebrow">SOFTWARE</p><h3>Version information</h3><div class="version-list"><div><span>App version</span><strong>2.6.0</strong></div><div><span>Node runtime</span><strong>1.39.5</strong></div><div><span>Packaged by</span><strong>Kraskus</strong></div><div><span>Powered by</span><strong>Mysterium Network</strong></div></div></article></div>
+        <article class="panel service-settings"><div class="panel-head"><div><p class="eyebrow">TRAFFIC SERVICES</p><h3>Accepted network traffic</h3></div><span class="health-score">4 enabled</span></div><p class="section-copy">Choose which supported service types this node accepts. Availability remains controlled by the official Mysterium runtime.</p><div class="service-toggle-grid"><div class="setting-row"><span>B2B data scraping<small>Traffic from approved business clients</small></span><button class="toggle active" aria-label="B2B data scraping enabled" aria-pressed="true"><i></i></button></div><div class="setting-row"><span>B2B VPN and data transfer<small>Business VPN and transfer traffic</small></span><button class="toggle active" aria-label="B2B VPN and data transfer enabled" aria-pressed="true"><i></i></button></div><div class="setting-row"><span>Mysterium VPN<small>Traffic from Mysterium VPN users</small></span><button class="toggle active" aria-label="Mysterium VPN enabled" aria-pressed="true"><i></i></button></div><div class="setting-row"><span>Public traffic<small>Traffic from supported third-party clients</small></span><button class="toggle active" aria-label="Public traffic enabled" aria-pressed="true"><i></i></button></div></div></article>
+        <article class="panel account-setting"><div><p class="eyebrow">CONNECTED ACCOUNT</p><h3>Node claim is active</h3><p>This node is linked to your MystNodes account. New-user referral setup is hidden after a successful claim.</p></div><button class="button ghost" data-action="dashboard">Open dashboard <span>↗</span></button></article>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="newUserModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="setupTitle">
+      <button class="modal-close" aria-label="Close setup">×</button>
+      <div class="modal-mark"><img src="mystnodes-mark.svg" alt="Mysterium Network"></div>
+      <p class="eyebrow">NEW NODE SETUP</p>
+      <h2 id="setupTitle">Start earning with MystNodes</h2>
+      <p>Create your MystNodes account, then return here to finish connecting this node.</p>
+      <div class="steps"><span><i>1</i>Create account</span><span><i>2</i>Claim node</span><span><i>3</i>Start sharing</span></div>
+      <button class="button primary wide" id="referralContinue" data-referral-hook="preserve-existing-referral-url">Create MystNodes account <span>↗</span></button>
+      <button class="text-button modal-existing" data-action="existing-user">I already have an account</button>
+      <small class="referral-note">This button uses the Kraskus referral link. Referral attribution and rewards are managed by MystNodes.</small>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="logsModal" aria-hidden="true">
+    <div class="modal logs-modal" role="dialog" aria-modal="true" aria-labelledby="logsTitle">
+      <button class="modal-close" data-close-logs aria-label="Close logs">×</button>
+      <div class="panel-head"><div><p class="eyebrow">RUNTIME LOGS</p><h2 id="logsTitle">Node activity</h2></div><span class="health-score">Live</span></div>
+      <div class="log-stream" aria-label="Recent node log messages"><p><time>12:09:27</time><span class="green-text">INFO</span> Session service ready</p><p><time>12:09:18</time><span>INFO</span> Payment channel synchronized</p><p><time>12:08:54</time><span>INFO</span> Discovery connected · 8 peers</p><p><time>12:08:41</time><span>INFO</span> Identity loaded from persistent storage</p></div>
+      <button class="button ghost wide" data-close-logs>Close logs</button>
+    </div>
+  </div>
+
+  <div class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+  <script src="live.js"></script>
+</body>
+</html>
