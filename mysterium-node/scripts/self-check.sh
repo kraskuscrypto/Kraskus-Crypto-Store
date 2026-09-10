@@ -66,11 +66,13 @@ assert compose["services"]["portal"]["ports"] == ["0.0.0.0:33060:80"]
 portal_mounts = compose["services"]["portal"]["volumes"]
 assert "${APP_DATA_DIR}/data/portal:/usr/share/nginx/html:ro" in portal_mounts
 assert "${APP_DATA_DIR}/data/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro" in portal_mounts
-assert compose["services"]["portal"]["depends_on"]["portal-migrator"]["condition"] == "service_completed_successfully"
+assert compose["services"]["portal"]["depends_on"]["portal-migrator"]["condition"] == "service_healthy"
 assert ":4449/" in compose["services"]["portal-migrator"]["command"][-1]
+assert "exec tail -f /dev/null" in compose["services"]["portal-migrator"]["command"][-1]
+assert compose["services"]["portal-migrator"]["restart"] == "unless-stopped"
 print("PASS: version synchronization")
 print("PASS: updater security declaration")
-print("PASS: persistent portal migration")
+print("PASS: persistent portal migration sidecar")
 PY
 
 echo "PASS: packaged runtime files"
