@@ -37,7 +37,7 @@ Packaged interface mark: `portal/mystnodes-mark.svg` and its runtime copy under
 
 New users who click **Create MystNodes Account** are sent to:
 
-https://mystnodes.co/?referral_code=CJSoelVnKkllilXIgv7JqeroUv1jhnZ4KWE4G6E4
+https://my.mystnodes.com/registration?referral_code=CJSoelVnKkllilXIgv7JqeroUv1jhnZ4KWE4G6E4
 
 This is a Kraskus referral URL. Existing users can skip that path. MystNodes
 controls referral attribution, eligibility, rewards, account creation, and node
@@ -63,6 +63,6 @@ container.
 
 New-user onboarding uses the disclosed Kraskus referral URL:
 
-https://mystnodes.co/?referral_code=CJSoelVnKkllilXIgv7JqeroUv1jhnZ4KWE4G6E4
+https://my.mystnodes.com/registration?referral_code=CJSoelVnKkllilXIgv7JqeroUv1jhnZ4KWE4G6E4
 
 Existing users may bypass referral signup and use their own MystNodes account.

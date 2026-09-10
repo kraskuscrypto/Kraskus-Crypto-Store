@@ -4,6 +4,7 @@ const panels=[...document.querySelectorAll('.tab-panel')];
 const modal=document.getElementById('newUserModal');
 const logsModal=document.getElementById('logsModal');
 const toast=document.querySelector('.toast');
+const nodeUiUrl=new URL('node/',window.location.href).href;
 
 function openTab(name){
   navButtons.forEach(button=>{const active=button.dataset.tab===name;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));});
@@ -20,7 +21,7 @@ function showToast(message){
 navButtons.forEach(button=>button.addEventListener('click',()=>openTab(button.dataset.tab)));
 document.querySelectorAll('[data-tab-jump]').forEach(button=>button.addEventListener('click',()=>openTab(button.dataset.tabJump)));
 document.querySelectorAll('[data-action="new-user"]').forEach(button=>button.addEventListener('click',()=>{modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.querySelector('.modal-close').focus();}));
-document.querySelectorAll('[data-action="existing-user"]').forEach(button=>button.addEventListener('click',()=>{modal.classList.remove('open');modal.setAttribute('aria-hidden','true');window.open('/node/','_blank','noopener');}));
+document.querySelectorAll('[data-action="existing-user"]').forEach(button=>button.addEventListener('click',()=>{modal.classList.remove('open');modal.setAttribute('aria-hidden','true');window.open(nodeUiUrl,'_blank','noopener');}));
 document.querySelectorAll('[data-action="dashboard"]').forEach(button=>button.addEventListener('click',()=>window.open('https://my.mystnodes.com/','_blank','noopener')));
 document.querySelectorAll('[data-action="view-logs"]').forEach(button=>button.addEventListener('click',()=>{logsModal.classList.add('open');logsModal.setAttribute('aria-hidden','false');logsModal.querySelector('[data-close-logs]').focus();}));
 document.querySelector('.modal-close').addEventListener('click',()=>{modal.classList.remove('open');modal.setAttribute('aria-hidden','true');});
@@ -28,7 +29,6 @@ modal.addEventListener('click',event=>{if(event.target===modal)document.querySel
 document.querySelectorAll('[data-close-logs]').forEach(button=>button.addEventListener('click',()=>{logsModal.classList.remove('open');logsModal.setAttribute('aria-hidden','true');}));
 logsModal.addEventListener('click',event=>{if(event.target===logsModal)logsModal.querySelector('[data-close-logs]').click();});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&modal.classList.contains('open'))document.querySelector('.modal-close').click();if(event.key==='Escape'&&logsModal.classList.contains('open'))logsModal.querySelector('[data-close-logs]').click();});
-document.getElementById('referralContinue').addEventListener('click',()=>window.open('https://mystnodes.co/?referral_code=CJSoelVnKkllilXIgv7JqeroUv1jhnZ4KWE4G6E4','_blank','noopener'));
 document.querySelectorAll('.range-switch button').forEach(button=>button.addEventListener('click',()=>{button.parentElement.querySelectorAll('button').forEach(item=>item.classList.remove('active'));button.classList.add('active');}));
 document.querySelectorAll('.toggle').forEach(toggle=>toggle.addEventListener('click',event=>{const button=event.currentTarget;if(button.disabled)return;button.classList.toggle('active');button.setAttribute('aria-pressed',String(button.classList.contains('active')));const servicePanel=button.closest('.service-settings');if(servicePanel){const count=servicePanel.querySelectorAll('.toggle.active').length;servicePanel.querySelector('.health-score').textContent=count+' enabled';}}));
 
