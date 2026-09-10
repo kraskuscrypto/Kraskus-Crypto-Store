@@ -8,13 +8,14 @@ description: MystNodes by Kraskus installs and runs the official upstream Myster
   to the official Node UI with their own account and API key. The underlying node
   software is provided by Mysterium Network. Participation may expose the host's residential
   IP to third-party traffic; review Mysterium's terms and enable only service types
-  appropriate for your location and risk tolerance. v2.6.6 migrates preserved portal assets
-  during Store updates and opens the official Node UI directly on its verified host endpoint.
+  appropriate for your location and risk tolerance. v2.6.7 migrates preserved portal assets
+  during Store updates, remains healthy for StratumOS lifecycle tracking, and opens the
+  official Node UI directly on its verified host endpoint.
   v2.6.0 added a redesigned responsive
   control center backed by read-only snapshots from the local Mysterium API. v2.5.1
   fixed 5tratumOS runtime packaging for the portal, status agent, and updater. v2.5.0 added one-click node updates
   with automatic backup, immutable image verification, health checks, and rollback.
-version: 2.6.6
+version: 2.6.7
 category: Networking
 developer: Kraskus
 website: https://www.mysterium.network/
