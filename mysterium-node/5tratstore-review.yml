@@ -1,7 +1,7 @@
 schemaVersion: 1
 status: proposed
 appId: mysterium-node
-appVersion: 2.6.3
+appVersion: 2.6.4
 reviewedAt: ''
 reviewedBy: ''
 upstream:
@@ -60,5 +60,5 @@ notes: Mysterium upstream requires NET_ADMIN and documents host networking for t
   0x7fcab4a87784762620198e10d0d589d828c3f036, started all five services, and produced
   all 27 expected API snapshots. Reboot recovery and clean uninstall remain required
   before this proposed package can be approved and merged into the client-facing store.
-  v2.6.3 replaces the legacy registration redirect with the current MystNodes registration
-  URL and resolves Node UI navigation relative to the app proxy path.
+  v2.6.4 uses the current MystNodes registration URL, opens the official Node UI directly
+  on host port 4449, and cache-busts portal assets to prevent stale navigation handlers.

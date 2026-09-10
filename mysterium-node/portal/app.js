@@ -4,7 +4,7 @@ const panels=[...document.querySelectorAll('.tab-panel')];
 const modal=document.getElementById('newUserModal');
 const logsModal=document.getElementById('logsModal');
 const toast=document.querySelector('.toast');
-const nodeUiUrl=`http://${window.location.hostname}:33060/node/`;
+const nodeUiUrl=`http://${window.location.hostname}:4449/`;
 
 function openTab(name){
   navButtons.forEach(button=>{const active=button.dataset.tab===name;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));});
