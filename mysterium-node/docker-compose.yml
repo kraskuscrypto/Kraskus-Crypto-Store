@@ -6,7 +6,7 @@ services:
 
   portal-migrator:
     image: alpine:3.22.1@sha256:4bcff63911fcb4448bd4fdacec207030997caf25e9bea4045fa6c8c44de311d1
-    restart: "no"
+    restart: unless-stopped
     command:
     - /bin/sh
     - -ec
@@ -20,14 +20,24 @@ services:
       fi
       sed -i "s|window.open('/node/'|window.open(nodeUiUrl|" /portal/app.js
       sed -i 's|https://mystnodes.co/?referral_code=|https://my.mystnodes.com/registration?referral_code=|g' /portal/app.js /portal/index.html
-      sed -i 's|src="app.js[^\"]*"|src="app.js?v=2.6.6"|' /portal/index.html
-      sed -i 's|src="live.js[^\"]*"|src="live.js?v=2.6.6"|' /portal/index.html
+      sed -i 's|src="app.js[^\"]*"|src="app.js?v=2.6.7"|' /portal/index.html
+      sed -i 's|src="live.js[^\"]*"|src="live.js?v=2.6.7"|' /portal/index.html
       grep -Fq ':4449/' /portal/app.js
-      grep -Fq 'app.js?v=2.6.6' /portal/index.html
+      grep -Fq 'app.js?v=2.6.7' /portal/index.html
+      touch /tmp/portal-migrated
+      exec tail -f /dev/null
     volumes:
     - ${APP_DATA_DIR}/data/portal:/portal
     security_opt:
     - no-new-privileges:true
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - test -f /tmp/portal-migrated
+      interval: 2s
+      timeout: 1s
+      retries: 30
+      start_period: 1s
 
   portal:
     image: nginx:1.27-alpine@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10
@@ -46,7 +56,7 @@ services:
       update-agent:
         condition: service_started
       portal-migrator:
-        condition: service_completed_successfully
+        condition: service_healthy
 
   mysterium:
     image: mysteriumnetwork/myst:1.39.5-alpine@sha256:d0c270c6bcb50c1004ba355c264f85aa16b3a5a414f8b9f8f5b0f449ea85a142
@@ -76,7 +86,7 @@ services:
     restart: unless-stopped
     network_mode: host
     environment:
-      APP_VERSION: 2.6.6
+      APP_VERSION: 2.6.7
       NODE_VERSION: 1.39.5
       STATUS_INTERVAL: '30'
     command:
