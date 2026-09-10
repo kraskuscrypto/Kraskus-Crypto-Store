@@ -1,7 +1,7 @@
 schemaVersion: 1
 status: proposed
 appId: mysterium-node
-appVersion: 2.6.5
+appVersion: 2.6.6
 reviewedAt: ''
 reviewedBy: ''
 upstream:
@@ -60,7 +60,8 @@ notes: Mysterium upstream requires NET_ADMIN and documents host networking for t
   0x7fcab4a87784762620198e10d0d589d828c3f036, started all five services, and produced
   all 27 expected API snapshots. Reboot recovery and clean uninstall remain required
   before this proposed package can be approved and merged into the client-facing store.
-  v2.6.5 uses the current MystNodes registration URL, opens the official Node UI directly
+  v2.6.6 uses the current MystNodes registration URL, opens the official Node UI directly
   on host port 4449, and cache-busts portal assets to prevent stale navigation handlers.
-  v2.6.5 mounts portal code and nginx configuration from the versioned package directory;
-  persistent node identity, status, backups, and update state remain under APP_DATA_DIR.
+  v2.6.6 uses a one-shot Alpine migration service to update preserved portal navigation
+  before nginx starts. Persistent node identity, status, backups, and update state remain
+  under APP_DATA_DIR and are not mounted into the migration service.
