@@ -62,8 +62,13 @@ assert str(review["appVersion"]) == version
 assert review["security"]["dockerSocket"] is True
 assert "update-agent" in compose["services"]
 assert compose["services"]["portal"]["ports"] == ["0.0.0.0:33060:80"]
+portal_mounts = compose["services"]["portal"]["volumes"]
+assert "./portal:/usr/share/nginx/html:ro" in portal_mounts
+assert "./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro" in portal_mounts
+assert all("${APP_DATA_DIR}/data/portal:" not in mount for mount in portal_mounts)
 print("PASS: version synchronization")
 print("PASS: updater security declaration")
+print("PASS: versioned portal mounts")
 PY
 
 echo "PASS: packaged runtime files"
