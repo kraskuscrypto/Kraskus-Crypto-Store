@@ -10,9 +10,13 @@ function openTab(name){
   navButtons.forEach(button=>{const active=button.dataset.tab===name;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));});
   panels.forEach(panel=>panel.classList.toggle('active',panel.id===name));
   document.getElementById('pageTitle').textContent=titles[name]||'MystNodes';
-  const mainScroller=document.querySelector('.main');
-  if(mainScroller)mainScroller.scrollTo({top:0,behavior:'smooth'});
-  document.scrollingElement?.scrollTo({top:0,behavior:'smooth'});
+  const resetScroll=()=>{
+    const mainScroller=document.querySelector('.main');
+    if(mainScroller)mainScroller.scrollTop=0;
+    if(document.scrollingElement)document.scrollingElement.scrollTop=0;
+  };
+  resetScroll();
+  requestAnimationFrame(resetScroll);
 }
 
 function showToast(message){

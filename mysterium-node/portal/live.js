@@ -305,7 +305,7 @@
     renderServices(services);
     renderLogs(status, monitoring, services);
     set($('.node-mini strong'), online ? 'Node online' : 'Node offline');
-    set($('.node-mini span'), `Official runtime · ${safe(status?.node_version)}`);
+    set($('.node-mini > div > span'), `Official runtime · ${safe(status?.node_version)}`);
   }
 
   $('#sessionFilter')?.addEventListener('change', event => {
