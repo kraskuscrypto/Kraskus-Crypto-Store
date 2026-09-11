@@ -10,7 +10,9 @@ function openTab(name){
   navButtons.forEach(button=>{const active=button.dataset.tab===name;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));});
   panels.forEach(panel=>panel.classList.toggle('active',panel.id===name));
   document.getElementById('pageTitle').textContent=titles[name]||'MystNodes';
-  window.scrollTo({top:0,behavior:'smooth'});
+  const mainScroller=document.querySelector('.main');
+  if(mainScroller)mainScroller.scrollTo({top:0,behavior:'smooth'});
+  document.scrollingElement?.scrollTo({top:0,behavior:'smooth'});
 }
 
 function showToast(message){
@@ -34,23 +36,11 @@ document.querySelectorAll('.toggle').forEach(toggle=>toggle.addEventListener('cl
 
 document.querySelectorAll('.identity-address button').forEach(button=>button.addEventListener('click',async()=>{const value=button.closest('.identity-address').dataset.fullIdentity;try{await navigator.clipboard.writeText(value);showToast('Complete node identity copied.');}catch{showToast('Copy unavailable in this preview.');}}));
 
-const earningsData={
-  '7d':{title:'Last 7 days',change:'+8.2%',heights:[44,61,53,72,66,88,100,100,100,100,100,100],values:['0.21','0.29','0.25','0.34','0.31','0.41','0.47','0.47','0.47','0.47','0.47','0.47'],labels:['Aug 29','Aug 31','Sep 2','Sep 4']},
-  '30d':{title:'Last 30 days',change:'+12.4%',heights:[32,46,38,59,51,74,63,81,69,93,84,100],values:['0.21','0.31','0.26','0.40','0.35','0.50','0.43','0.55','0.47','0.63','0.57','0.68'],labels:['Aug 6','Aug 13','Aug 20','Aug 27','Sep 4']},
-  '90d':{title:'Last 90 days',change:'+19.7%',heights:[22,30,41,36,48,55,62,58,71,79,91,100],values:['1.10','1.48','2.04','1.79','2.39','2.74','3.09','2.89','3.54','3.94','4.53','4.98'],labels:['Jun 7','Jul 1','Aug 1','Sep 4']},
-  'all':{title:'Lifetime earnings',change:'+24.82 MYST',heights:[10,16,23,31,39,47,56,64,73,82,91,100],values:['0.42','0.78','1.24','1.86','2.71','3.88','5.22','7.06','9.81','13.42','18.11','24.82'],labels:['First session','30 days','60 days','Today']}
-};
-
-function renderEarnings(range){
-  const data=earningsData[range];
-  document.getElementById('earningsRangeTitle').textContent=data.title;
-  document.getElementById('earningsChange').textContent=data.change;
-  document.querySelectorAll('#earningsBars i').forEach((bar,index)=>{bar.style.height=data.heights[index]+'%';bar.dataset.value=data.values[index]+' MYST';bar.setAttribute('aria-label',data.values[index]+' MYST');});
-  document.getElementById('earningsLabels').innerHTML=data.labels.map(label=>'<span>'+label+'</span>').join('');
-}
-
-document.querySelectorAll('[data-earnings-range]').forEach(button=>button.addEventListener('click',()=>renderEarnings(button.dataset.earningsRange)));
-renderEarnings('30d');
+document.querySelectorAll('[data-earnings-range]').forEach(button=>{
+  const supported=button.dataset.earningsRange==='30d';
+  button.disabled=!supported;
+  if(!supported)button.title='The local collector currently provides a live 30-day earnings series.';
+});
 
 document.querySelectorAll('.session-row.expandable').forEach(row=>{const toggle=()=>{const record=row.closest('.session-record');const open=record.classList.toggle('open');row.setAttribute('aria-expanded',String(open));};row.addEventListener('click',toggle);row.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();toggle();}});});
 
