@@ -12,7 +12,12 @@
   const safe = (value, fallback = 'Unavailable') => value === undefined || value === null || value === '' ? fallback : value;
   const number = value => Number.parseFloat(value || 0) || 0;
   const token = value => number(value?.human ?? value?.ether ?? value);
-  const tokenText = value => value === undefined || value === null ? '— MYST' : `${token(value).toLocaleString(undefined, {maximumFractionDigits: 6})} MYST`;
+  const formatToken = value => {
+    const amount = token(value);
+    const digits = Math.abs(amount) > 0 && Math.abs(amount) < 0.01 ? 6 : 2;
+    return amount.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: digits});
+  };
+  const tokenText = value => value === undefined || value === null ? '— MYST' : `${formatToken(value)} MYST`;
   const compactId = value => value && value.length > 16 ? `${value.slice(0, 8)}…${value.slice(-6)}` : safe(value);
   const set = (element, value) => { if (element) element.textContent = value; };
   const html = value => String(value ?? '').replace(/[&<>'"]/g, character => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[character]));
@@ -44,11 +49,22 @@
   }
 
   function drawSeries(svg, values, className) {
-    if (!svg || !values?.length) return;
+    if (!svg) return;
+    const chart = svg.closest('.chart');
+    chart?.querySelector('.chart-empty')?.remove();
+    const clean = (values || []).filter(Number.isFinite);
+    if (clean.length < 2 || clean.every(value => value === 0)) {
+      svg.replaceChildren();
+      const empty = document.createElement('div');
+      empty.className = 'chart-empty';
+      empty.innerHTML = `<strong>${clean.length ? 'Trend building' : 'Waiting for trend data'}</strong><span>${clean.length ? 'More reporting points are needed to draw this chart.' : 'The chart will appear after the collector reports activity.'}</span>`;
+      chart?.append(empty);
+      return;
+    }
     const width = 720;
     const height = 145;
-    const max = Math.max(...values, 1);
-    const points = values.map((value, index) => `${index * width / Math.max(values.length - 1, 1)},${height - (value / max * 120)}`).join(' ');
+    const max = Math.max(...clean, 1);
+    const points = clean.map((value, index) => `${index * width / Math.max(clean.length - 1, 1)},${height - (value / max * 120)}`).join(' ');
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
     path.setAttribute('points', points);
     path.setAttribute('class', `line ${className}`);
@@ -74,7 +90,7 @@
         row.setAttribute('role', 'button');
         row.setAttribute('aria-expanded', 'false');
       }
-      row.innerHTML = `<span><i class="service-icon ${html(info.color)}">${html(info.letter)}</i> ${html(info.label)}</span><span>${html(country)}</span><span>${html(duration(session.duration_seconds))}</span><span>${html(bytes(session.transferred_bytes))}</span><span>${html(tokenText(session.earnings))}</span><span class="live"><i></i> Recorded${limit ? '' : ' ›'}</span>`;
+      row.innerHTML = `<span><i class="service-icon ${html(info.color)}">${html(info.letter)}</i> ${html(info.label)}</span><span>${html(country)}</span><span>${html(duration(session.duration_seconds))}</span><span>${html(bytes(session.transferred_bytes))}</span><span>${html(tokenText(session.earnings))}</span><span class="live"><i></i> Reported${limit ? '' : ' ›'}</span>`;
       if (!limit) {
         const expanded = document.createElement('div');
         expanded.className = 'session-expanded';
@@ -121,14 +137,14 @@
     const lifetime = identity ? token(identity.earnings_total_tokens) : null;
     const unsettled = identity ? token(identity.earnings_tokens) : null;
     const balance = identity ? token(identity.balance_tokens) : null;
-    set($('.earnings-hero h2', root), lifetime === null ? '— MYST' : `${lifetime.toLocaleString(undefined, {maximumFractionDigits: 6})} MYST`);
+    set($('.earnings-hero h2', root), lifetime === null ? '— MYST' : tokenText(lifetime));
     const cards = $$('.detail-grid.thirds .metric-card', root);
     const labels = ['On-chain balance', 'Unsettled earnings', 'Lifetime earnings'];
     const values = [balance, unsettled, lifetime];
     const notes = ['Current identity balance', 'Awaiting settlement', 'All recorded earnings'];
     cards.forEach((card, index) => {
       set($('.metric-head span', card), labels[index]);
-      set($(':scope > strong', card), values[index] === null ? '— MYST' : `${values[index].toLocaleString(undefined, {maximumFractionDigits: 6})} MYST`);
+      set($(':scope > strong', card), values[index] === null ? '— MYST' : tokenText(values[index]));
       set($(':scope > p', card), notes[index]);
     });
     renderEarningsBars(series, 'Last 30 days');
@@ -136,15 +152,29 @@
 
   function renderEarningsBars(series, title) {
     const data = series?.data || [];
-    const bars = $$('#earningsBars i');
+    const chart = $('#earningsBars');
+    if (!chart) return;
+    chart.replaceChildren();
     const valuesSeries = data.map(item => number(item.value));
     const max = Math.max(...valuesSeries, 1);
-    bars.forEach((bar, index) => {
-      const item = data[Math.floor(index * data.length / bars.length)];
-      const value = number(item?.value);
+    data.forEach(item => {
+      const value = number(item.value);
+      const bar = document.createElement('i');
       bar.style.height = `${value ? Math.max(5, value / max * 100) : 2}%`;
-      bar.dataset.value = `${value.toLocaleString(undefined, {maximumFractionDigits: 6})} MYST`;
+      bar.dataset.value = tokenText(value);
+      bar.tabIndex = 0;
+      bar.setAttribute('aria-label', tokenText(value));
+      chart.append(bar);
     });
+    chart.classList.toggle('sparse', data.length > 0 && data.length < 6);
+    if (!data.length) {
+      const empty = document.createElement('div');
+      empty.className = 'chart-empty';
+      empty.innerHTML = '<strong>No earnings history yet</strong><span>Reporting points will appear here as the runtime records them.</span>';
+      chart.append(empty);
+    }
+    const labels = $('#earningsLabels');
+    if (labels) labels.hidden = data.length < 3;
     set($('#earningsRangeTitle'), title);
     set($('#earningsChange'), data.length ? `${data.length} reporting points` : 'Awaiting data');
   }
@@ -204,21 +234,24 @@
     set($(':scope > strong', overviewCards[0]), tokenText(currentIdentity?.earnings_total_tokens || earnings?.total_tokens));
     set($(':scope > p', overviewCards[0]), 'Reported by the Mysterium runtime');
     set($(':scope > strong', overviewCards[1]), bytes(transfer30d?.transferred_data_bytes));
-    set($(':scope > p', overviewCards[1]), 'Last 30 days');
+    set($(':scope > p', overviewCards[1]), '30-day aggregate reported by the runtime');
     set($('.metric-head span', overviewCards[2]), 'Recent sessions');
     set($(':scope > strong', overviewCards[2]), recentCount === null ? '—' : String(recentCount));
-    set($(':scope > p', overviewCards[2]), 'Reported in the last 24 hours');
+    set($(':scope > p', overviewCards[2]), 'Records returned for the last 24 hours');
     set($('.metric-head span', overviewCards[3]), 'Online time');
     set($(':scope > strong', overviewCards[3]), activity ? `${number(activity.online_percent).toFixed(1)}%` : safe(status?.host_uptime));
     set($(':scope > p', overviewCards[3]), activity ? 'Provider activity metric' : 'Host uptime');
 
-    set($('#overview .status-pill'), online ? '● Everything looks good' : '● Node attention needed');
+    set($('#overview .status-pill'), online ? '● Node service healthy' : '● Node attention needed');
     set($('#overview .hero-copy > p'), online ? 'Live data is flowing from the official Mysterium runtime through a private local collector.' : 'The dashboard is waiting for the official Mysterium runtime.');
     set($('#overview .chart-summary strong'), bytes(transfer30d?.transferred_data_bytes));
     drawSeries($('#overview .chart svg'), (dataSeries7d?.data || []).map(item => number(item.value)), 'purple');
     const health = quality ? Math.round(number(quality.quality) * (number(quality.quality) <= 1 ? 100 : 1)) : 0;
-    set($('#overview .health-score'), health ? `${health}% quality` : 'Awaiting quality');
-    set($('#overview .health-ring strong'), health || '—');
+    set($('#overview .health-score'), health ? `Provider quality: ${health}%` : 'Awaiting provider quality');
+    const healthRing = $('#overview .health-ring');
+    if (healthRing) healthRing.style.background = `conic-gradient(var(--green) 0 ${Math.max(0, Math.min(100, health))}%, rgba(255,255,255,.06) ${Math.max(0, Math.min(100, health))}% 100%)`;
+    set($('#overview .health-ring strong'), health ? `${health}%` : '—');
+    set($('#overview .health-ring span'), 'provider quality');
     const healthValues = $$('#overview .health-list strong');
     set(healthValues[0], online ? '● Running' : '● Offline');
     set(healthValues[1], safe(nat?.type));
@@ -253,13 +286,15 @@
     set($('.session-total span', sessionRoot), 'Transferred in recent sessions');
     set(totals[1], recentCount === null ? '—' : String(recentCount));
     set($$('.session-total span', sessionRoot)[1], 'Sessions in the last 24 hours');
-    set($('.session-detail h3', sessionRoot), 'Last 24 hours');
+    set($('.session-detail .eyebrow', sessionRoot), 'RECENT SESSION RECORDS');
+    set($('.session-detail h3', sessionRoot), 'Reported in the last 24 hours');
     renderSessionRows($('.session-detail', sessionRoot), sessions);
     const sessionStats = $$('#sessions .detail-grid.two .panel');
     set($('.big-stat', sessionStats[0]), bytes(transfer30d?.transferred_data_bytes));
-    set($('.muted-copy', sessionStats[0]), 'Transferred in the last 30 days');
+    set($('.muted-copy', sessionStats[0]), '30-day aggregate reported by the runtime');
     set($('.big-stat', sessionStats[1]), safe(count30d?.count, '—'));
-    set($('.muted-copy', sessionStats[1]), 'Sessions in the last 30 days');
+    set($('h3', sessionStats[1]), 'Runtime session count');
+    set($('.muted-copy', sessionStats[1]), 'Separate 30-day aggregate reported by the runtime');
 
     const runtimeLabels = $$('#settings .version-list strong');
     set(runtimeLabels[0], safe(status?.app_version));
