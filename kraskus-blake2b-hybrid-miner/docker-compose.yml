@@ -1,0 +1,27 @@
+services:
+  app_proxy:
+    environment:
+      APP_HOST: miner
+      APP_PORT: 8765
+
+  miner:
+    image: ghcr.io/kraskuscrypto/kraskus-blake2b-hybrid-miner@sha256:a2bd1c5569c98d170b2fcaa151f9e47ba436eb28f680f35dbbfcf60ddad21e53
+    restart: unless-stopped
+    environment:
+      KRASKUS_UI_HOST: "0.0.0.0"
+      KRASKUS_UI_PORT: "8765"
+      KRASKUS_MINER_HOME: "/data"
+      NVIDIA_VISIBLE_DEVICES: "all"
+      NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
+    volumes:
+      - ${APP_DATA_DIR}/data:/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/api/status', timeout=5).read()"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    security_opt:
+      - no-new-privileges:true

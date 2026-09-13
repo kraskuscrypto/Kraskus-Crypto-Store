@@ -1,0 +1,14 @@
+appId: kraskus-blake2b-hybrid-miner
+status: beta
+developer: Kraskus Crypto
+appVersion: 0.1.0-beta1
+notes:
+  - Packages the qualified Kraskus BLAKE2b Hybrid Miner v0.2.0-beta1 binary unchanged.
+  - Supports CPU mining on normal Docker hosts.
+  - CUDA/hybrid mode requires NVIDIA GPU access to be exposed by the Docker host.
+  - Persists launcher settings and miner state under the app data directory.
+  - Does not mount the Docker socket and is not privileged.
+releaseNotes:
+  - Initial 5tratumOS Dev Store packaging.
+  - Adds native app proxy integration and persistent miner settings.
+  - Uses the multi-architecture CUDA beta targeting compute 6.1, 7.5, 8.6, 8.9, and 12.0.

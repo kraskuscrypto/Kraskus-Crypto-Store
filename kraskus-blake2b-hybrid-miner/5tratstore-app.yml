@@ -1,0 +1,24 @@
+id: kraskus-blake2b-hybrid-miner
+name: Kraskus BLAKE2b Hybrid Miner
+tagline: Mine BLAKE2b with CPU, NVIDIA CUDA, or both
+description: >-
+  Runs the Kraskus BLAKE2b Hybrid Miner with a local browser dashboard,
+  hardware detection, pool configuration, worker telemetry, and the qualified
+  v0.2.0-beta1 mining engine. CPU mining works without NVIDIA hardware. CUDA
+  mode requires a compatible NVIDIA GPU and a Docker host configured to expose
+  the NVIDIA runtime/devices to containers.
+version: 0.1.0-beta1
+category: Mining
+developer: Kraskus
+website: https://kraskuscrypto.com
+repo: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
+support: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps/issues
+icon: https://raw.githubusercontent.com/kraskuscrypto/Kraskus-Crypto-Store/main/kraskus-blake2b-hybrid-miner/assets/icon.png
+port: 8765
+path: /
+uiMode: proxy
+services:
+  app_proxy:
+    environment:
+      APP_HOST: miner
+      APP_PORT: 8765
