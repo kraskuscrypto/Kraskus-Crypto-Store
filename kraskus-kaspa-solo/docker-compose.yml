@@ -1,0 +1,151 @@
+# 5tratumOS package for Kraskus Kaspa Solo.
+#
+# Self-contained: bundles its own kaspad, exactly like every other first-party
+# Kraskus solo package (kraskus-zec-solo bundles zebra, kraskus-xmr-solo bundles
+# monerod). Command V2's shared kaspad fleet-manager network belongs to a
+# separate deployment model and is not referenced anywhere in this file.
+#
+# Conventions:
+#   - the UI service publishes NO host port itself — app_proxy (platform-managed)
+#     is the only thing bound to the manifest's `port:` (33067), reaching the UI
+#     container over the app's own internal network via APP_HOST/APP_PORT
+#   - only ports with a real external requirement are published to the host:
+#     the miner-facing Stratum port, and kaspad's P2P port (needed for normal
+#     node operation)
+#   - kaspad's own RPC ports (gRPC/borsh/JSON) are internal-only
+#   - persistent data under ${APP_DATA_DIR}/<subpath>
+#   - app-scoped bridge networks only, no shared/external network of any kind
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: ui
+      APP_PORT: 80
+
+  kaspad:
+    # Official kaspanet image, pinned by immutable digest. Pruned by default
+    # (no --archival flag).
+    image: kaspanet/rusty-kaspad@sha256:db36449e2f41cf33ab7c26683ce390cb71bdea9c403eefd2e740a7d5605bcd8b
+    restart: unless-stopped
+
+    command:
+      - kaspad
+      - --yes
+      - --nologfiles
+      - --disable-upnp
+      - --utxoindex
+      - --rpclisten=0.0.0.0:16110
+      - --rpclisten-borsh=0.0.0.0:17110
+      - --rpclisten-json=0.0.0.0:18110
+
+    volumes:
+      - ${APP_DATA_DIR}/node:/app/data
+
+    # P2P is published — a solo node needs normal network participation to
+    # sync. RPC (16110/17110/18110) is internal-only: nothing outside this
+    # package's own containers needs it, so it is not published to the host.
+    ports:
+      - "16111:16111/tcp"
+
+    networks:
+      - public
+      - internal
+
+  stratum:
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-stratum@sha256:9bc41c4810e04f6681a6ccdb411e695e9f97cd7e9ea0f7e9edb8e7d7004c07a5
+    restart: unless-stopped
+
+    command:
+      - /app/stratum-bridge
+      - --config
+      - /config/config.yaml
+      - --node-mode
+      - external
+
+    environment:
+      KRASKUS_SOLO_PAYOUT_FILE: "/run/kraskus/solo-payout-address"
+
+    volumes:
+      - ${APP_DATA_DIR}/wallet/.kraskus:/run/kraskus:ro
+      - ./stratum-config.yaml:/config/config.yaml:ro
+
+    ports:
+      - "5556:5556/tcp"
+
+    networks:
+      - public
+      - internal
+
+    depends_on:
+      - kaspad
+
+  adapter:
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter@sha256:93042c0be4392fa8135d2c0c8f354c0fb09bb8f32b3dba8ffdf217be48554bbb
+
+    restart: unless-stopped
+
+    environment:
+      KASPA_STRATUM_API: http://stratum:3030
+      LISTEN_PORT: "18420"
+      KASPA_MINER_PORT: "5556"
+      KASPAD_GRPC_ADDR: "kaspad:16110"
+      KASPA_WALLET_API: "http://wallet-api:18422"
+
+    volumes:
+      - ${APP_DATA_DIR}/wallet:/wallet
+
+    # No host port — only "ui" (same "internal" network) talks to this.
+    networks:
+      - internal
+
+    depends_on:
+      - stratum
+      - kaspad
+
+  wallet-api:
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-wallet-api@sha256:4b36ca1d4706feb97d13cace9ed17d5068a577d4d3070bb181c6874705527d2e
+
+    restart: unless-stopped
+
+    environment:
+      LISTEN_PORT: "18422"
+      KASPA_NETWORK: "mainnet"
+      KASPA_WALLET_NAME: "kraskus"
+      KASPA_WALLET_SERVER: "ws://kaspad:17110"
+      HOME: "/wallet"
+
+    volumes:
+      - ${APP_DATA_DIR}/wallet:/wallet
+
+    # No host port — only "adapter" talks to this, over "internal".
+    networks:
+      - internal
+
+    depends_on:
+      - kaspad
+
+  ui:
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-ui@sha256:4efabe782ac2385deab9c1fe46f3d00e8fed1f18805f02297d3cce3b7079800f
+
+    restart: unless-stopped
+
+    # No ports here — app_proxy (above) is the only public entry point,
+    # matching every sibling Kraskus 5tratumOS app. On "public" too (not
+    # published to the host) so the platform's app_proxy can still reach
+    # this service.
+    networks:
+      - public
+      - internal
+
+    depends_on:
+      - adapter
+
+networks:
+  # Only where miner/node P2P exposure requires it (stratum, kaspad).
+  public:
+    driver: bridge
+  # kaspad/stratum/adapter/wallet-api/ui internal communication. No external
+  # or shared network of any kind — fully app-scoped.
+  internal:
+    driver: bridge
+    internal: true

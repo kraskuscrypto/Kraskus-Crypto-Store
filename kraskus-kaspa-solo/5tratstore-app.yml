@@ -1,0 +1,29 @@
+id: kraskus-kaspa-solo
+name: Kraskus Kaspa Solo
+tagline: Kaspa full node and solo mining node
+description: >-
+  Kraskus Kaspa Solo turns 5tratumOS into an easy-to-use Kaspa
+  full node and local solo mining appliance. The app manages
+  node synchronization, mining readiness, worker connections,
+  a real native Kaspa wallet, and confirmed block detection
+  from a single interface. Normal users do not need to manage
+  kaspad, RPC, Docker, Linux, JSON, or Stratum configuration.
+  An automatic 1% developer fee applies only to successfully mined
+  block rewards after coinbase maturity; miner hashrate is never
+  diverted. Wallet sends are not yet enabled in this release.
+version: 0.1.0-beta
+category: Mining
+developer: Kraskus Crypto
+website: https://kraskuscrypto.com/
+repo: https://github.com/kraskuscrypto/Kraskus-Mining-Platform
+support: https://kraskuscrypto.com/
+icon: assets/icon.png
+port: 33067
+path: /
+uiMode: proxy
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: ui
+      APP_PORT: 80
