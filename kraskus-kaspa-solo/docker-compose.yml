@@ -108,7 +108,7 @@ services:
       - kaspad
 
   wallet-api:
-    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-wallet-api@sha256:6bd6c8c7cd3b65d01edc9770628ebcc380b9b22bac03f7690ed6bd0c36925fee
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-wallet-api@sha256:e6a4e7b20967ed3d1958c587b9791eefed816f3496944d6a1c500f18db65b079
 
     restart: unless-stopped
 
@@ -117,7 +117,7 @@ services:
       KASPA_NETWORK: "mainnet"
       KASPA_WALLET_NAME: "kraskus"
       KASPA_WALLET_SERVER: "ws://kaspad:17110"
-      KRASKUS_DEV_FEE_AUTO_PAY: "true"
+      KRASKUS_DEV_FEE_AUTO_PAY: "false"
       HOME: "/wallet"
 
     volumes:
