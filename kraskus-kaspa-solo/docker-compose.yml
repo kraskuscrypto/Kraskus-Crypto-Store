@@ -108,7 +108,7 @@ services:
       - kaspad
 
   wallet-api:
-    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-wallet-api@sha256:e6a4e7b20967ed3d1958c587b9791eefed816f3496944d6a1c500f18db65b079
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-wallet-api@sha256:2351ccf24af409d74fbe6db565660d8a5d4be7718a52030b047e1c02825d27fd
 
     restart: unless-stopped
 
