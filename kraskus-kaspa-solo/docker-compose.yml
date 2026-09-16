@@ -130,7 +130,7 @@ services:
       - kaspad
 
   ui:
-    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-ui@sha256:64e30be8f1ac3c9df5dd834ff6db48e8d08dc9b0ed669b8832bf4b9139651a39
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-ui@sha256:beed66bdc6be4e84901a6655d4c65ebe51977384bf0acfddd403cc06b687481d
 
     restart: unless-stopped
 
