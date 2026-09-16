@@ -1,8 +1,8 @@
 id: kraskus-kaspa-solo
-name: Kraskus Kaspa Solo
+name: Kaspa by Kraskus
 tagline: Kaspa full node and solo mining node
 description: >-
-  Kraskus Kaspa Solo turns 5tratumOS into an easy-to-use Kaspa
+  Kaspa by Kraskus turns 5tratumOS into an easy-to-use Kaspa
   full node and local solo mining appliance. The app manages
   node synchronization, mining readiness, worker connections,
   a real native Kaspa wallet, and confirmed block detection
