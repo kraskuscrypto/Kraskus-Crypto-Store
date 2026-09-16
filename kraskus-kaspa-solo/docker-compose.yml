@@ -117,7 +117,7 @@ services:
       KASPA_NETWORK: "mainnet"
       KASPA_WALLET_NAME: "kraskus"
       KASPA_WALLET_SERVER: "ws://kaspad:17110"
-      KRASKUS_DEV_FEE_AUTO_PAY: "false"
+      KRASKUS_DEV_FEE_AUTO_PAY: "true"
       HOME: "/wallet"
 
     volumes:
