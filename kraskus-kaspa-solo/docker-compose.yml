@@ -52,7 +52,7 @@ services:
       - internal
 
   stratum:
-    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-stratum@sha256:9bc41c4810e04f6681a6ccdb411e695e9f97cd7e9ea0f7e9edb8e7d7004c07a5
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-stratum@sha256:3abec9a6ea547fe477fceb1c11d950a0575d28830305d7646cd966d49d09759c
     restart: unless-stopped
 
     command:
@@ -65,9 +65,14 @@ services:
     environment:
       KRASKUS_SOLO_PAYOUT_FILE: "/run/kraskus/solo-payout-address"
 
+    # No stratum-config.yaml bind mount: 5StratumOS's real installer only
+    # materializes docker-compose.yml/.env for an installed app, not extra
+    # sidecar files that sit next to the compose file in the store repo — a
+    # relative-path bind mount here silently resolved to an empty directory
+    # on a real VM120 install, so config.yaml is now baked into the image at
+    # build time instead.
     volumes:
       - ${APP_DATA_DIR}/wallet/.kraskus:/run/kraskus:ro
-      - ./stratum-config.yaml:/config/config.yaml:ro
 
     ports:
       - "5556:5556/tcp"
@@ -125,7 +130,7 @@ services:
       - kaspad
 
   ui:
-    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-ui@sha256:56e1676d206c40f35f03e94fc6a9edbc449de250d2072fafb7761c894cb4ac63
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-ui@sha256:64e30be8f1ac3c9df5dd834ff6db48e8d08dc9b0ed669b8832bf4b9139651a39
 
     restart: unless-stopped
 
