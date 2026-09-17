@@ -2,18 +2,22 @@
 
 Official client-facing Kraskus Crypto Store releases for 5tratumOS.
 
+## Published apps
+
+The Main Store currently publishes only:
+
+- **Kaspa by Kraskus** — full node, true-solo miner, and native wallet.
+- **Mysterium Node** — Mysterium provider node with the Kraskus management UI.
+
+Other Kraskus apps are temporarily unpublished while their interfaces are being updated to the current Kraskus UI standard. They will return to the Main Store after their refresh and release qualification are complete.
+
 ## First-time setup
 
-1. Add this custom store in 5tratumOS using `https://github.com/kraskuscrypto/Kraskus-Crypto-Store`.
-2. Install **Kraskus Compatibility** first.
-3. Open it once and wait for the completion screen.
-4. Install or update Kraskus apps normally.
+Add this custom store in 5tratumOS using `https://github.com/kraskuscrypto/Kraskus-Crypto-Store`.
 
-Kraskus Compatibility is a one-time safety utility for older 5tratumOS releases that reject dynamically named custom-store channels. It supports both the legacy `custom-kraskus-5tratstore` channel and the current `custom-kraskus-crypto-store` channel. Newer compatible systems are left unchanged.
+### Older 5tratumOS compatibility
 
-## Terminal fallback
-
-If the Compatibility app cannot be installed, use:
+Older 5tratumOS releases that reject dynamically named custom-store channels can use the compatibility installer below. Current compatible systems do not need it.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/kraskuscrypto/Kraskus-Crypto-Store/main/scripts/install-kraskus-compat.sh | sudo bash
