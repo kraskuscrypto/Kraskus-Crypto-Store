@@ -24,12 +24,20 @@ All persistent state lives below `${APP_DATA_DIR}`:
 `assets/icon.png` is the official Kaspa mark, sourced from
 https://kaspa.org/icon.svg.
 
-## Deferred functionality
+## 0.2.0-beta
 
-- Wallet Send is disabled in this release.
-- The automatic developer fee accrues and reconciles against real wallet
-  UTXOs, but automatic on-chain payment of the accrued fee is not yet
-  enabled.
+- Wallet Send enabled with real Kaspa transaction preview, network-fee
+  estimation, explicit confirm step, single-use preview tokens, and txid
+  recovery after broadcast. Ambiguous post-broadcast outcomes fail closed and
+  are never automatically retried.
+- Existing configured wallets are no longer blocked by an unconfirmed-backup
+  UI state when the one-time recovery phrase is no longer available.
+- Automatic 1% developer-fee payment enabled for mature successful block
+  rewards. The signer requires an operator-provisioned root-owned 0600 secret
+  file; no wallet password or signing secret is included in this package.
+- Updated immutable adapter, wallet-api, and UI images; live node, mining,
+  worker telemetry, wallet, Blocks, and best-share/network-difficulty behavior
+  revalidated on 5tratumOS.
 
 ## 0.1.0-beta
 

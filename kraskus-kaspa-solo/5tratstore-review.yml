@@ -1,7 +1,7 @@
 schemaVersion: 1
 status: approved
 appId: kraskus-kaspa-solo
-appVersion: 0.1.0-beta
+appVersion: 0.2.0-beta
 reviewedAt: "2026-09-16"
 reviewedBy: "Kraskus Crypto"
 
@@ -42,28 +42,15 @@ security:
   networkEndpointsReviewed: true
 
 notes: >-
-  Initial 0.1.0-beta Official Store package for the Kraskus Kaspa Solo
-  true-solo appliance. Kaspa P2P TCP 16111 and the Stratum solo-mining
-  endpoint TCP 5556 are intentionally published. kaspad RPC (gRPC/borsh/
-  JSON), the adapter, and the wallet API remain on application-internal
-  networks only, with no shared or external Kaspa node dependency of any
-  kind. Blockchain and wallet state remain below APP_DATA_DIR. The stratum
-  and adapter/wallet-api/ui runtime images were rebuilt from source (the
-  stratum bridge from the official rusty-kaspa bridge source at pinned
-  commit a41a333b08848f41bf737b72592e463a6011b8ac, plus narrowly scoped
-  Kraskus patches; the wallet-api base rebuilt from rusty-kaspa's own
-  official Dockerfile after the prior base image became unpullable) and
-  are pinned by exact GHCR digests; kaspad is pinned to the official
-  kaspanet/rusty-kaspad upstream digest. A clean install test with fresh
-  app data (no reused wallet, blockchain, or shared-node state) passed
-  with no manual patching required. A live synced-node mining validation
-  against a real ASIC (IceRiver) then confirmed genuine Stratum
-  connect/authorize/submit/accept end-to-end (68/68 shares accepted, 0
-  stale, 0 invalid), correct /api/workers visibility, correct Best Share
-  updates from real submitted work, correct online/idle/offline worker
-  lifecycle transitions on disconnect, and zero container restarts
-  throughout, before Official Store promotion. The automatic developer fee
-  (1% of successfully mined block rewards, reconciled against real wallet
-  UTXOs after coinbase maturity) does not divert miner hashrate. Automatic
-  on-chain payment of the accrued fee and Wallet Send are intentionally
-  deferred to a later release and are disabled in this build.
+  0.2.0-beta production-qualified update for the Kraskus Kaspa Solo
+  true-solo appliance. Wallet Send is enabled through a two-step
+  preview/confirm flow with real fee estimation, single-use preview tokens,
+  password handling confined to memory, and fail-closed ambiguous-broadcast
+  handling. The existing-wallet backup-confirmation gate was corrected so a
+  configured wallet is never hidden merely because backup_confirmed is false.
+  Automatic 1% developer-fee payment is enabled after coinbase maturity and
+  uses a separately provisioned root-owned 0600 wallet-unlock secret; no
+  secret is shipped in the store package. The fee remains successful-block
+  only and does not divert miner hashrate. Node, Stratum, worker telemetry,
+  best-share/network-difficulty comparison, wallet receive/send, Blocks, UI,
+  and immutable image pins were revalidated on the live 5tratumOS host.
