@@ -85,7 +85,7 @@ services:
       - kaspad
 
   adapter:
-    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter@sha256:f85d9be1031d6169e584444e18a00c28271fe5ca955fa1b42a482cc26d651d7f
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter@sha256:39c78fa9eb01ab85ac9a0443054e1194e68c2eb4ab7a97a386e6c5b7f5bea48f
 
     restart: unless-stopped
 
