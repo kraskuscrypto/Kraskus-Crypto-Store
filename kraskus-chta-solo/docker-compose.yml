@@ -1,0 +1,144 @@
+services:
+
+  app_proxy:
+    environment:
+      APP_HOST: ui
+      APP_PORT: 80
+
+
+  init:
+    image: ghcr.io/kraskuscrypto/kraskus-chta-solo@sha256:ecd132f97d5c7957dabc80e18eaa4517d87ee9f033d7b01b5d401e74dc515528
+    restart: "no"
+    user: "0:0"
+    command:
+      - python3
+      - /qualification/init_config_v3.py
+    volumes:
+      - ${APP_DATA_DIR}/data/init_config_v3.py:/qualification/init_config_v3.py:ro
+      - ${APP_DATA_DIR}/config:/kraskus-config
+      - ${APP_DATA_DIR}/secrets:/run/secrets
+      - ${APP_DATA_DIR}/pool:/ckpool-data
+      - ${APP_DATA_DIR}/node:/node-data
+    security_opt:
+      - no-new-privileges:true
+
+  cheetahcoin:
+    image: ghcr.io/kraskuscrypto/kraskus-cheetahcoin-core@sha256:072f124dcbcff225733a0248f14689edafd1bedd402798f2d677dd4515fcd321
+    restart: unless-stopped
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    command:
+      - -datadir=/data
+      - -conf=/kraskus-config/cheetahcoin.conf
+    volumes:
+      - ${APP_DATA_DIR}/node:/data
+      - ${APP_DATA_DIR}/config:/kraskus-config:ro
+    networks:
+      - chta
+    stop_grace_period: 90s
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - /usr/local/bin/cheetahcoin-cli -datadir=/data -conf=/kraskus-config/cheetahcoin.conf getblockchaininfo >/dev/null 2>&1
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+    security_opt:
+      - no-new-privileges:true
+
+  pool:
+    image: ghcr.io/kraskuscrypto/kraskus-chta-ckpool@sha256:fafa08b00a243cd4047a0ff1735573c8a1119149a9afb18abc1f052c050f1588
+    restart: unless-stopped
+    depends_on:
+      init:
+        condition: service_completed_successfully
+      cheetahcoin:
+        condition: service_healthy
+    ports:
+      - "3336:3333"
+    volumes:
+      - ${APP_DATA_DIR}/config:/kraskus-config:ro
+      - ${APP_DATA_DIR}/pool:/www
+      - ${APP_DATA_DIR}/data/ckpool-entrypoint-v3.sh:/kraskus-entrypoint.sh:ro
+    entrypoint:
+      - /bin/sh
+      - /kraskus-entrypoint.sh
+    networks:
+      - chta
+    security_opt:
+      - no-new-privileges:true
+
+  kraskus:
+    image: ghcr.io/kraskuscrypto/kraskus-chta-solo@sha256:7d7b581c9caf3ae10c853b7b4c08171e9553beca19f7700ef5fc81283e37e4bf
+    restart: unless-stopped
+    depends_on:
+      init:
+        condition: service_completed_successfully
+      cheetahcoin:
+        condition: service_healthy
+      pool:
+        condition: service_started
+
+    environment:
+      KRASKUS_API_HOST: 0.0.0.0
+      KRASKUS_API_PORT: "18411"
+      KRASKUS_APP_NAME: CheetahCoin by Kraskus
+      KRASKUS_APP_VERSION: 0.2.33-beta
+      KRASKUS_CHTA_RPC_URL: http://cheetahcoin:8536/
+      KRASKUS_CHTA_RPC_USER_FILE: /run/secrets/rpc-user
+      KRASKUS_CHTA_RPC_PASSWORD_FILE: /run/secrets/rpc-password
+      KRASKUS_CHTA_SHARELOG_DIR: /ckpool-data
+      KRASKUS_CHTA_USERS_DIR: /ckpool-data/users
+      KRASKUS_CHTA_CKPOOL_STATUS_FILE: /ckpool-data/pool/pool.status
+      KRASKUS_CHTA_SETTINGS_FILE: /kraskus-config/settings.json
+      KRASKUS_CHTA_CKPOOL_CONFIG: /kraskus-config/ckpool.conf
+      KRASKUS_CHTA_RELOAD_REQUEST_FILE: /kraskus-config/reload-request.json
+      KRASKUS_CHTA_RELOAD_ACK_FILE: /ckpool-data/reload-ack.json
+      KRASKUS_CHTA_RELOAD_TIMEOUT: "20"
+      KRASKUS_CHTA_STRATUM_PORT: "3336"
+
+    volumes:
+      - ${APP_DATA_DIR}/config:/kraskus-config
+      - ${APP_DATA_DIR}/secrets:/run/secrets:ro
+      - ${APP_DATA_DIR}/pool:/ckpool-data:ro
+    networks:
+      - chta
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+
+  ui:
+    image: ghcr.io/kraskuscrypto/kraskus-chta-ui@sha256:7d365cb6d8f9cc6aee89d451afbd364c1f8abc03527aa825c03c758d393c9147
+    restart: unless-stopped
+    depends_on:
+      kraskus:
+        condition: service_started
+    environment:
+      CHTA_API_HOST: kraskus
+    networks:
+      - chta
+    read_only: true
+    tmpfs:
+      - /etc/nginx/conf.d
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  chta:
+    name: kraskus-chta-solo-v2-qualification

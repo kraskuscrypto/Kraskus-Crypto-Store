@@ -1,0 +1,30 @@
+id: kraskus-chta-solo
+name: CheetahCoin by Kraskus
+tagline: CheetahCoin full node and SHA256 solo mining
+description: >-
+  CheetahCoin by Kraskus turns 5tratumOS into a self-contained
+  CheetahCoin full node and local CKPool solo-mining appliance.
+  The Template V2 interface shows node synchronization, live mining
+  readiness, workers, accepted and rejected shares, best submitted
+  difficulty, round progress, and independently confirmed blocks.
+  The Wallet page configures the real CHTA payout address used by
+  CKPool; this release does not claim native balance, transaction
+  history, or send functionality that the appliance API does not expose.
+  RPC credentials and mining settings remain in persistent local app
+  storage, and CKPool stays gated until a valid payout address is set.
+version: 0.2.33-beta
+category: Mining
+developer: Kraskus Crypto
+website: https://kraskuscrypto.com/
+repo: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
+support: https://kraskuscrypto.com/
+icon: assets/divinity-chta-logo.png
+port: 33064
+path: /
+uiMode: proxy
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: ui
+      APP_PORT: 80
