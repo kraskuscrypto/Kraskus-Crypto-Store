@@ -26,13 +26,13 @@ services:
       fi
       sed -i "s|window.open('/node/'|window.open(nodeUiUrl|" /portal/app.js
       sed -i 's|https://mystnodes.co/?referral_code=|https://my.mystnodes.com/registration?referral_code=|g' /portal/app.js /portal/index.html
-      sed -i 's|href="styles.css[^"]*"|href="styles.css?v=2.6.9"|' /portal/index.html
-      sed -i 's|src="app.js[^\"]*"|src="app.js?v=2.6.9"|' /portal/index.html
-      sed -i 's|src="live.js[^\"]*"|src="live.js?v=2.6.9"|' /portal/index.html
+      sed -i 's|href="styles.css[^"]*"|href="styles.css?v=2.6.11"|' /portal/index.html
+      sed -i 's|src="app.js[^\"]*"|src="app.js?v=2.6.11"|' /portal/index.html
+      sed -i 's|src="live.js[^\"]*"|src="live.js?v=2.6.11"|' /portal/index.html
       grep -Fq ':4449/' /portal/app.js
-      grep -Fq 'styles.css?v=2.6.9' /portal/index.html
-      grep -Fq 'app.js?v=2.6.9' /portal/index.html
-      grep -Fq '2.6.9 presentation and embedded-window refinements' /portal/styles.css
+      grep -Fq 'styles.css?v=2.6.11' /portal/index.html
+      grep -Fq 'app.js?v=2.6.11' /portal/index.html
+      grep -Fq '2.6.11 presentation and embedded-window refinements' /portal/styles.css
       touch /tmp/portal-migrated
       exec tail -f /dev/null
     volumes:
@@ -95,7 +95,7 @@ services:
     restart: unless-stopped
     network_mode: host
     environment:
-      APP_VERSION: 2.6.9
+      STATUS_APP_VERSION: 2.6.11
       NODE_VERSION: 1.39.5
       STATUS_INTERVAL: '30'
     command:

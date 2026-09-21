@@ -1,7 +1,7 @@
 schemaVersion: 1
 status: proposed
 appId: mysterium-node
-appVersion: 2.6.9
+appVersion: 2.6.11
 reviewedAt: ''
 reviewedBy: ''
 upstream:
@@ -70,3 +70,5 @@ notes: Mysterium upstream requires NET_ADMIN and documents host networking for t
   Persistent node identity, status, backups, and update state remain under APP_DATA_DIR and
   are not mounted into the migration service. The completed helper stays healthy and idle so
   StratumOS reports the application as running.
+
+# v2.6.11 corrects UI data-integrity mappings against live TequilAPI snapshots.

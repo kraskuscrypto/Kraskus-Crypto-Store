@@ -8,7 +8,7 @@ API_DIR="$OUT_DIR/api"
 TEQUILAPI="${TEQUILAPI_URL:-http://127.0.0.1:4050}"
 
 INTERVAL="${STATUS_INTERVAL:-30}"
-APP_VERSION="${APP_VERSION:-2.6.9}"
+APP_VERSION="${STATUS_APP_VERSION:-2.6.11}"
 
 mkdir -p "$OUT_DIR" "$API_DIR"
 
@@ -23,6 +23,27 @@ snapshot_api() {
         return 0
     fi
 
+    rm -f "$temp"
+    return 1
+}
+
+collect_myst_price() {
+    target="$API_DIR/myst-price.json"
+    temp="$target.$$"
+    now="$(date +%s)"
+    previous=0
+    if [ -f "$target" ]; then
+        previous="$(stat -c %Y "$target" 2>/dev/null || echo 0)"
+    fi
+    age=$((now - previous))
+    if [ "$age" -lt 300 ] && [ -s "$target" ]; then
+        return 0
+    fi
+    url='https://api.coingecko.com/api/v3/simple/price?ids=mysterium&vs_currencies=usd,eur,gbp,cad,aud'
+    if wget -q -T 8 -O "$temp" "$url" 2>/dev/null && [ -s "$temp" ]; then
+        mv "$temp" "$target"
+        return 0
+    fi
     rm -f "$temp"
     return 1
 }
@@ -80,6 +101,7 @@ json_escape() {
 collect() {
 
     collect_tequilapi
+    collect_myst_price || true
 
     #
     # CPU LOAD

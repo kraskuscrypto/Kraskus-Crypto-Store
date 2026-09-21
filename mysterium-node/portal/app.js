@@ -41,9 +41,10 @@ document.querySelectorAll('.toggle').forEach(toggle=>toggle.addEventListener('cl
 document.querySelectorAll('.identity-address button').forEach(button=>button.addEventListener('click',async()=>{const value=button.closest('.identity-address').dataset.fullIdentity;try{await navigator.clipboard.writeText(value);showToast('Complete node identity copied.');}catch{showToast('Copy unavailable in this preview.');}}));
 
 document.querySelectorAll('[data-earnings-range]').forEach(button=>{
-  const supported=button.dataset.earningsRange==='30d';
+  const range=button.dataset.earningsRange;
+  const supported=range==='7d'||range==='30d';
   button.disabled=!supported;
-  if(!supported)button.title='The local collector currently provides a live 30-day earnings series.';
+  if(!supported)button.title='The pinned runtime exposes session history for up to 30 days.';
 });
 
 document.querySelectorAll('.session-row.expandable').forEach(row=>{const toggle=()=>{const record=row.closest('.session-record');const open=record.classList.toggle('open');row.setAttribute('aria-expanded',String(open));};row.addEventListener('click',toggle);row.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();toggle();}});});

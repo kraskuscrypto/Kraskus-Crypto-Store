@@ -1,6 +1,7 @@
 (() => {
   'use strict';
 
+  const APP_RELEASE = '2.6.11';
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const api = name => fetch(`/live-api/${name}.json`, {cache: 'no-store'})
@@ -20,7 +21,35 @@
   const tokenText = value => value === undefined || value === null ? '— MYST' : `${formatToken(value)} MYST`;
   const compactId = value => value && value.length > 16 ? `${value.slice(0, 8)}…${value.slice(-6)}` : safe(value);
   const set = (element, value) => { if (element) element.textContent = value; };
+  const natLabel = value => ({
+    prcone: 'Port-restricted cone',
+    restricted: 'Restricted cone',
+    fullcone: 'Full cone',
+    symmetric: 'Symmetric',
+    open: 'Open / public',
+    unknown: 'Unknown'
+  }[String(value || '').toLowerCase()] || safe(value));
+  const monitoringOk = value => ['success', 'passed'].includes(String(value || '').toLowerCase());
+  const qualityDisplay = value => {
+    const raw = number(value);
+    if (!Number.isFinite(raw) || raw <= 0) return {raw: 0, percent: 0, text: 'Awaiting provider quality'};
+    const percent = Math.max(0, Math.min(100, raw / 3 * 100));
+    return {raw, percent, text: `${raw.toFixed(1)} / 3`};
+  };
   const html = value => String(value ?? '').replace(/[&<>'"]/g, character => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[character]));
+  let priceSnapshot = null;
+  let selectedCurrency = localStorage.getItem('mystnodes-currency') || 'USD';
+  const supportedCurrencies = new Set(['USD', 'EUR', 'GBP', 'CAD', 'AUD']);
+  if (!supportedCurrencies.has(selectedCurrency)) selectedCurrency = 'USD';
+  const fiatRate = () => number(priceSnapshot?.mysterium?.[selectedCurrency.toLowerCase()]);
+  const fiatText = value => {
+    const rate = fiatRate();
+    if (!rate && rate !== 0) return 'Price unavailable';
+    const amount = token(value) * rate;
+    return new Intl.NumberFormat(undefined, {style: 'currency', currency: selectedCurrency, minimumFractionDigits: 2, maximumFractionDigits: 2}).format(amount);
+  };
+  const estimatedFiatText = value => fiatRate() ? `≈ ${fiatText(value)}` : 'Fiat estimate unavailable';
+
 
   function bytes(value) {
     if (value === undefined || value === null) return '—';
@@ -46,6 +75,59 @@
     if (value.includes('dvpn')) return {key: 'dvpn', label: 'Mysterium VPN', letter: 'M', color: 'purple-bg'};
     if (value.includes('wireguard') || value.includes('openvpn')) return {key: 'public', label: 'Public VPN', letter: 'P', color: 'purple-bg'};
     return {key: value || 'other', label: value ? value.replaceAll('_', ' ') : 'Network service', letter: '?', color: 'cyan-bg'};
+  }
+
+  function dailySeries(sessions, days, valueOf) {
+    const now = new Date();
+    const rows = [];
+    const byDay = new Map();
+    for (let offset = days - 1; offset >= 0; offset -= 1) {
+      const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - offset));
+      const key = date.toISOString().slice(0, 10);
+      byDay.set(key, 0);
+      rows.push({key, date, value: 0});
+    }
+    for (const session of sessions || []) {
+      if (!session?.started_at) continue;
+      const key = String(session.started_at).slice(0, 10);
+      if (!byDay.has(key)) continue;
+      byDay.set(key, byDay.get(key) + number(valueOf(session)));
+    }
+    rows.forEach(row => { row.value = byDay.get(row.key) || 0; });
+    return rows;
+  }
+
+  function setTrafficLabels(rows) {
+    const labels = $$('#overview .chart-labels span');
+    if (!labels.length || !rows.length) return;
+    const formatter = new Intl.DateTimeFormat(undefined, {month: 'short', day: 'numeric', timeZone: 'UTC'});
+    labels.forEach((label, index) => {
+      const pos = labels.length === 1 ? 0 : Math.round(index * (rows.length - 1) / (labels.length - 1));
+      set(label, formatter.format(rows[pos].date));
+    });
+  }
+
+  function renderTrafficTrend(sessions, days) {
+    const rows = dailySeries(sessions, days, session => session.transferred_bytes);
+    drawSeries($('#overview .chart svg'), rows.map(row => row.value), 'purple');
+    setTrafficLabels(rows);
+  }
+
+  function renderEarningsFromSessions(sessions, days, title) {
+    const rows = dailySeries(sessions, days, session => token(session.earnings));
+    renderEarningsBars({data: rows.map(row => ({value: row.value, date: row.key}))}, title);
+    const labels = $('#earningsLabels');
+    if (labels) {
+      labels.hidden = false;
+      const nodes = [...labels.children];
+      const formatter = new Intl.DateTimeFormat(undefined, {month: 'short', day: 'numeric', timeZone: 'UTC'});
+      nodes.forEach((label, index) => {
+        const pos = nodes.length === 1 ? 0 : Math.round(index * (rows.length - 1) / (nodes.length - 1));
+        set(label, formatter.format(rows[pos].date));
+      });
+    }
+    const earned = rows.reduce((sum, row) => sum + row.value, 0);
+    set($('#earningsChange'), `${formatToken(earned)} MYST · ${estimatedFiatText(earned)}`);
   }
 
   function drawSeries(svg, values, className) {
@@ -119,25 +201,27 @@
     if (addressBox && address) addressBox.dataset.fullIdentity = address;
     set($('.identity-value', root), compactId(address));
     const metadata = $$('.identity-meta strong', root);
-    set(metadata[0], identity?.registration_status ? `Registration: ${identity.registration_status}` : 'Identity detected');
+    set(metadata[0], identity?.registration_status || 'Unknown');
     set(metadata[1], 'Persistent volume');
     set(metadata[2], status?.updated_at ? new Date(status.updated_at).toLocaleString() : 'Awaiting snapshot');
-    set(metadata[3], status?.identity === 'Protected' ? 'Healthy' : safe(status?.identity));
+    set(metadata[3], status?.identity === 'Protected' ? 'Files detected' : safe(status?.identity));
     set($('.account-state strong', root), 'Manage in MystNodes');
     set($('.account-state span', root), 'Claim status is not exposed by the local node API');
-    const protectedIdentity = status?.identity === 'Protected';
-    set($('.identity-seal span', root), protectedIdentity ? 'VERIFIED' : 'WAITING');
-    set($('.callout strong', root), protectedIdentity ? 'Identity protection is active' : 'Identity files not yet detected');
-    set($('.callout p', root), protectedIdentity ? 'Your identity files are stored outside the container so updates will not reset your node.' : 'The persistent volume is ready; status will update after the node creates or loads an identity.');
+    const persistentIdentity = status?.identity === 'Protected';
+    set($('.identity-seal span', root), persistentIdentity ? 'PERSISTED' : 'WAITING');
+    set($('.identity-main .health-score', root), persistentIdentity ? 'Persistent' : 'Waiting');
+    set($('.callout strong', root), persistentIdentity ? 'Identity storage is persistent' : 'Identity files not yet detected');
+    set($('.callout p', root), persistentIdentity ? 'Identity files are stored outside the runtime container so normal updates and container recreation do not erase them.' : 'The persistent volume is ready; status will update after the node creates or loads an identity.');
   }
 
-  function renderEarnings(identity, earnings, series) {
+  function renderEarnings(identity, earnings, sessions30) {
     const root = $('#earnings');
     if (!root) return;
     const lifetime = identity ? token(identity.earnings_total_tokens) : null;
     const unsettled = identity ? token(identity.earnings_tokens) : null;
     const balance = identity ? token(identity.balance_tokens) : null;
     set($('.earnings-hero h2', root), lifetime === null ? '— MYST' : tokenText(lifetime));
+    set($('#lifetimeFiat', root), lifetime === null ? '—' : estimatedFiatText(lifetime));
     const cards = $$('.detail-grid.thirds .metric-card', root);
     const labels = ['On-chain balance', 'Unsettled earnings', 'Lifetime earnings'];
     const values = [balance, unsettled, lifetime];
@@ -145,9 +229,26 @@
     cards.forEach((card, index) => {
       set($('.metric-head span', card), labels[index]);
       set($(':scope > strong', card), values[index] === null ? '— MYST' : tokenText(values[index]));
+      set($('.fiat-estimate', card), values[index] === null ? '—' : estimatedFiatText(values[index]));
       set($(':scope > p', card), notes[index]);
     });
-    renderEarningsBars(series, 'Last 30 days');
+    renderEarningsFromSessions(sessions30, 30, 'Last 30 days');
+  }
+
+  function renderServiceEarnings(earnings) {
+    const root = $('#serviceEarnings');
+    if (!root) return;
+    const values = [
+      earnings?.public_tokens,
+      earnings?.data_transfer_tokens,
+      earnings?.scraping_tokens,
+      earnings?.dvpn_tokens,
+      earnings?.monitoring_tokens
+    ];
+    $$('.service-earning-card').forEach((card, index) => {
+      set($(':scope > strong', card), tokenText(values[index]));
+      set($(':scope > small', card), estimatedFiatText(values[index]));
+    });
   }
 
   function renderEarningsBars(series, title) {
@@ -223,13 +324,23 @@
   }
 
   async function refresh() {
-    const [status, identityList, identity, services, nat, monitoring, quality, activity, earnings, sessions1d, count30d, transfer30d, dataSeries7d, earningsSeries30d] = await Promise.all([
-      statusApi(), api('identities'), api('identity'), api('services'), api('nat'), api('monitoring-status'), api('quality'), api('activity'), api('service-earnings'), api('sessions-1d'), api('sessions-count-30d'), api('transferred-30d'), api('data-series-7d'), api('earnings-series-30d')
+    const [status, healthcheck, identityList, identity, services, nat, monitoring, quality, activity, earnings, sessions1d, sessions7d, sessions30d, transfer7d, transfer30d, mystPrice] = await Promise.all([
+      statusApi(), api('healthcheck'), api('identities'), api('identity'), api('services'), api('nat'), api('monitoring-status'), api('quality'), api('activity'), api('service-earnings'), api('sessions-1d'), api('sessions-7d'), api('sessions-30d'), api('transferred-7d'), api('transferred-30d'), api('myst-price')
     ]);
+    if (mystPrice?.mysterium) priceSnapshot = mystPrice;
     const online = status?.mysterium === 'Healthy';
     const currentIdentity = identity || (identityList?.identities?.[0] ? {id: identityList.identities[0].id} : null);
     const sessions = Array.isArray(sessions1d?.sessions) ? sessions1d.sessions : null;
+    const sessions7 = Array.isArray(sessions7d?.sessions) ? sessions7d.sessions : null;
+    const sessions30 = Array.isArray(sessions30d?.sessions) ? sessions30d.sessions : null;
     const recentCount = sessions ? sessions.length : null;
+    const count30 = sessions30 ? sessions30.length : null;
+    const runningServices = Array.isArray(services) ? services.filter(service => String(service.status).toLowerCase() === 'running') : [];
+    const trafficServices = runningServices.filter(service => String(service.type).toLowerCase() !== 'monitoring');
+    const monitorHealthy = monitoringOk(monitoring?.status);
+    const providerReady = online && monitorHealthy && trafficServices.length > 0;
+    const providerLocation = runningServices.find(service => service?.proposal?.location)?.proposal?.location || null;
+    const q = qualityDisplay(quality?.quality);
     const overviewCards = $$('#overview .metric-grid .metric-card');
     set($(':scope > strong', overviewCards[0]), tokenText(currentIdentity?.earnings_total_tokens || earnings?.total_tokens));
     set($(':scope > p', overviewCards[0]), 'Reported by the Mysterium runtime');
@@ -242,41 +353,52 @@
     set($(':scope > strong', overviewCards[3]), activity ? `${number(activity.online_percent).toFixed(1)}%` : safe(status?.host_uptime));
     set($(':scope > p', overviewCards[3]), activity ? 'Provider activity metric' : 'Host uptime');
 
-    set($('#overview .status-pill'), online ? '● Node service healthy' : '● Node attention needed');
+    set($('#overview .status-pill'), providerReady ? '● Provider available' : online ? '● Runtime online · provider check needed' : '● Node attention needed');
     set($('#overview .hero-copy > p'), online ? 'Live data is flowing from the official Mysterium runtime through a private local collector.' : 'The dashboard is waiting for the official Mysterium runtime.');
-    set($('#overview .chart-summary strong'), bytes(transfer30d?.transferred_data_bytes));
-    drawSeries($('#overview .chart svg'), (dataSeries7d?.data || []).map(item => number(item.value)), 'purple');
-    const health = quality ? Math.round(number(quality.quality) * (number(quality.quality) <= 1 ? 100 : 1)) : 0;
-    set($('#overview .health-score'), health ? `Provider quality: ${health}%` : 'Awaiting provider quality');
+    set($('#overview .chart-summary strong'), bytes(transfer7d?.transferred_data_bytes));
+    renderTrafficTrend(sessions7, 7);
+    set($('#overview .health-score'), q.raw ? `Provider quality: ${q.text}` : q.text);
     const healthRing = $('#overview .health-ring');
-    if (healthRing) healthRing.style.background = `conic-gradient(var(--green) 0 ${Math.max(0, Math.min(100, health))}%, rgba(255,255,255,.06) ${Math.max(0, Math.min(100, health))}% 100%)`;
-    set($('#overview .health-ring strong'), health ? `${health}%` : '—');
-    set($('#overview .health-ring span'), 'provider quality');
+    if (healthRing) healthRing.style.background = `conic-gradient(var(--green) 0 ${q.percent}%, rgba(255,255,255,.06) ${q.percent}% 100%)`;
+    set($('#overview .health-ring strong'), q.raw ? q.text : '—');
+    set($('#overview .health-ring span'), 'quality score');
     const healthValues = $$('#overview .health-list strong');
     set(healthValues[0], online ? '● Running' : '● Offline');
-    set(healthValues[1], safe(nat?.type));
+    set(healthValues[1], natLabel(nat?.type));
     set(healthValues[2], status?.identity === 'Protected' ? '● Secured' : safe(status?.identity));
     set(healthValues[3], status?.updated_at ? new Date(status.updated_at).toLocaleTimeString() : 'Waiting');
     renderSessionRows($('#overview .sessions-preview'), sessions, 3);
 
     const nodeCards = $$('#node .detail-grid.thirds .panel');
     set($('.big-stat', nodeCards[0]), safe(status?.node_version));
-    set($('.big-stat', nodeCards[1]), online ? 'Online' : 'Offline');
-    set($('.muted-copy', nodeCards[1]), status?.updated_at ? `Snapshot ${new Date(status.updated_at).toLocaleTimeString()}` : 'Awaiting heartbeat');
-    set($('.big-stat', nodeCards[2]), safe(nat?.type));
-    set($('.muted-copy', nodeCards[2]), nat ? 'Reported by Mysterium NAT probe' : 'Awaiting NAT probe');
+    set($('h3', nodeCards[1]), 'Provider availability');
+    set($('.big-stat', nodeCards[1]), providerReady ? 'Available' : online ? 'Checking' : 'Offline');
+    set($('.muted-copy', nodeCards[1]), providerReady ? `${trafficServices.length} traffic services running` : online ? `Monitoring: ${safe(monitoring?.status)}` : 'Runtime unavailable');
+    set($('h3', nodeCards[2]), 'NAT type');
+    set($('.big-stat', nodeCards[2]), natLabel(nat?.type));
+    set($('.muted-copy', nodeCards[2]), nat ? `Mysterium NAT probe · raw: ${safe(nat?.type)}` : 'Awaiting NAT probe');
     const components = $$('#node .status-table > div');
     set($('strong', components[0]), online ? 'Running' : 'Unavailable');
-    set($('small', components[0]), safe(status?.host_uptime));
-    set($('strong', components[1]), safe(monitoring?.status));
-    set($('small', components[1]), 'Monitoring agent');
-    set($('strong', components[2]), recentCount === null ? 'Waiting' : `${recentCount} recent`);
-    set($('small', components[2]), 'Last 24 hours');
-    set($('strong', components[3]), currentIdentity ? 'Identity loaded' : 'Waiting');
+    set($('small', components[0]), healthcheck?.uptime ? `${healthcheck.uptime} runtime uptime` : 'Awaiting runtime uptime');
+    set($('strong', components[1]), monitorHealthy ? 'Healthy' : safe(monitoring?.status));
+    set($('small', components[1]), `Mysterium monitoring: ${safe(monitoring?.status)}`);
+    set($('strong', components[2]), recentCount === null ? 'Waiting' : `${recentCount} reported`);
+    set($('small', components[2]), 'Session records in last 24 hours');
+    set($('strong', components[3]), currentIdentity ? 'Loaded' : 'Waiting');
     set($('small', components[3]), compactId(currentIdentity?.id));
+    set($('#node .info-panel .health-score'), providerReady ? 'Provider available' : online ? 'Runtime online' : 'Attention needed');
+    set($('#hostCpu'), safe(status?.cpu_load));
+    set($('#hostMemory'), status?.memory_pct !== undefined ? `${status.memory_pct}%` : '—');
+    set($('#hostDisk'), status?.disk_pct !== undefined ? `${status.disk_pct}%` : '—');
+    set($('#hostDiskFree'), safe(status?.disk_free, '—'));
+    set($('#providerRegion'), providerLocation ? [providerLocation.city, providerLocation.country].filter(Boolean).join(', ') : '—');
+    set($('#providerIsp'), safe(providerLocation?.isp, '—'));
+    set($('#providerIpType'), safe(providerLocation?.ip_type, '—'));
+    set($('#providerNat'), natLabel(nat?.type));
 
     renderIdentity(currentIdentity, status);
-    renderEarnings(currentIdentity, earnings, earningsSeries30d);
+    renderEarnings(currentIdentity, earnings, sessions30);
+    renderServiceEarnings(earnings);
     const sessionRoot = $('#sessions');
     set($('.detail-hero .status-pill', sessionRoot), recentCount === null ? '● Waiting for session data' : `● ${recentCount} sessions reported`);
     set($('.detail-hero h2', sessionRoot), 'Recent network sessions');
@@ -292,14 +414,14 @@
     const sessionStats = $$('#sessions .detail-grid.two .panel');
     set($('.big-stat', sessionStats[0]), bytes(transfer30d?.transferred_data_bytes));
     set($('.muted-copy', sessionStats[0]), '30-day aggregate reported by the runtime');
-    set($('.big-stat', sessionStats[1]), safe(count30d?.count, '—'));
-    set($('h3', sessionStats[1]), 'Runtime session count');
-    set($('.muted-copy', sessionStats[1]), 'Separate 30-day aggregate reported by the runtime');
+    set($('.big-stat', sessionStats[1]), count30 === null ? '—' : String(count30));
+    set($('h3', sessionStats[1]), 'Session records');
+    set($('.muted-copy', sessionStats[1]), 'Counted from records returned for the last 30 days');
 
     const runtimeLabels = $$('#settings .version-list strong');
-    set(runtimeLabels[0], safe(status?.app_version));
+    set(runtimeLabels[0], APP_RELEASE);
     set(runtimeLabels[1], safe(status?.node_version));
-    set($('#settings .version-badge'), `Kraskus App ${safe(status?.app_version)}`);
+    set($('#settings .version-badge'), `Kraskus App ${APP_RELEASE}`);
     set($('#settings .account-setting h3'), 'Managed in the MystNodes dashboard');
     set($('#settings .account-setting p:last-of-type'), 'The local node API does not disclose MystNodes claim status. Open the dashboard to review or claim this node.');
     renderServices(services);
@@ -318,7 +440,10 @@
 
   $$('[data-earnings-range="7d"], [data-earnings-range="30d"]').forEach(button => button.addEventListener('click', async () => {
     const range = button.dataset.earningsRange;
-    renderEarningsBars(await api(`earnings-series-${range}`), range === '7d' ? 'Last 7 days' : 'Last 30 days');
+    const days = range === '7d' ? 7 : 30;
+    const data = await api(`sessions-${range}`);
+    const sessions = Array.isArray(data?.sessions) ? data.sessions : [];
+    renderEarningsFromSessions(sessions, days, range === '7d' ? 'Last 7 days' : 'Last 30 days');
   }));
 
   const trafficButtons = $$('#overview .traffic-panel .range-switch button');
@@ -326,8 +451,10 @@
     if (index > 1) { button.disabled = true; button.title = 'The pinned runtime provides up to 30 days of series data'; return; }
     button.addEventListener('click', async () => {
       const range = index === 0 ? '7d' : '30d';
-      const [series, total] = await Promise.all([api(`data-series-${range}`), api(`transferred-${range}`)]);
-      drawSeries($('#overview .chart svg'), (series?.data || []).map(item => number(item.value)), 'purple');
+      const days = index === 0 ? 7 : 30;
+      const [sessionData, total] = await Promise.all([api(`sessions-${range}`), api(`transferred-${range}`)]);
+      const sessions = Array.isArray(sessionData?.sessions) ? sessionData.sessions : [];
+      renderTrafficTrend(sessions, days);
       set($('#overview .chart-summary strong'), bytes(total?.transferred_data_bytes));
     });
   });
@@ -336,6 +463,16 @@
     button.disabled = true;
     button.title = 'The pinned runtime provides up to 30 days of series data';
   });
+
+  const currencySelect = $('#currencySelect');
+  if (currencySelect) {
+    currencySelect.value = selectedCurrency;
+    currencySelect.addEventListener('change', () => {
+      selectedCurrency = supportedCurrencies.has(currencySelect.value) ? currencySelect.value : 'USD';
+      localStorage.setItem('mystnodes-currency', selectedCurrency);
+      refresh();
+    });
+  }
 
   $$('.metric-card > strong, .big-stat, .session-total strong').forEach(element => set(element, '—'));
   $$('.sessions-preview .session-row:not(.header), #sessions .session-record').forEach(element => element.remove());
