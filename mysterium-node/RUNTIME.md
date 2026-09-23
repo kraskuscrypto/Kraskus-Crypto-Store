@@ -27,3 +27,12 @@ in the official Mysterium Node UI under `/node/`.
 
 ## Data safety
 Updates must preserve `${APP_DATA_DIR}/data/mysterium`.
+
+## Update delivery
+5tratumOS copies `data/` into `${APP_DATA_DIR}` only on first install and never
+overwrites existing files. The `portal-migrator` service therefore embeds the
+versioned application files (portal `app.js`, `live.js`, `styles.css`,
+`index.html`, the status agent script and the nginx site config) and writes them
+into persistent storage before `portal` and `status-agent` start. Regenerate the
+payloads with `scripts/embed-portal-assets.sh` after editing those sources and
+verify with `scripts/self-check.sh`.

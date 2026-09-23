@@ -76,3 +76,30 @@ print("PASS: persistent portal migration sidecar")
 PY
 
 echo "PASS: packaged runtime files"
+
+# Embedded migrator payloads must be byte-identical to the packaged sources.
+# (v2.6.11 shipped stale payloads and failed its own migration check.)
+check_payload() {
+  local src="$1" target="$2" payload
+  payload="$(grep -F "| base64 -d | gzip -d > ${target}" "$APP_DIR/docker-compose.yml" | sed "s/.*printf '%s' '//; s/' | base64 -d | gzip -d > .*//")"
+  [ -n "$payload" ] || { echo "FAIL: no embedded payload for ${target}" >&2; exit 1; }
+  printf '%s' "$payload" | base64 -d | gzip -dc | cmp -s - "$APP_DIR/$src" || { echo "FAIL: embedded payload for ${target} differs from ${src}" >&2; exit 1; }
+}
+check_payload portal/app.js /portal/app.js.new
+check_payload portal/live.js /portal/live.js.new
+check_payload portal/styles.css /portal/styles.css.new
+check_payload portal/index.html /portal/index.html.new
+check_payload status-agent/status.sh /status-agent/status.sh.new
+check_payload nginx/default.conf /nginx/default.conf.new
+echo "PASS: embedded migrator payloads match sources"
+
+grep -Fq "styles.css?v=$VERSION" "$APP_DIR/portal/index.html"
+grep -Fq "app.js?v=$VERSION" "$APP_DIR/portal/index.html"
+grep -Fq "live.js?v=$VERSION" "$APP_DIR/portal/index.html"
+grep -Fq "Kraskus App $VERSION" "$APP_DIR/portal/index.html"
+grep -Fq "$VERSION presentation and embedded-window refinements" "$APP_DIR/portal/styles.css"
+grep -Fq "STATUS_APP_VERSION:-$VERSION" "$APP_DIR/status-agent/status.sh"
+grep -Fq "STATUS_APP_VERSION: $VERSION" "$APP_DIR/docker-compose.yml"
+grep -Fq "$VERSION presentation and embedded-window refinements' /portal/styles.css" "$APP_DIR/docker-compose.yml"
+grep -Fq "styles.css?v=$VERSION' /portal/index.html" "$APP_DIR/docker-compose.yml"
+echo "PASS: release version markers ($VERSION)"
