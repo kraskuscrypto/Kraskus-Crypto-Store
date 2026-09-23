@@ -1,7 +1,7 @@
 schemaVersion: 1
 status: proposed
 appId: mysterium-node
-appVersion: 2.6.11
+appVersion: 2.6.12
 reviewedAt: ''
 reviewedBy: ''
 upstream:
@@ -72,3 +72,7 @@ notes: Mysterium upstream requires NET_ADMIN and documents host networking for t
   StratumOS reports the application as running.
 
 # v2.6.11 corrects UI data-integrity mappings against live TequilAPI snapshots.
+# v2.6.12 repairs the release package: the migration sidecar now embeds the v2.6.11 portal
+# bundle (app.js, live.js, styles.css, index.html), the status agent and the nginx config,
+# so Store updates and fresh installs deliver the same dashboard. The v2.6.11 package
+# embedded the v2.6.9 bundle and could not pass its own migration check.
