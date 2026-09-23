@@ -9,15 +9,14 @@ description: >-
   from a single interface. Normal users do not need to manage
   kaspad, RPC, Docker, Linux, JSON, or Stratum configuration.
   An automatic 1% developer fee applies only to successfully mined
-  block rewards after coinbase maturity; miner hashrate is never
-  diverted. Wallet Send is enabled with preview/confirm safeguards and real network-fee estimation.
-version: 0.2.0-beta
+  block rewards after coinbase maturity; miner hashrate is never diverted.
+version: 0.3.0
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/
 repo: https://github.com/kraskuscrypto/Kraskus-Mining-Platform
 support: https://kraskuscrypto.com/
-icon: assets/icon.png
+icon: assets/kaspa-emblem-std-v2.png
 port: 33067
 path: /
 uiMode: proxy
