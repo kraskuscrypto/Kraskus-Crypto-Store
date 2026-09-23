@@ -4,12 +4,13 @@ Official client-facing Kraskus Crypto Store releases for 5tratumOS.
 
 ## Published apps
 
-The Main Store currently publishes only:
+Apps are promoted to Main only after completing the current Kraskus UI standard and release-qualification process.
 
 - **Kaspa by Kraskus** — full node, true-solo miner, and native wallet.
 - **Mysterium Node** — Mysterium provider node with the Kraskus management UI.
+- **XMR Solo by Kraskus** — Monero solo-mining node, wallet, and stratum gateway. XMR Solo 0.1.17 is the first app promoted under this qualification standard.
 
-Other Kraskus apps are temporarily unpublished while their interfaces are being updated to the current Kraskus UI standard. They will return to the Main Store after their refresh and release qualification are complete.
+Other Kraskus apps remain temporarily unpublished while their interfaces are being updated to the current Kraskus UI standard and their release-qualification process completes. They will return to the Main Store after that work is done.
 
 ## First-time setup
 

@@ -1,0 +1,156 @@
+schemaVersion: 1
+status: proposed
+appId: kraskus-xmr-solo
+appVersion: 0.1.17
+reviewedAt: ""
+reviewedBy: ""
+
+upstream:
+  sourceUrl: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
+  license: mixed
+  licenseEvidence: LICENSES.md
+
+rights:
+  packageOriginal: true
+  softwareDistributionCleared: true
+  containerUseCleared: true
+  listingTextCleared: true
+  artworkCleared: true
+  noticesIncluded: true
+
+delivery:
+  mode: immutable-container-appliance
+  storePayload: recipe-only
+  mirrorsThirdPartyPayload: false
+
+compatibility:
+  osVersions:
+    - Debian-13-5tratumOS-clean-room
+  architectures:
+    - amd64
+  installTested: false
+  startTested: false
+  updateTested: false
+  uninstallTested: false
+
+security:
+  privileged: false
+  hostNetwork: false
+  dockerSocket: false
+  hostMountsReviewed: true
+  devicesReviewed: true
+  networkEndpointsReviewed: true
+
+notes: >-
+  XMR 0.1.14 Dev Store candidate from canonical source commit
+  da26f67f06e44b8287595cdef226d79aa673aaac and GitHub Actions build
+  35625993691. This release replaces the old miner-facing daemon HTTP mode
+  with RandomX Stratum on TCP 1921 while retaining true solo block submission
+  to the local monerod. It adds real worker/share/hashrate/difficulty telemetry,
+  configurable share difficulty, Kaspa Template V2 UI parity, configured-wallet
+  parity, the finalized Monero hero/branding, and preserves automatic non-blocking
+  1% developer-fee settlement after 60-block maturity. All runtime images are
+  pinned to immutable 0.1.14 GHCR digests. Source/runtime qualification
+  passed; clean client install/update/uninstall qualification remains a Dev Store
+  follow-up before any Main Store promotion.
+
+# 0.1.6-beta release qualification
+#
+# Promotes the qualified XMR runtime image set from
+# Kraskus-Mining-Platform-V2 source commit:
+# ca8d5a6c9ced9e1fe8504fa53a44eb50fd1b08c0
+#
+# Runtime services are pinned to immutable GHCR digests.
+# Full-wallet create/restore stores the local wallet password in an
+# appliance-local mode-0600 credential used by the automatic developer-fee
+# settlement worker. Watch-only wallets remain monitoring-only.
+#
+# Kraskus XMR Solo charges a 1% developer fee only on successfully mined
+# block rewards. Settlement occurs automatically after maturity. Miner
+# hashrate is never diverted.
+#
+# The adapter also persists last-known-good node telemetry so the UI can
+# remain useful during temporary monerod RPC timeouts.
+
+
+# 0.1.7-beta release qualification
+#
+# Updates only the XMR UI image to source commit:
+# f69435d4898cfabab4d6e3948f78eef524715fda
+#
+# The wallet setup method controls are now explicitly presented as tabs.
+# Selecting Create New Wallet, Restore Existing Wallet, or Watch-Only switches
+# to the corresponding setup panel, updates accessibility state, and focuses
+# the first relevant field. The lower action button remains the operation that
+# actually creates/restores/configures the wallet.
+#
+# Monerod, adapter, miner gateway, and wallet API remain pinned to the same
+# 0.1.6-beta qualified digests. No wallet, fee-settlement, miner-gateway, or
+# daemon behavior changes are introduced by this package revision.
+
+
+# 0.1.8-beta release qualification
+#
+# Updates only the XMR UI image to source commit:
+# 709e92f478ff1981053bd29e4b478e58562b68f0
+#
+# Corrects the stale hard-coded release labels in the sidebar footer and
+# version service card from v0.1.1-beta to v0.1.8-beta. All wallet setup,
+# wallet/API, daemon, miner-gateway, fee-settlement, storage, and networking
+# behavior remains unchanged from the already-qualified 0.1.7-beta release.
+
+# 0.1.9-beta release qualification
+#
+# Canonical source repository:
+# https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
+#
+# Final immutable image build source:
+# 9b371e3ba75f758098d9b1d63445ba37e8577eb7
+#
+# Canonical release metadata commit:
+# 46076d46195ed346c990d0fa336e8227e97f7b95
+#
+# GitHub Actions build run:
+# 33825587530
+#
+# All five linux/amd64 runtime images are pinned by immutable GHCR digest.
+# Automatic 1% developer-fee settlement remains maturity-gated,
+# retryable, orphan-aware, and double-payment-safe. Pending settlement does
+# not block mining or user wallet sends.
+
+
+# 0.1.10-beta release qualification
+#
+# Template V2 UI-only Dev Store candidate.
+# Source commit: 535eff209526a1d2076157495900ebcc2992baee
+# UI digest: sha256:d9d14da0ce025c2169a599cd5dcb8908f0aba1a6f6081639bab88954d38ceb54
+# Backend/runtime images unchanged from 0.1.9-beta.
+# Pending client-style VM120 install/update/restart/persistence qualification.
+
+
+# 0.1.11-beta release qualification
+#
+# Final Template V2 fidelity/branding candidate for VM120.
+# Source commit: f8d11dcc1f6295d762285ec1bb81f65e316616e4
+# UI digest: sha256:10c132a36ba2cd0366e290ea4ccfebb95c2a5badbdd6af701edf60ad679eb4bf
+# Visible product name: Monero by Kraskus.
+# Exact supplied Monero emblem used on the hero coin.
+# Backend/runtime images unchanged from 0.1.9-beta.
+
+# 0.1.14 release qualification
+#
+# Canonical source commit: da26f67f06e44b8287595cdef226d79aa673aaac
+# GitHub Actions build run: 35625993691
+# RandomX Stratum: TCP 1921; internal telemetry: HTTP 1924.
+# Live Stratum, wallet payout switching, configured wallet, UI parity, and
+# synthetic automatic 1% developer-fee qualification passed on VM100.
+# Clean Dev Store install/update/uninstall remains a follow-up beta test.
+
+# 0.1.15 release qualification
+#
+# Clean-install safety fix: removes the developer-address fallback from the
+# miner gateway. Before wallet setup, Stratum remains available but XMRig Proxy
+# stays stopped and no block template can be built against a fallback payout.
+# After wallet create/restore writes wallet-config.json, the proxy starts
+# automatically with the user wallet payout address. Dev fee remains 1% of
+# successfully mined rewards after 60-block maturity; hashrate is never diverted.

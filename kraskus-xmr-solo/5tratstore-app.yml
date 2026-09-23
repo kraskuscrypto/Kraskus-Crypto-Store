@@ -1,0 +1,28 @@
+id: kraskus-xmr-solo
+name: Monero by Kraskus
+tagline: Monero full node, wallet, and RandomX solo mining appliance
+description: >-
+  Monero by Kraskus turns 5tratumOS into a self-contained Monero
+  node, wallet, and true solo mining appliance. XMRig connects to a
+  RandomX Stratum endpoint on port 1921, with real worker, share, hashrate,
+  and submitted-difficulty telemetry while only network-valid blocks are
+  forwarded to the local monerod. Wallet state and blockchain data remain
+  in persistent 5tratumOS app storage. An automatic 1% developer fee applies
+  only to successfully mined block rewards after 60-block maturity; miner
+  hashrate is never diverted.
+version: 0.1.17
+category: Mining
+developer: Kraskus Crypto
+website: https://kraskuscrypto.com/
+repo: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
+support: https://kraskuscrypto.com/
+icon: assets/xmr-emblem-std-v2.png
+port: 33065
+path: /
+uiMode: proxy
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: ui
+      APP_PORT: 8080
