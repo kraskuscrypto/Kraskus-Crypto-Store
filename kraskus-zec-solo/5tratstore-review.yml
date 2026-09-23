@@ -1,0 +1,29 @@
+appId: kraskus-zec-solo
+status: approved
+developer: Kraskus Crypto
+notes:
+  - Self-contained Kraskus ZEC Solo runtime.
+  - Includes the Kraskus UI, API/controller, Stratum server, and supervised Zebra service.
+  - No pre-existing host development runtime is required.
+  - No Docker socket access is required by the application runtime.
+  - Payout configuration is applied through the Kraskus UI and shared safely with Zebra.
+  - Testnet remains available for qualification and wallet-flow testing.
+  - Mainnet activation remains subject to storage safety requirements.
+appVersion: 0.4.0
+
+releaseNotes:
+  - Adds native 24-word Zallet wallet recovery with persistent restored account metadata and password setup support.
+  - Finalizes Template V2 parity, ZEC Kraskus branding, native black Zcash hero mark, and zero-value balance presentation.
+  - Removes the temporary recovery sidecar architecture; recovery now runs inside the packaged Zallet supervisor with no Docker socket access.
+  - Matches the live Kaspa wallet interaction pattern: clean balance page with Send and Receive dialogs, including ZEC Max/available/password/preview send flow.
+  - Mirrors the ZEC Template V2 UI image through a public GHCR package path so clean 5tratumOS hosts can install without registry credentials.
+  - Implements the missing Zallet wallet password endpoint with salted PBKDF2-HMAC-SHA256 verifier storage and password-protected status reporting.
+  - Fixes Zcash wallet backup confirmation challenge indexing and restores the pending recovery phrase after refresh.
+  - Removes Solo round and Network difficulty from Mining, restores Kaspa-style Node/System settings structure, and fixes wallet post-confirmation state handling.
+  - Advances successful wallet creation directly into recovery confirmation and compacts ZEC-only mining diagnostics behind disclosures.
+  - Restores Kaspa Template V2 information hierarchy across Mining and Settings while preserving Zcash-specific semantics.
+  - Migrates Zcash by Kraskus to the canonical Kraskus App Template V2 interface.
+  - Renders the Zcash center mark as native vector coin material with no image or CSS-mask dependency.
+  - Ships the live-qualified ZEC 0.3.10 controller with corrected Zebra tip difficulty during initial sync.
+  - Preserves Zebra, Zallet, Stratum 3335, wallet data, payout settings, and existing app data across update.
+  - Updates the Store/OS app icon to match the native-vector hero coin mark, replacing the flat legacy emblem badge.

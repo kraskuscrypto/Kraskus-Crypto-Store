@@ -1,0 +1,125 @@
+# Kraskus ZEC Solo 0.4.0.
+#
+# Every image below is pinned tag@sha256:digest, read back from GHCR after the
+# push. 0.4.0 rebuilds the controller, zallet-supervisor and UI images from
+# canonical source in Kraskus-Crypto-Apps at commit
+# d6444e29c3578382deaa48c5e9d95536c31291f7 (branch fix/zec-defect-resolution-v1),
+# and each carries org.opencontainers.image.version=0.4.0 and .revision set to
+# that commit.
+#
+# The 0.3.26 controller was `FROM` a published image of itself, so its
+# inherited metadata reported 0.3.2-beta and no image could be traced to a
+# commit. That is what the rebuild fixes; see docs/zec-image-provenance.md in
+# the apps repo.
+#
+# zebra is unchanged in this release and keeps its existing digest.
+services:
+  app_proxy:
+    environment:
+      APP_HOST: ui
+      APP_PORT: 8080
+  ui:
+    image: ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller:ui-0.4.0@sha256:69d8887d906e8d820a30ebc87d9af8b505b99e765e50fde94ef3bda3d5857532
+    restart: unless-stopped
+    depends_on:
+    - kraskus
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    cap_add:
+    - CHOWN
+    - SETGID
+    - SETUID
+  kraskus:
+    image: ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller:0.4.0@sha256:b5045825e2a94bffc22a75e5f941423a6c848565fd0f6b2a64b328725dd9d2cb
+    restart: unless-stopped
+    depends_on:
+    - zebra
+    environment:
+      KRASKUS_BASE: /data
+      KRASKUS_PACKAGED_MODE: '1'
+      KRASKUS_ZEBRA_RPC_URL: http://zebra:18232
+      KRASKUS_ZEBRA_COOKIE_FILE: /zebra/.cookie
+      KRASKUS_ZALLET_RPC_URL: http://127.0.0.1:28232
+      KRASKUS_ZALLET_SUPERVISOR_URL: http://127.0.0.1:28233
+      KRASKUS_MINER_ADDRESS_FILE: /kraskus-config/miner-address
+      KRASKUS_NETWORK_FILE: /kraskus-config/network
+      KRASKUS_STRATUM_HOST: 0.0.0.0
+      KRASKUS_STRATUM_PORT: 3335
+      KRASKUS_STRATUM_HEALTH_HOST: 127.0.0.1
+      KRASKUS_STRATUM_HEALTH_PORT: 18402
+      KRASKUS_STRATUM_STATUS_URL: http://127.0.0.1:18402/status
+    volumes:
+    - ${APP_DATA_DIR}/kraskus:/data
+    - ${APP_DATA_DIR}/zebra:/zebra:ro
+    - ${APP_DATA_DIR}/config:/kraskus-config
+    ports:
+    - 3335:3335
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    cap_add:
+    - DAC_OVERRIDE
+  zallet-init:
+    image: ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller:0.4.0@sha256:b5045825e2a94bffc22a75e5f941423a6c848565fd0f6b2a64b328725dd9d2cb
+    user: 0:0
+    entrypoint:
+    - /bin/sh
+    - -c
+    command:
+    - 'mkdir -p /var/lib/zallet
+
+      chown 10001:10001 /var/lib/zallet
+
+      chmod 700 /var/lib/zallet
+
+      '
+    volumes:
+    - ${APP_DATA_DIR}/kraskus/zallet:/var/lib/zallet
+    restart: 'no'
+    network_mode: none
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    cap_add:
+    - CHOWN
+    - DAC_OVERRIDE
+    - FOWNER
+  zallet:
+    image: ghcr.io/kraskuscrypto/kraskus-zec-zallet-supervisor:0.4.0@sha256:fae84858116f38e8ad6f9e84783a4e829d623c4f3c1bcacb3c3a3bab56c49391
+    restart: unless-stopped
+    user: 10001:10001
+    network_mode: service:kraskus
+    depends_on:
+      zebra:
+        condition: service_started
+      zallet-init:
+        condition: service_completed_successfully
+    environment:
+      SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
+    volumes:
+    - ${APP_DATA_DIR}/kraskus/zallet:/var/lib/zallet
+    - ${APP_DATA_DIR}/zebra:/zebra:ro
+    - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+  zebra:
+    image: ghcr.io/kraskuscrypto/kraskus-zebra@sha256:abbbddd84563023df621f1eecceeb816da5c2951d9b60718133f131e1341c6d0
+    restart: unless-stopped
+    environment:
+      ZEBRA_NETWORK__LISTEN_ADDR: 0.0.0.0:18233
+      ZEBRA_RPC__LISTEN_ADDR: 0.0.0.0:18232
+      ZEBRA_RPC__COOKIE_DIR: /home/zebra/.cache/zebra
+      ZEBRA_STATE__CACHE_DIR: /home/zebra/.cache/zebra
+      KRASKUS_MINER_ADDRESS_FILE: /kraskus-config/miner-address
+      KRASKUS_NETWORK_FILE: /kraskus-config/network
+    volumes:
+    - ${APP_DATA_DIR}/zebra:/home/zebra/.cache/zebra
+    - ${APP_DATA_DIR}/config:/kraskus-config:ro
+    security_opt:
+    - no-new-privileges:true
