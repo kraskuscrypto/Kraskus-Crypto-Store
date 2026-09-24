@@ -1,0 +1,58 @@
+schemaVersion: 1
+status: approved
+appId: kraskus-prl-solo
+appVersion: 0.2.0
+reviewedAt: "2026-09-23"
+reviewedBy: "Kraskus Crypto"
+
+upstream:
+  sourceUrl: https://github.com/pearl-research-labs/pearl
+  license: mixed
+  licenseEvidence: LICENSES.md
+
+rights:
+  packageOriginal: true
+  softwareDistributionCleared: true
+  containerUseCleared: true
+  listingTextCleared: true
+  artworkCleared: true
+  noticesIncluded: true
+
+delivery:
+  mode: immutable-container-appliance
+  storePayload: recipe-only
+  mirrorsThirdPartyPayload: false
+
+compatibility:
+  osVersions:
+    - Debian-13-5tratumOS-clean-room
+  architectures:
+    - amd64
+  installTested: true
+  startTested: true
+  updateTested: true
+  uninstallTested: true
+
+security:
+  privileged: false
+  hostNetwork: false
+  dockerSocket: false
+  hostMountsReviewed: true
+  devicesReviewed: true
+  networkEndpointsReviewed: true
+
+notes: >-
+  PRL 0.2.0 (release qualification). One authoritative readiness model:
+  height 0, no peers, a lagging or stale tip never reads as synced, and the
+  gateway hands out work only while the node is synced. Wallet creation runs
+  in the background and persists the recovery phrase to a 0600 artifact
+  before the wallet is reported, so a lost HTTP response cannot orphan it;
+  mining payout activates only after the phrase is confirmed (or the wallet
+  was restored). Customer Forget wallet (typed FORGET WALLET) removes only
+  the customer wallet. Blocks come from the gateway's found-block ledger,
+  verified against the node. Send is not offered. All four images are built
+  from committed source by apps/prl-solo/build.sh with OCI version/revision
+  labels and are pinned by digest. Stratum is exposed on TCP 1902; node RPC,
+  Oyster RPC, gateway telemetry (1903), API and UI backend traffic remain
+  app-internal. The fixed required 1.00% developer-fee coinbase split is
+  unchanged and applies only to successfully mined blocks.
