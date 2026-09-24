@@ -1,0 +1,27 @@
+id: kraskus-prl-solo
+name: Pearl by Kraskus
+tagline: Pearl solo mining node with native Oyster wallet
+description: >-
+  Pearl by Kraskus for 5tratumOS. Runs a real Pearl v1.4.8 mainnet node,
+  native Oyster wallet, Kraskus Pearl Stratum gateway, and Template V2
+  interface. Truthful readiness (mining opens only once the node is synced
+  and the wallet's recovery phrase is backed up), wallet create, backup,
+  restore and forget, a verified found-blocks ledger, live worker/share
+  telemetry, and a fixed required 1.00% developer-fee coinbase split on
+  successfully mined blocks.
+version: 0.2.0
+category: Mining
+developer: Kraskus Crypto
+website: https://kraskuscrypto.com/
+repo: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
+support: https://kraskuscrypto.com/
+icon: assets/prl-emblem-std-v1.png
+port: 33068
+path: /
+uiMode: proxy
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: ui
+      APP_PORT: 80
