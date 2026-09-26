@@ -69,7 +69,7 @@ services:
       - internal
 
   stratum:
-    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-stratum@sha256:63af5dfd6781a05d0348e52e32e8c7c4a14cd7982181842f3ae0d06a689e8ef2
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-stratum@sha256:66fb4ac265f12a12a389c3de561fd4544b766187c9f15ebd904355afb51d6043
     restart: unless-stopped
 
     command:
@@ -103,7 +103,7 @@ services:
       - kaspad
 
   adapter:
-    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter@sha256:8f650dd93faafda7dc747b646f857b96d8f7a5d6ed0ee2ef213a60f58614ab8b
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter@sha256:ed7b4e9d2e1f1d023879d5c1b42d081184229e244409dfb4c951a4ff20307fb5
 
     restart: unless-stopped
 
@@ -126,7 +126,7 @@ services:
       - kaspad
 
   wallet-api:
-    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-wallet-api@sha256:b6e5989ebc95a40981a1dde7a844be9e7970ca24ff8313095b7e35cac4042acc
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-wallet-api@sha256:c100782d78df0a0cb3d32549e8f0ac775d6d2baad3fe561c9232c95386ac60e0
 
     restart: unless-stopped
 
@@ -151,7 +151,7 @@ services:
       - kaspad
 
   ui:
-    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-ui@sha256:7e96b18dd5e84eb91912213987864c5de8e5fd839782054772a3749a17dbf2b7
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-ui@sha256:e1459c20a262305a20f5553ab02468b65144480f8a2669247074fa10c2ee0bca
 
     restart: unless-stopped
 
