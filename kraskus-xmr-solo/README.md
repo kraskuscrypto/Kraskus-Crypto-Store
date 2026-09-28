@@ -142,7 +142,7 @@ Kraskus brand asset vault.
 - Workers are listed in natural name order (`miner2` before `miner10`).
 - Each worker shows its own assigned share difficulty, kept separate from best submitted share difficulty and Monero network difficulty.
 - Several rigs behind one IP address are now distinct; opening a worker shows that worker.
-- A rig can request its own fixed share difficulty by adding `+difficulty` to its username, for example `rig-01+50000`; the suffix is not shown in the worker name. There is no automatic difficulty adjustment (VarDiff); the default share difficulty stays 1,000.
+- A rig can request its own fixed share difficulty by adding `+difficulty` to its username, for example `rig-01+50000`; the suffix is not shown in the worker name. (Removed in 0.1.20; per-worker difficulty is now configured in Workers.) There is no automatic difficulty adjustment (VarDiff); the default share difficulty stays 1,000.
 - Saving a new default share difficulty asks for confirmation when miners are connected; every miner now reconnects within seconds instead of staying on a stale job.
 - Share and event history files are size-bounded; lifetime accepted/rejected totals and best shares are kept across restarts and upgrades.
 - Far fewer routine events and container log lines (no event per share or per block-template poll).
@@ -155,3 +155,11 @@ Kraskus brand asset vault.
 - A Restore that fails part-way no longer leaves a half-configured wallet; it can simply be retried. A slow Restore that times out in the browser still completes in the background.
 - Includes the 0.1.18 worker, share-difficulty, reconnect and log changes unchanged.
 - Pins the rebuilt wallet-api image from GitHub Actions run 36362496508, source commit `0f9a8cbf77015ae98ef7c8060987319a95cf838c`; miner-gateway and UI keep their 0.1.18 digests, monerod and adapter are unchanged.
+
+## 0.1.20
+
+- Per-worker difficulty is set in the app: open a worker under Mining → Workers and choose Difficulty **Default** or **Fixed** (100 to 2,147,483,646). Saving reconnects only that worker (about 5 seconds); other workers keep mining undisturbed. Settings are kept across restarts, updates, and uninstall without purge.
+- The Workers list shows each worker's actual assigned difficulty and whether it uses Default or Fixed; "capped by network difficulty" appears only when a Fixed value is above the network difficulty.
+- Difficulty suffixes in miner usernames (`name+difficulty`) are no longer supported. A login or rig ID containing `+` is refused with "Difficulty suffixes are no longer supported. Configure worker difficulty in XMR Solo → Workers."
+- **Action for miners that used a `+difficulty` suffix:** after updating, remove the suffix from the miner configuration (use the plain worker name) and, if you want a fixed difficulty, set it for that worker under Workers. Existing wallet, node data, settings, and worker history are kept; no reset is needed.
+- Pins the rebuilt miner-gateway and UI images from GitHub Actions run 36457837012, source commit `9b3831e487c8f8d6aa2606ffed978a516c2bc14f`; wallet-api (0.1.19), monerod and adapter are unchanged.
