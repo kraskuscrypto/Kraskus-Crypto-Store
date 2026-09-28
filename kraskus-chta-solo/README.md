@@ -42,6 +42,17 @@ from the Blocks page. Per-block share logs are not written.
 `assets/chta-official-emblem-v2.png` is the approved CHTA application emblem
 used by the Store listing.
 
+## 0.3.1
+
+- Rejected shares are now the number of submissions the pool actually
+  rejected (stale, duplicate, below the share difficulty, unknown job or
+  invalid time). 0.3.0 showed CKPool's difficulty-weighted reject total, so on
+  port 1926 a handful of rejected shares at difficulty 4096 appeared as tens
+  of thousands of rejects and a very high reject percentage. Port 1927 was not
+  visibly affected. Accepted shares, share acceptance, the payout and the 1%
+  developer fee are unchanged. The corrected counter starts at zero when the
+  updated pool starts; no action is needed after updating.
+
 ## 0.3.0
 
 - Reproducible release: all custom images built from committed source with

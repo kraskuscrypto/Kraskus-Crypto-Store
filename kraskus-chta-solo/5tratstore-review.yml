@@ -1,8 +1,8 @@
 schemaVersion: 1
 status: approved
 appId: kraskus-chta-solo
-appVersion: 0.3.0
-reviewedAt: "2026-09-24"
+appVersion: 0.3.1
+reviewedAt: "2026-09-26"
 reviewedBy: "Kraskus Crypto"
 
 upstream:
@@ -44,7 +44,13 @@ security:
   networkEndpointsReviewed: true
 
 notes: >-
-  0.3.0 is a release-qualification rebuild. Every custom image (backend/init,
+  0.3.1 corrects the rejected-share count: it is now the number of
+  submissions CKPool rejected (a count added to the pool's status file by a
+  small reviewed patch), not CKPool's difficulty-weighted reject total that
+  0.3.0 displayed and that inflated port 1926's rejects and reject percentage.
+  Share acceptance, accepted counts, payout and the 1% developer fee are
+  unchanged; the new counter starts at zero after the update.
+  0.3.0 was a release-qualification rebuild. Every custom image (backend/init,
   UI, CheetahCoin Core, CKPool) is built from committed source with
   version/revision labels; the 0.2.x backend's chain of images built on top of
   earlier images is gone, and the Core image now downloads the official

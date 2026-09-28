@@ -14,7 +14,7 @@ description: >-
   encrypted backup of the complete wallet file; the same backup restores the
   exact wallet on any CHTA Kraskus install. A required 1% developer fee is
   paid directly from successful block coinbases.
-version: 0.3.0
+version: 0.3.1
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/

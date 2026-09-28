@@ -1,4 +1,4 @@
-# 5tratumOS package for CHTA Kraskus (Kraskus CHTA Solo) 0.3.0.
+# 5tratumOS package for CHTA Kraskus (Kraskus CHTA Solo) 0.3.1.
 #
 # Every custom image is built by apps/chta-solo/build.sh from committed source
 # and pinned here by tag + digest after publication (release-manifest.json).
@@ -31,7 +31,7 @@ services:
       APP_PORT: 80
 
   init:
-    image: ghcr.io/kraskuscrypto/kraskus-chta-solo:0.3.0@sha256:8b7e6c9df8ff55098ae51541fffe11b35f00b7f2efb88625d454022ed1ce30fe
+    image: ghcr.io/kraskuscrypto/kraskus-chta-solo:0.3.1@sha256:9667a5d6de876b0ab7ac150f98556c16a03498410db583e83147979f6e500730
     restart: "no"
     user: "0:0"
     command:
@@ -49,7 +49,7 @@ services:
       - no-new-privileges:true
 
   cheetahcoin:
-    image: ghcr.io/kraskuscrypto/kraskus-cheetahcoin-core:0.3.0@sha256:dbe52262137c3178e608a4be714a9d1f2cd4eb216cb396f68e89c27b7f85969c
+    image: ghcr.io/kraskuscrypto/kraskus-cheetahcoin-core:0.3.1@sha256:fd9d745510f4508bdc4f40a42919dcfa6bf50491735688834ef6b3e27013120f
     restart: unless-stopped
     depends_on:
       init:
@@ -73,7 +73,7 @@ services:
       - no-new-privileges:true
 
   pool:
-    image: ghcr.io/kraskuscrypto/kraskus-chta-ckpool:0.3.0@sha256:1d15221c99d099e3a7b6cff988d3fa6280ebb45a14caa14bde431b5991dc5636
+    image: ghcr.io/kraskuscrypto/kraskus-chta-ckpool:0.3.1@sha256:2355f9ca770776dcaa3f4091cb57af827b58338f80065a3d3ecf9b92c8618082
     restart: unless-stopped
     depends_on:
       init:
@@ -94,7 +94,7 @@ services:
       - no-new-privileges:true
 
   pool_lowhash:
-    image: ghcr.io/kraskuscrypto/kraskus-chta-ckpool:0.3.0@sha256:1d15221c99d099e3a7b6cff988d3fa6280ebb45a14caa14bde431b5991dc5636
+    image: ghcr.io/kraskuscrypto/kraskus-chta-ckpool:0.3.1@sha256:2355f9ca770776dcaa3f4091cb57af827b58338f80065a3d3ecf9b92c8618082
     restart: unless-stopped
     depends_on:
       init:
@@ -115,7 +115,7 @@ services:
       - no-new-privileges:true
 
   kraskus:
-    image: ghcr.io/kraskuscrypto/kraskus-chta-solo:0.3.0@sha256:8b7e6c9df8ff55098ae51541fffe11b35f00b7f2efb88625d454022ed1ce30fe
+    image: ghcr.io/kraskuscrypto/kraskus-chta-solo:0.3.1@sha256:9667a5d6de876b0ab7ac150f98556c16a03498410db583e83147979f6e500730
     restart: unless-stopped
     depends_on:
       init:
@@ -161,7 +161,7 @@ services:
       - no-new-privileges:true
 
   ui:
-    image: ghcr.io/kraskuscrypto/kraskus-chta-ui:0.3.0@sha256:cd6d3f581e33dd90279e82f5e42a8339b8ce03161eb6777023ea262a999be64d
+    image: ghcr.io/kraskuscrypto/kraskus-chta-ui:0.3.1@sha256:93768c63e2a060e44e814d643504b8611dbdb8193bab811c0cdf2cdb3bc51052
     restart: unless-stopped
     depends_on:
       kraskus:
