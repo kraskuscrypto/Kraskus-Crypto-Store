@@ -1,0 +1,101 @@
+schemaVersion: 1
+status: proposed
+appId: kraskus-btc-blake2b-solo
+appVersion: 0.2.5
+reviewedAt: ""
+reviewedBy: ""
+
+upstream:
+  sourceUrl: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
+  license: mixed
+  licenseEvidence: LICENSES.md
+
+rights:
+  packageOriginal: true
+  softwareDistributionCleared: true
+  containerUseCleared: true
+  listingTextCleared: true
+  artworkCleared: true
+  noticesIncluded: true
+
+delivery:
+  mode: immutable-container-appliance
+  storePayload: recipe-only
+  mirrorsThirdPartyPayload: false
+
+compatibility:
+  osVersions:
+    - Debian-13-5tratumOS-clean-room
+  architectures:
+    - amd64
+  installTested: false
+  startTested: false
+  updateTested: false
+  uninstallTested: false
+
+security:
+  privileged: false
+  hostNetwork: false
+  dockerSocket: false
+  hostMountsReviewed: true
+  devicesReviewed: true
+  networkEndpointsReviewed: true
+
+notes: >-
+  0.2.5 sets the permanent developer-fee address
+  bc1q2wvdwgw3qpng8pzw4jx4cmk7vx0d384c8tmr7v (0.2.4's interim address is
+  retired). The fee stays 1% of each block found (coinbase split, 99% to
+  your reward address); only DATUM and the adapter are rebuilt. Bitcoin
+  Knots and the UI are the same images as 0.2.3. Wallet, backup, payout
+  gate, readiness and Stratum 1923 are unchanged.
+
+  0.2.3 keeps the Wallet page and the status bar responsive while the node
+  is busy: wallet balances are read in the background and the last known
+  values stay on screen (with their age) while Bitcoin Knots is processing
+  blocks, instead of "Status unavailable" / "Loading wallet...". A lasting
+  wallet failure is still reported. Wallet, backup, restore, payout gate,
+  readiness, Knots, DATUM, Stratum 1923 and the 1% developer fee are
+  unchanged.
+
+  0.2.2 simplifies the Wallet page to the Kraskus Kaspa/CHTA/XMR pattern:
+  status, balance, address and backup status with Back up / Receive
+  buttons. Backing up is one dialog (wallet password, backup passphrase,
+  download the encrypted file, then confirm it is stored safely); mining
+  stays off until a backup of this exact wallet was downloaded and
+  confirmed. Uploading the file again is optional (Settings > Wallet >
+  Verify backup). Restore is a separate dialog. Backup format, restore,
+  migration, payout, readiness, Knots, DATUM, Stratum 1923 and the 1%
+  developer fee are unchanged.
+
+  0.2.1 is a readiness hotfix. Node liveness now uses a lock-free Knots RPC
+  (getconnectioncount) and chain status is collected in the background with
+  a long timeout, so a node that is busy connecting blocks during initial
+  sync reads SYNCING instead of "Knots RPC unavailable"; a stopped node
+  still reads ERROR after 30 seconds without an answer. Wallet, backup
+  gate, Stratum 1923, Knots configuration and the 1% developer fee are
+  unchanged.
+
+  0.2.0 is the remediation release of BTC2b by Kraskus (formerly shown as
+  BTC BLAKE2b). One customer-owned Bitcoin Knots descriptor wallet receives
+  mining rewards; mining starts only after its encrypted full-descriptor
+  backup has been downloaded, verified and confirmed. The 0.1.x settlement
+  wallet is preserved and migrated explicitly. Sensitive wallet and node
+  operations require the wallet password. Stratum moves to 1923. The 1%
+  developer fee is a DATUM build invariant verified at runtime. Found
+  blocks are recorded durably by DATUM. Qualification evidence and the
+  immutable image digests are recorded in release-manifest.json and the
+  QA report; compatibility flags are set only after the 5tratumOS
+  install/update/uninstall qualification.
+
+  IMPORTANT for 0.1.x installs: the 0.1.x Knots node can need 2 to 6.5
+  minutes to shut down (Tor-control hang), and an update that kills it
+  during that window can corrupt its chain database. Before updating, stop
+  only the BTC2b Knots container with a long grace (docker stop -t 600),
+  confirm it exited with code 0, then run the normal update. Never use
+  docker kill, docker rm -f, --purge, or delete chain or wallet data. The
+  exact commands are in README.md. 0.2.0 itself stops in seconds (Tor
+  control disabled) and carries a 10 minute stop grace.
+
+  Real BLAKE2b ASIC shares on BTC2b Mainnet are not yet verified (no
+  compatible hardware available). The proof of work is cross-checked
+  against Knots and verified end to end on regtest.
