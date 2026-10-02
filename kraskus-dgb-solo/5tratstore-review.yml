@@ -1,0 +1,49 @@
+schemaVersion: 1
+status: proposed
+appId: kraskus-dgb-solo
+appVersion: 0.1.0
+reviewedAt: ""
+reviewedBy: ""
+
+upstream:
+  sourceUrl: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
+  license: mixed
+  licenseEvidence: LICENSES.md
+
+rights:
+  packageOriginal: true
+  softwareDistributionCleared: true
+  containerUseCleared: true
+  listingTextCleared: true
+  artworkCleared: true
+  noticesIncluded: true
+
+delivery:
+  mode: immutable-container-appliance
+  storePayload: recipe-only
+  mirrorsThirdPartyPayload: false
+
+compatibility:
+  osVersions:
+    - Debian-13-5tratumOS-clean-room
+  architectures:
+    - amd64
+  installTested: false
+  startTested: false
+  updateTested: false
+  uninstallTested: false
+
+security:
+  privileged: false
+  hostNetwork: false
+  dockerSocket: false
+  hostMountsReviewed: true
+  devicesReviewed: true
+  networkEndpointsReviewed: true
+
+notes: >-
+  0.1.0 is in development and is not published. Release gates: DigiByte Core
+  9.26.6 final (Thaw Day, mainnet block 24,490,000), the owner-supplied
+  mainnet developer-fee address, and accepted shares plus node-accepted
+  blocks for every algorithm. Compatibility flags are set only after the
+  5tratumOS install/update/uninstall qualification.
