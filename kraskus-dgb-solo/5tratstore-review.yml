@@ -1,7 +1,7 @@
 schemaVersion: 1
 status: proposed
 appId: kraskus-dgb-solo
-appVersion: 0.1.0
+appVersion: 0.1.1
 reviewedAt: ""
 reviewedBy: ""
 
@@ -42,8 +42,9 @@ security:
   networkEndpointsReviewed: true
 
 notes: >-
-  0.1.0 is in development and is not published. Release gates: DigiByte Core
-  9.26.6 final (Thaw Day, mainnet block 24,490,000), the owner-supplied
-  mainnet developer-fee address, and accepted shares plus node-accepted
-  blocks for every algorithm. Compatibility flags are set only after the
-  5tratumOS install/update/uninstall qualification.
+  0.1.1 changes only the developer-fee coinbase outputs: the fixed 1 percent
+  (100 basis points of the block reward) is split into three pinned outputs,
+  0.50 / 0.25 / 0.25 percent, with integer atomic-unit arithmetic and every
+  rounding remainder paid to the miner (99 percent). DigiByte Core 9.26.6
+  (92330d95), wallet, node, adapter, UI layout, ports and the Stratum
+  protocol are unchanged from 0.1.0.

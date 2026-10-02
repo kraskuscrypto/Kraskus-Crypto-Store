@@ -9,8 +9,10 @@ description: >-
   1930. Each algorithm gets its own work, difficulty and share accounting
   from your own node. Mining starts only after the wallet backup is
   confirmed; rewards go straight to that wallet. A fixed 1 percent developer
-  fee is applied only to successfully mined blocks as a coinbase split.
-version: 0.1.0
+  fee is applied only to successfully mined blocks as a coinbase split
+  (0.50, 0.25 and 0.25 percent to three developer addresses); the miner
+  receives the remaining 99 percent.
+version: 0.1.1
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/

@@ -8,7 +8,7 @@ A DigiByte Core full node, a customer-owned backed-up wallet, and true solo mini
 | Scrypt | `stratum+tcp://<host>:1929` |
 | Skein | `stratum+tcp://<host>:1930` |
 
-Point each miner at the port for its algorithm. The username is the worker name; `<anything>.<worker>` is shown as `<worker>`. Addresses are never displayed. Mining starts only after the wallet backup is confirmed. Block rewards pay the wallet directly, less a fixed 1% developer fee taken as a coinbase split on found blocks only.
+Point each miner at the port for its algorithm. The username is the worker name; `<anything>.<worker>` is shown as `<worker>`. Addresses are never displayed. Mining starts only after the wallet backup is confirmed. Block rewards pay the wallet directly, less a fixed 1% developer fee taken as a coinbase split on found blocks only (0.50%, 0.25% and 0.25% of the block reward to three developer addresses; you receive the remaining 99%).
 
 ## Safe stop before down, uninstall, reinstall or a node-version change
 
