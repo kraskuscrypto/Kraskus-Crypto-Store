@@ -8,7 +8,9 @@ API_DIR="$OUT_DIR/api"
 TEQUILAPI="${TEQUILAPI_URL:-http://127.0.0.1:4050}"
 
 INTERVAL="${STATUS_INTERVAL:-30}"
-APP_VERSION="${STATUS_APP_VERSION:-2.6.12}"
+PROVIDER_INTERVAL="${PROVIDER_INTERVAL:-900}"
+PROVIDER_LAST_FILE="$OUT_DIR/.provider-last"
+APP_VERSION="${STATUS_APP_VERSION:-2.6.13}"
 
 mkdir -p "$OUT_DIR" "$API_DIR"
 
@@ -49,23 +51,11 @@ collect_myst_price() {
 }
 
 collect_tequilapi() {
+    # Fast local/runtime-backed endpoints can refresh with the dashboard heartbeat.
     snapshot_api healthcheck "/healthcheck" || true
     snapshot_api identities "/identities" || true
     snapshot_api services "/services?include_all=true" || true
     snapshot_api nat "/nat/type" || true
-    snapshot_api monitoring-status "/node/monitoring-status" || true
-    snapshot_api quality "/node/provider/quality" || true
-    snapshot_api activity "/node/provider/activity-stats" || true
-    snapshot_api service-earnings "/node/provider/service-earnings" || true
-
-    for range in 1d 7d 30d; do
-        snapshot_api "sessions-$range" "/node/provider/sessions?range=$range" || true
-        snapshot_api "sessions-count-$range" "/node/provider/sessions-count?range=$range" || true
-        snapshot_api "transferred-$range" "/node/provider/transferred-data?range=$range" || true
-        snapshot_api "earnings-series-$range" "/node/provider/series/earnings?range=$range" || true
-        snapshot_api "sessions-series-$range" "/node/provider/series/sessions?range=$range" || true
-        snapshot_api "data-series-$range" "/node/provider/series/data?range=$range" || true
-    done
 
     if [ -s "$API_DIR/identities.json" ]; then
         identity_id="$(tr -d '\n\r ' < "$API_DIR/identities.json" | sed -n 's/.*"id":"\([^"]*\)".*/\1/p' | head -n 1)"
@@ -73,8 +63,41 @@ collect_tequilapi() {
             snapshot_api identity "/identities/$identity_id" || true
         fi
     fi
-}
 
+    # Provider endpoints proxy to quality.mysterium.network. Polling the entire
+    # provider API every 30 seconds can trip upstream rate limiting and make the
+    # node receive plain-text error bodies instead of JSON quality data. Poll only
+    # the metrics the dashboard actually uses, at a conservative cadence, and
+    # spread the requests out so one dashboard cannot hammer the provider API.
+    now_epoch="$(date +%s)"
+    last_epoch=0
+    if [ -s "$PROVIDER_LAST_FILE" ]; then
+        last_epoch="$(cat "$PROVIDER_LAST_FILE" 2>/dev/null || echo 0)"
+    fi
+
+    if [ $((now_epoch - last_epoch)) -ge "$PROVIDER_INTERVAL" ]; then
+        # Mark the attempt before querying so failures cannot create a retry storm.
+        printf '%s\n' "$now_epoch" > "$PROVIDER_LAST_FILE"
+
+        snapshot_api monitoring-status "/node/monitoring-status" || true
+        sleep 2
+        snapshot_api quality "/node/provider/quality" || true
+        sleep 2
+        snapshot_api activity "/node/provider/activity-stats" || true
+        sleep 2
+        snapshot_api service-earnings "/node/provider/service-earnings" || true
+        sleep 2
+        snapshot_api sessions-1d "/node/provider/sessions?range=1d" || true
+        sleep 2
+        snapshot_api sessions-count-30d "/node/provider/sessions-count?range=30d" || true
+        sleep 2
+        snapshot_api transferred-30d "/node/provider/transferred-data?range=30d" || true
+        sleep 2
+        snapshot_api data-series-7d "/node/provider/series/data?range=7d" || true
+        sleep 2
+        snapshot_api earnings-series-30d "/node/provider/series/earnings?range=30d" || true
+    fi
+}
 human_bytes() {
     awk -v n="${1:-0}" '
     BEGIN {

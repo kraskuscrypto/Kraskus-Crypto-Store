@@ -5,7 +5,7 @@
 - Upstream project: Mysterium Network Node
 - Source: https://github.com/mysteriumnetwork/node
 - Official container: `mysteriumnetwork/myst`
-- Target tag: `1.39.5-alpine`
+- Target tag: `1.39.7-alpine`
 - License: GPL-3.0
 - License evidence: https://github.com/mysteriumnetwork/node/blob/master/LICENSE
 - Docker installation docs: https://github.com/mysteriumnetwork/node/blob/master/INSTALL.md

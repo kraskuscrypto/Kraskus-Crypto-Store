@@ -1,7 +1,7 @@
 schemaVersion: 1
 status: proposed
 appId: mysterium-node
-appVersion: 2.6.12
+appVersion: 2.6.13
 reviewedAt: ''
 reviewedBy: ''
 upstream:
@@ -55,7 +55,7 @@ notes: Mysterium upstream requires NET_ADMIN and documents host networking for t
   Nginx exposes those snapshot files to the portal with GET/HEAD-only access; it does not
   proxy the TequilAPI or expose its port to the LAN. Node-changing actions continue through
   the official Mysterium Node UI. VM100 upgrade qualification preserved identity
-  0xd81d6fb238fa698fedcf0b9b2643ded8591f14eb and the pinned 1.39.5 runtime. A clean
+  0xd81d6fb238fa698fedcf0b9b2643ded8591f14eb and the pinned 1.39.7 runtime. A clean
   dev-store installation on the 192.168.1.163 tester generated identity
   0x7fcab4a87784762620198e10d0d589d828c3f036, started all five services, and produced
   all 27 expected API snapshots. Reboot recovery and clean uninstall remain required
@@ -76,3 +76,9 @@ notes: Mysterium upstream requires NET_ADMIN and documents host networking for t
 # bundle (app.js, live.js, styles.css, index.html), the status agent and the nginx config,
 # so Store updates and fresh installs deliver the same dashboard. The v2.6.11 package
 # embedded the v2.6.9 bundle and could not pass its own migration check.
+
+# v2.6.13 reduces provider API pressure discovered during live node diagnostics.
+# The status collector keeps local health/NAT refreshes at 30 seconds but limits the
+# quality/monitoring/session/earnings provider endpoints used by the dashboard to one
+# spaced batch every 15 minutes, marking attempts before requests to prevent retry storms.
+# The official Mysterium node image is updated to 1.39.7 with an immutable digest.
