@@ -1,0 +1,118 @@
+schemaVersion: 1
+status: proposed
+appId: kraskus-bsv-solo
+appVersion: 0.5.2
+reviewedAt: ""
+reviewedBy: ""
+
+upstream:
+  sourceUrl: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
+  license: mixed
+  licenseEvidence: LICENSES.md
+
+rights:
+  packageOriginal: true
+  softwareDistributionCleared: true
+  containerUseCleared: true
+  listingTextCleared: true
+  artworkCleared: true
+  noticesIncluded: true
+
+delivery:
+  mode: immutable-container-appliance
+  storePayload: recipe-only
+  mirrorsThirdPartyPayload: false
+
+compatibility:
+  osVersions:
+    - Debian-13-5tratumOS-clean-room
+  architectures:
+    - amd64
+  # Set from the 0.3.0 VM120 customer-path qualification
+  # (Docs/Dev-Store-QA/bsv.md); not assumed.
+  installTested: false
+  startTested: false
+  updateTested: false
+  uninstallTested: false
+
+security:
+  privileged: false
+  hostNetwork: false
+  dockerSocket: false
+  hostMountsReviewed: true
+  devicesReviewed: true
+  networkEndpointsReviewed: true
+
+notes: >-
+  0.4.0 is the hardened release on the Kraskus foundation 1.1.1 (the Kaspa
+  Solo 0.3.3 security model). The product is now named Bitcoin SV (label
+  BSV Kraskus) and the Home hero is the silver B/SV coin drawn in code (no
+  image asset), replacing the 0.3.3 gold dragon coin. The 5tratumOS login and the P2 per-app proxy
+  token now gate every state change and every wallet-data read (0.3.3
+  accepted settings and wallet changes from anyone who could reach the UI
+  port); the UI port is published on 127.0.0.1 only. The wallet password is
+  the only app credential: it is set as the last wallet set-up step and is
+  required, over the platform's HTTPS and behind a persisted lock-out, for
+  the encrypted backup export, Forget, payout destination changes and the
+  wallet history rescan (which also needs the typed phrase RESCAN WALLET).
+  The app never rebuilds or reindexes the blockchain: the 0.3.x history
+  rebuild (-reindex) is removed, and the wallet history rescan only rescans
+  the wallet over the blocks the pruned node still has. The
+  API and controller run as uid 10001; SV Node keeps uid 999 and its data,
+  bind mount, command and 660 s shutdown grace are unchanged; the one-shot
+  init service no longer mounts the chain. SV Node refuses to start when a
+  chain is expected but its chainstate is missing (no genesis resync onto an
+  empty mount point). Secret and wallet files are written 0600 atomically.
+  Workers/Miners shows real live miner state (online/idle/offline, estimated
+  hashrate, accepted/stale/invalid, difficulty, session uptime, best share,
+  blocks) and /api/overview no longer fails during initial sync. Wallet
+  backup verify/restore use chunked uploads that pass the dashboard proxy.
+  Wallet, payout and settings files are kept as they are.
+  0.3.3 changes only the Home hero coin face: the coin is now gold, with an
+  engraved legend band (the Satoshi Vision reference coin), BSV side marks, circuit
+  traces and a dragon coiled behind the struck B, drawn in code (no image
+  asset). The coin's size, float and tilt, orbits and glow are unchanged.
+  Everything else -- node, wallet, readiness, Stratum, the 1% developer fee,
+  port 1922, shutdown handling and the rest of the UI -- is unchanged from
+  0.3.2.
+  0.3.2 hardens SV Node shutdown; nothing else changes. The node supervisor
+  logs every stop (BSV_NODE_SHUTDOWN_BEGIN / CLEAN / UNCLEAN / TIMEOUT),
+  leaves a clean-shutdown marker only after bitcoind exits cleanly, reports
+  a stop that timed out as a failure instead of success, and warns at start
+  when the previous stop was not confirmed. The package ships
+  bsv-safe-stop.sh, which stops SV Node with up to 15 minutes to flush and
+  refuses to let an update or reinstall continue unless the clean exit is
+  confirmed. Wallet, readiness, Stratum, the 1% developer fee, port 1922,
+  the UI, prune target, dbcache and sync tuning are unchanged from 0.3.1.
+  0.3.1 is a Stratum job-lifecycle hotfix on top of 0.3.0; nothing else
+  changes. A same-tip template refresh no longer invalidates the work miners
+  hold: every job for the current block stays valid for 10 minutes (up to 64
+  jobs) and is sent with clean_jobs=false, refreshes are published at most
+  every 30 seconds, and only a new block (or a payout change) sends
+  clean_jobs=true and makes older jobs stale. A brief node RPC hiccup no
+  longer disconnects miners: the gate holds the issued jobs for up to 90
+  seconds before closing. Unknown jobs are reported as "Job not found"
+  instead of "stale job", and every Stratum disconnect is logged with its
+  reason. Wallet, backup/restore, the 1% developer fee, the 10 GB excessive
+  block size, port 1922 and the UI are unchanged from 0.3.0.
+  0.3.0 is a release-qualification rebuild. Every custom image (backend, SV
+  Node wrapper, UI) is built from committed source with version/revision
+  labels; the UI and its approved silver hero are rebuilt from source instead
+  of hand-patched images. SV Node always runs with a 10 GB excessive block
+  size, passed last on its command line and verified at runtime. One
+  readiness model reports Starting, Syncing, Synced, Stratum not ready,
+  Setup required, Ready, Degraded, No peers or Error; zero peers, a stale tip,
+  a node behind the network, a stale controller or a missing payout is never
+  Ready, and Stratum port 1922 now refuses miners with the reason instead of
+  accepting them without work. Wallet: the built-in SV Node wallet can be
+  created, backed up as an encrypted copy of the complete wallet file,
+  verified, forgotten (archived, not erased) and restored to the same
+  address; it becomes a mining payout only after the backup is confirmed, and
+  a 0.2.x built-in-wallet payout is paused on upgrade until its backup is
+  verified. The wallet password protects backup download, restore/replace
+  and Forget; it is not a spending password. Restoring a wallet older than
+  the pruned node's retained blocks recovers the keys and asks before
+  rebuilding chain history. Sending is removed. Blocks come from a durable
+  found-block ledger and distinguish no blocks found, block data
+  unavailable, maturing, confirmed, orphaned and rejected. The 1% developer
+  fee is unchanged and can no longer be the customer payout.

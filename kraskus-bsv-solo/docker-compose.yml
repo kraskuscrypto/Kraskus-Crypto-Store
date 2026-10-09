@@ -1,0 +1,275 @@
+# 5tratumOS package for Bitcoin SV 0.5.2 (Kraskus V3, foundation 1.2.1).
+#
+# 0.5.0 (V3 migration, owner decisions 2026-10-09): the shared V3 UI, the V3
+# API contract served by the api (coins/bsv/v3_api.py), the foundation 1.1.2
+# app-token fallback for platforms without the P2 proxy token (stock
+# 5tratumOS, Umbrel) and plain stop grace periods (V3 decision C). Services,
+# networks, data paths, the SV Node command and the chain mount are exactly
+# as 0.4.0.
+#
+# Every custom image is built by apps/bsv-solo/build.sh from committed source
+# and pinned here by tag + digest after publication (release-manifest.json).
+#
+#   init        backend image, one-shot (root, no network, no token): creates
+#               the RPC credentials / default settings when missing and hands
+#               config/, secrets/ and runtime/ to the service user 10001
+#               (lchown, never follows symlinks, modes kept; secret files lose
+#               group/other bits). It mounts ONLY those three directories and
+#               never sees the SV Node datadir (data/node, the chain).
+#   svnode      SV Node 1.2.2 + Kraskus supervisor, uid 999 (bitcoin) exactly
+#               as 0.3.3, same bind mount, same command, same 660 s grace. The
+#               supervisor ALWAYS appends -excessiveblocksize=10000000000
+#               (10 GB), performs wallet swaps through wallet-transfer/, writes
+#               bitcoin.conf on a fresh install only, and refuses to start
+#               bitcoind when a chain is expected but chainstate/ is missing
+#               (genesis-sync guard, exit 78, nothing changed).
+#   controller  GMC -> Stratum V1 on host port 1922 (uid 10001); 1% developer
+#               fee in every coinbase (constants.py); refuses miners unless
+#               ready; per-worker statistics into status.json.
+#   api         appliance API (V3 contract) + wallet lifecycle (internal 18421,
+#               uid 10001).
+#               Token service of the P2 secure proxy: every state change and
+#               every wallet-data read needs the 5tratumOS proxy token; the
+#               wallet password guards recovery export, forget, payout
+#               destination changes and the history rebuild. No send.
+#   ui          shared Kraskus V3 web UI (nginx, plain HTTP 8080). Published once on
+#               the manifest port 18422; 5tratumOS P2 renders it on 127.0.0.1
+#               only and reaches it through its authenticated HTTPS dashboard
+#               route, adding the per-app token.
+#
+# Networks are identical to 0.2.x/0.3.x on purpose: every long-running service
+# uses `bsv` (Docker name kraskus-bsv-solo). The 5tratumOS CLI updates with
+# `up --remove-orphans` and never removes a network the new compose file no
+# longer declares, so renaming it would leak an address-pool slot on every
+# upgraded install. init has no network at all (it never needed one).
+#
+# Published host ports: 1922 (Stratum), 8333 (Bitcoin SV P2P) and
+# the UI 18422 (127.0.0.1 under P2). RPC, the API and wallet-transfer are
+# internal.
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: ui
+      APP_PORT: 8080
+    networks:
+      - bsv
+
+  init:
+    image: ghcr.io/kraskuscrypto/kraskus-bsv-solo:0.5.2@sha256:98d2cca010000ca5e07e8f1f80bdad76a8f6e77dc658f0ee30c41f1299fb0624
+    restart: "no"
+    user: "0:0"
+    command: ["python3", "/app/init_config.py"]
+    # ONLY the app's own directories. Never data/node (the chain), never the
+    # data root (which contains it). tests/test_bsv_hardened_compose.py
+    # enforces this.
+    volumes:
+      - ${APP_DATA_DIR}/data/config:/data/config
+      - ${APP_DATA_DIR}/data/secrets:/data/secrets
+      - ${APP_DATA_DIR}/data/runtime:/data/runtime
+    network_mode: none
+    security_opt:
+      - no-new-privileges:true
+
+  svnode:
+    image: ghcr.io/kraskuscrypto/kraskus-bsv-node:0.5.2@sha256:bcb744bcf5d3b36fc3f10392042191ce8cc366f798cddf05fda54873ef2638cb
+    restart: unless-stopped
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    # Tuning only. Consensus-critical flags (-excessiveblocksize,
+    # -maxstackmemoryusageconsensus) are added by the supervisor itself.
+    # dbcache 2048 MiB: 8192 drove a shared 24 GB host into full swap
+    # (Docs/Dev-Store-QA/bsv.md, VM100 measurements 2026-09-24).
+    command:
+      - -assumevalid=000000000000000002177a2c23a3b7e00e3d406de4d523e55cc29db20de8edb3
+      - -dbcache=2048
+      - -maxparallelblocks=2
+      - -maxparallelblocksperpeer=1
+      - -blockdownloadlowerwindow=32
+      - -addnode=57.128.233.172:8333
+      - -addnode=195.144.22.198:8333
+      - -addnode=135.125.170.182:8333
+      - -addnode=15.235.232.121:8333
+      - -addnode=99.127.49.102:8333
+    environment:
+      # Owner of the swap files the API reads/deletes (wallet-transfer/).
+      BSV_API_UID: "10001"
+    volumes:
+      # The chain: byte-identical to 0.3.3 (same host path, same container
+      # path). tests/test_bsv_hardened_compose.py enforces it.
+      - ${APP_DATA_DIR}/data/node:/data
+      - ${APP_DATA_DIR}/data/wallet-transfer:/wallet-transfer
+      # RPC credentials for writing bitcoin.conf on a FRESH install only.
+      - ${APP_DATA_DIR}/data/secrets:/run/kraskus-bsv/secrets:ro
+    ports:
+      - "8333:8333"
+    # Unchanged from 0.3.3 (supervisor budget 600 s + 60 s headroom) and NOT
+    # listed in x-5tratumos-stop-policy, so an update never adds a migration
+    # stop of the running node. No `init: true`: the supervisor is PID 1 with
+    # its TERM trap installed before bitcoind starts (measured, 0.3.3 audit).
+    stop_grace_period: 660s
+    healthcheck:
+      test: ["CMD-SHELL", "bitcoin-cli -datadir=/data -conf=/data/bitcoin.conf getblockcount >/dev/null 2>&1"]
+      interval: 30s
+      timeout: 15s
+      retries: 20
+      start_period: 600s
+    networks:
+      - bsv
+    security_opt:
+      - no-new-privileges:true
+
+  controller:
+    image: ghcr.io/kraskuscrypto/kraskus-bsv-solo:0.5.2@sha256:98d2cca010000ca5e07e8f1f80bdad76a8f6e77dc658f0ee30c41f1299fb0624
+    restart: unless-stopped
+    user: "10001:10001"
+    command: ["python3", "-m", "kraskus_solo.coins.bsv.main"]
+    depends_on:
+      init:
+        condition: service_completed_successfully
+      svnode:
+        condition: service_started
+    environment:
+      KRASKUS_BSV_RPC_URL: http://svnode:8332/
+      KRASKUS_BSV_RPC_USER_FILE: /data/secrets/rpc-user
+      KRASKUS_BSV_RPC_PASSWORD_FILE: /data/secrets/rpc-password
+      KRASKUS_BSV_SETTINGS_FILE: /data/config/settings.json
+      KRASKUS_BSV_STATUS_FILE: /data/config/status.json
+      KRASKUS_BSV_WALLET_STATE_FILE: /data/config/wallet-state.json
+      KRASKUS_BSV_TELEMETRY_FILE: /data/runtime/share-events.jsonl
+      KRASKUS_BSV_BLOCK_LEDGER_FILE: /data/runtime/blocks.jsonl
+      KRASKUS_BSV_STRATUM_PORT: "1922"
+      KRASKUS_BSV_SHARE_DIFFICULTY: "16384"
+    # Only what it reads/writes; no access to the chain or wallet files.
+    volumes:
+      - ${APP_DATA_DIR}/data/config:/data/config
+      - ${APP_DATA_DIR}/data/secrets:/data/secrets:ro
+      - ${APP_DATA_DIR}/data/runtime:/data/runtime
+    ports:
+      - "1922:1922"
+    networks:
+      - bsv
+    # V3 decision C (as Kaspa 0.4.0): the 0.4.0 x-5tratumos-stop-policy value
+    # as the plain Compose grace (fsynced block ledger).
+    stop_grace_period: 60s
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  api:
+    image: ghcr.io/kraskuscrypto/kraskus-bsv-solo:0.5.2@sha256:98d2cca010000ca5e07e8f1f80bdad76a8f6e77dc658f0ee30c41f1299fb0624
+    restart: unless-stopped
+    # Token service of the secure-proxy contract: the platform mounts
+    # /run/5tratumos/proxy-token as 0440 root:10001, readable through this
+    # numeric group only. Unprivileged from its first instruction.
+    user: "10001:10001"
+    # Foundation 1.1.2 start step, as 10001 (never root): without a platform
+    # token it creates the app token once (0400, in the 0700 directory the
+    # init step created); with the P2 token mounted it removes it. Then the API.
+    command:
+      - python3
+      - -m
+      - kraskus_foundation.service_init
+      - --uid
+      - "10001"
+      - --gid
+      - "10001"
+      - --
+      - python3
+      - -m
+      - kraskus_solo.coins.bsv.api_service
+    depends_on:
+      init:
+        condition: service_completed_successfully
+      svnode:
+        condition: service_started
+    environment:
+      KRASKUS_BSV_RPC_URL: http://svnode:8332/
+      KRASKUS_BSV_RPC_USER_FILE: /data/secrets/rpc-user
+      KRASKUS_BSV_RPC_PASSWORD_FILE: /data/secrets/rpc-password
+      KRASKUS_BSV_SETTINGS_FILE: /data/config/settings.json
+      KRASKUS_BSV_STATUS_FILE: /data/config/status.json
+      KRASKUS_BSV_WALLET_STATE_FILE: /data/config/wallet-state.json
+      KRASKUS_BSV_TELEMETRY_FILE: /data/runtime/share-events.jsonl
+      KRASKUS_BSV_BLOCK_LEDGER_FILE: /data/runtime/blocks.jsonl
+      KRASKUS_BSV_WALLET_TRANSFER_DIR: /wallet-transfer
+      KRASKUS_BSV_STRATUM_PORT: "1922"
+      KRASKUS_BSV_SHARE_DIFFICULTY: "16384"
+      # Foundation 1.1.2 app-token fallback (V3, as Kaspa 0.4.0): used only
+      # while no P2 platform token is mounted. Never logged.
+      KRASKUS_APP_TOKEN_FILE: /data/config/app-token/token
+    volumes:
+      - ${APP_DATA_DIR}/data/config:/data/config
+      - ${APP_DATA_DIR}/data/secrets:/data/secrets:ro
+      - ${APP_DATA_DIR}/data/runtime:/data/runtime
+      - ${APP_DATA_DIR}/data/wallet-transfer:/wallet-transfer
+    networks:
+      - bsv
+    # V3 decision C: fsynced wallet-state / transfer writes (Kaspa F-5 parity).
+    stop_grace_period: 60s
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    # Liveness only (the process answers HTTP; no data, no token, never
+    # consults SV Node). Informational: nothing restarts on it.
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:18421/livez', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  ui:
+    image: ghcr.io/kraskuscrypto/kraskus-bsv-solo-ui:0.5.2@sha256:ec037f258930402762c4dbc535747fdb357a66b376a7cb01a935f1d877cd388e
+    restart: unless-stopped
+    depends_on:
+      init:
+        condition: service_completed_successfully
+      api:
+        condition: service_started
+    # The contract's ui_port (8080, plain HTTP, the only listener), published
+    # once on the manifest port. 5tratumOS P2 rewrites this to
+    # 127.0.0.1:18422:8080 (QA direct-port mode: all interfaces; the API still
+    # refuses every state change without the token). The UI never receives
+    # the token file: nginx relays the portal's header on /api/ only.
+    ports:
+      - "18422:8080/tcp"
+    # Foundation 1.1.2: the app-token fallback directory, read-only;
+    # kraskus-app-token.sh supplies that token only to /api/ requests that
+    # carry no token header (stock 5tratumOS, Umbrel). Under P2 the api
+    # removes the app token, so the UI only relays the platform's header.
+    volumes:
+      - ${APP_DATA_DIR}/data/config/app-token:/run/kraskus-app-token:ro
+    stop_grace_period: 5s
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8080/index.html"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - bsv
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  bsv:
+    name: kraskus-bsv-solo
+
+# Read only by 5tratumOS with the P2 secure proxy (daemon/app_secure_proxy.py):
+# the ui service's port 8080 is published on 127.0.0.1 only and the token
+# service gets the per-app token mounted read-only at /run/5tratumos.
+x-5tratumos-secure-proxy:
+  version: 1
+  ui_service: ui
+  ui_port: 8080
+  token_services: [api]
