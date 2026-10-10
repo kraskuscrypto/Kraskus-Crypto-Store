@@ -1,0 +1,27 @@
+id: kraskus-btc-blake2b-solo
+name: BTC2b by Kraskus
+tagline: BTC2b Bitcoin Knots node, backed-up wallet, and true solo mining
+description: >-
+  BTC2b by Kraskus runs a pruned Bitcoin Knots node on the BTC2b chain (the
+  Knots BLAKE2b hard fork of Bitcoin at block 961640), a customer-owned
+  descriptor wallet with an encrypted backup, and a CONVOY DATUM true-solo
+  Stratum V1 endpoint for BLAKE2b miners on port 1923. Mining starts only
+  after the wallet backup is confirmed; rewards go straight to that wallet.
+  A fixed 1 percent developer fee is applied only to successfully mined
+  blocks as a coinbase split.
+version: 0.2.6
+category: Mining
+developer: Kraskus Crypto
+website: https://kraskuscrypto.com/
+repo: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
+support: https://kraskuscrypto.com/
+icon: assets/btc2b-emblem-std-v3.png
+port: 33066
+path: /
+uiMode: proxy
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: ui
+      APP_PORT: 8080
