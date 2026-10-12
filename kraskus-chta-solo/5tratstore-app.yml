@@ -2,19 +2,21 @@ id: kraskus-chta-solo
 name: CheetahCoin by Kraskus
 tagline: CheetahCoin full node and SHA256 solo mining
 description: >-
-  CHTA Kraskus turns 5tratumOS into a self-contained CheetahCoin full node and
-  solo-mining appliance. The Template V2 interface shows node synchronization,
-  one truthful mining-readiness state, each Stratum port's live status,
-  workers, accepted and rejected shares, round progress, and blocks
-  independently confirmed by the node. Normal miners connect on port 1926;
-  NMMiner and other very-low-hash devices use port 1927 with a fixed 0.002
-  difficulty. Both ports stay closed until the node is synchronized and a
-  valid payout is configured. The built-in CheetahCoin wallet can receive,
-  send and act as the mining payout once you have downloaded and verified an
-  encrypted backup of the complete wallet file; the same backup restores the
-  exact wallet on any CHTA Kraskus install. A required 1% developer fee is
+  CheetahCoin by Kraskus turns 5tratumOS into a self-contained CheetahCoin
+  full node (CheetahCoin Core 2.5.0) and solo-mining appliance. The Kraskus
+  V3 interface shows node synchronization, one truthful mining-readiness
+  state, workers, accepted and rejected shares, and blocks independently
+  confirmed by the node. Normal miners connect on port 1926; NMMiner and
+  other very-low-hash devices use port 1927 with a fixed 0.002 difficulty.
+  Both ports stay closed until the node is synchronized and a valid payout is
+  configured. The built-in CheetahCoin wallet can receive, send and act as
+  the mining payout once you have downloaded and verified an encrypted backup
+  of the complete wallet file; the same backup restores the exact wallet on
+  any install. Wallet and settings changes are made through the 5tratumOS
+  dashboard; a wallet password you set at the end of wallet set-up protects
+  backups, sending, Forget and payout changes. A required 1% developer fee is
   paid directly from successful block coinbases.
-version: 0.3.1
+version: 0.5.1
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/
@@ -29,4 +31,4 @@ services:
   app_proxy:
     environment:
       APP_HOST: ui
-      APP_PORT: 80
+      APP_PORT: 8080

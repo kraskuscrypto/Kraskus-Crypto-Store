@@ -5,7 +5,7 @@ mining appliance.
 
 ## Ports
 
-- 33064 — 5tratumOS app proxy entry (web UI)
+- 33064 — web UI (5tratumOS dashboard; container port 8080)
 - 1926/tcp — Stratum, normal SHA256 miners (min difficulty 1024 by default,
   start 4096, vardiff)
 - 1927/tcp — Stratum, NMMiner / very-low-hash devices (fixed 0.002)
@@ -41,6 +41,59 @@ from the Blocks page. Per-block share logs are not written.
 
 `assets/chta-official-emblem-v2.png` is the approved CHTA application emblem
 used by the Store listing.
+
+## 0.5.1
+
+- Network difficulty: the app now reports the regular network difficulty from
+  CheetahCoin Core's block template, the same work CKPool hands to miners.
+  A template counts only when Core is in its regular-work window, 81 to 240 s
+  after the previous block, or at a retarget height. 0.5.0 showed Core's
+  tip-block figure, which reads 0.0025 (shown as "0.002") whenever the tip is
+  a cheetah block. Spike and cheetah work, share, port and worker
+  difficulties are never shown as the network difficulty. While the node
+  syncs, or before a value is confirmed, the interface shows "Updating…" and
+  computes no percentage.
+- Best share (this session) is CKPool's current-round best share, which resets
+  when the pool finds a block. It is no longer the all-time best. CKPool
+  records the block-finding share as the first best of the new round, so
+  right after a found block the percentage starts at 100% or more. A miner
+  idle since before the latest found block shows no round best.
+- Mining, payout, the Stratum ports (1926; 1927 at a fixed 0.002), the wallet
+  and the 1% developer fee are unchanged. CheetahCoin Core 2.5.0 and CKPool are
+  the 0.5.0 and 0.3.1 images, unchanged.
+
+## 0.5.0
+
+- Kraskus V3: the shared V3 interface (Home, Mining, Workers, Blocks, Wallet,
+  Settings) on foundation 1.2.0. The UI is served on port 33064 (container
+  8080); the backend answers the V3 API.
+- Security (V3 model): no app login. Every change and every wallet-data read
+  must come through the 5tratumOS dashboard (its per-app proxy token, or an
+  app token the backend creates at start on a platform without one). The
+  wallet password is the only credential: it protects backup downloads,
+  sending, Forget and payout changes after the first choice, with a
+  persisted lock-out after repeated wrong passwords.
+- Wallet set-up: create (or restore from your encrypted backup file) ->
+  download the encrypted backup -> upload it back with its passphrase to
+  verify -> set the wallet password last. Wallets from 0.3.x keep their
+  existing password and skip that step. Backup files travel in chunks, so
+  the dashboard's request-size limit no longer matters. The backup format is
+  unchanged.
+- Send: preview (address, amount, the fee CheetahCoin Core computes for the
+  transaction, total) and confirm with the wallet password.
+- Settings -> Mining -> Difficulty: Automatic (port 1926 minimum share
+  difficulty 1024) or Manual (your minimum, 1 or more); CKPool keeps
+  start = max(4096, minimum) and vardiff above it. The value in effect is
+  shown once the Stratum service has applied it.
+- Stratum: the interface shows the normal endpoint, port 1926. Port 1927 is
+  unchanged and still serves NMMiner / very-low-hash devices at a fixed
+  0.002 difficulty; its workers and shares are included in the totals
+  (listed with instance 1927).
+- CheetahCoin Core 2.5.0 (official release, SHA-256 verified). Same chain,
+  wallet, RPC and P2P: the existing chain and wallet are reused in place,
+  no reindex or rescan.
+- Unchanged: CKPool (0.3.1 image), Stratum ports, payout logic, wallet file
+  format, data paths and the 1% developer fee.
 
 ## 0.3.1
 
