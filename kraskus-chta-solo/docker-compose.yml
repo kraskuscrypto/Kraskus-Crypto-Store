@@ -1,15 +1,30 @@
-# 5tratumOS package for CHTA Kraskus (Kraskus CHTA Solo) 0.3.1.
+# 5tratumOS package for CheetahCoin by Kraskus (Kraskus CHTA Solo) 0.5.1
+# (Kraskus V3, foundation 1.2.0).
+#
+# 0.5.0 (V3 migration, owner design 2026-10-09): the shared V3 UI (nginx,
+# plain HTTP 8080, published once on the manifest port 33064), the V3 API
+# contract served by the backend (coins/chta/v3_api.py) behind the foundation
+# route policy, and the foundation 1.1.2 app-token fallback for platforms
+# without the P2 proxy token (stock 5tratumOS, Umbrel). CheetahCoin Core is
+# the official v2.5.0 release (owner-approved node baseline). CKPool runs the
+# unchanged 0.3.1 image. Services, networks and data paths are exactly as
+# 0.3.1.
 #
 # Every custom image is built by apps/chta-solo/build.sh from committed source
 # and pinned here by tag + digest after publication (release-manifest.json).
 #
 #   init          backend image, one-shot: secrets, Core config, both CKPool
-#                 configs (developer fee re-asserted on every start/upgrade)
-#   cheetahcoin   CheetahCoin Core 2.4.0 + wallet-swap supervisor
+#                 configs (developer fee re-asserted on every start/upgrade),
+#                 the empty config/app-token directory (0700, uid 1000)
+#   cheetahcoin   CheetahCoin Core 2.5.0 + wallet-swap supervisor
 #   pool          CKPool NORMAL entrance    host 1926 (min 1024 / start 4096)
 #   pool_lowhash  CKPool LOW-DIFF entrance  host 1927 (fixed 0.002, NMMiner)
-#   kraskus       backend API, readiness monitor, Stratum gate, wallet
-#   ui            web UI (nginx)
+#   kraskus       backend API (V3 contract), readiness monitor, Stratum gate,
+#                 wallet; token service of the P2 secure proxy: every state
+#                 change and every wallet-data read needs the platform (or
+#                 app) token, the wallet password guards backups, Forget,
+#                 send and payout changes
+#   ui            shared Kraskus V3 web UI (nginx, plain HTTP 8080)
 #
 # Both CKPool supervisors serve only while the backend's Stratum gate is open
 # (node synced with peers, valid payout, wallet backup confirmed when the
@@ -21,17 +36,18 @@
 # The 5tratumOS CLI updates with `up --remove-orphans` and never removes a
 # network the new compose file no longer declares, so renaming or dropping
 # either network would orphan it -- and leak an address-pool slot -- on every
-# upgraded install. Only the two Stratum ports are published; Core RPC/P2P,
-# the backend and the wallet-transfer directory are internal.
+# upgraded install. Published host ports: 1926 and 1927 (Stratum) and the UI
+# 33064 (127.0.0.1 under P2); Core RPC/P2P, the backend and the
+# wallet-transfer directory are internal.
 
 services:
   app_proxy:
     environment:
       APP_HOST: ui
-      APP_PORT: 80
+      APP_PORT: 8080
 
   init:
-    image: ghcr.io/kraskuscrypto/kraskus-chta-solo:0.3.1@sha256:9667a5d6de876b0ab7ac150f98556c16a03498410db583e83147979f6e500730
+    image: ghcr.io/kraskuscrypto/kraskus-chta-solo:0.5.1@sha256:53e057648bbf3bc66e68393ef3f919d8b3d919d47a3d81114a114648c3729ea6
     restart: "no"
     user: "0:0"
     command:
@@ -49,7 +65,7 @@ services:
       - no-new-privileges:true
 
   cheetahcoin:
-    image: ghcr.io/kraskuscrypto/kraskus-cheetahcoin-core:0.3.1@sha256:fd9d745510f4508bdc4f40a42919dcfa6bf50491735688834ef6b3e27013120f
+    image: ghcr.io/kraskuscrypto/kraskus-cheetahcoin-core:0.5.0@sha256:2a4a4d30010f04fd4304a0241d51ad0027502e59d0728d464533aad2b3e08742
     restart: unless-stopped
     depends_on:
       init:
@@ -115,8 +131,24 @@ services:
       - no-new-privileges:true
 
   kraskus:
-    image: ghcr.io/kraskuscrypto/kraskus-chta-solo:0.3.1@sha256:9667a5d6de876b0ab7ac150f98556c16a03498410db583e83147979f6e500730
+    image: ghcr.io/kraskuscrypto/kraskus-chta-solo:0.5.1@sha256:53e057648bbf3bc66e68393ef3f919d8b3d919d47a3d81114a114648c3729ea6
     restart: unless-stopped
+    # Foundation 1.1.2 start step, as the image user 1000 (never root):
+    # without a platform token it creates the app token once (0400, in the
+    # 0700 directory the init step created); with the P2 token mounted it
+    # removes it. Then the backend.
+    command:
+      - python3
+      - -m
+      - kraskus_foundation.service_init
+      - --uid
+      - "1000"
+      - --gid
+      - "1000"
+      - --
+      - python3
+      - -m
+      - kraskus_solo.coins.chta.main
     depends_on:
       init:
         condition: service_completed_successfully
@@ -144,6 +176,9 @@ services:
       KRASKUS_CHTA_LOWHASH_USERS_DIR: /ckpool-lowhash-data/users
       KRASKUS_CHTA_LOWHASH_CKPOOL_STATUS_FILE: /ckpool-lowhash-data/pool/pool.status
       KRASKUS_CHTA_LOWHASH_SUPERVISOR_STATE_FILE: /ckpool-lowhash-data/supervisor-state.json
+      # Foundation 1.1.2 app-token fallback (V3): used only while no P2
+      # platform token is mounted. Never logged.
+      KRASKUS_APP_TOKEN_FILE: /kraskus-config/app-token/token
     volumes:
       - ${APP_DATA_DIR}/config:/kraskus-config
       - ${APP_DATA_DIR}/secrets:/run/secrets:ro
@@ -161,25 +196,37 @@ services:
       - no-new-privileges:true
 
   ui:
-    image: ghcr.io/kraskuscrypto/kraskus-chta-ui:0.3.1@sha256:93768c63e2a060e44e814d643504b8611dbdb8193bab811c0cdf2cdb3bc51052
+    image: ghcr.io/kraskuscrypto/kraskus-chta-ui:0.5.1@sha256:dd3449c3fd14fa4895063e9604975a33afa2fb846aafc47477f4233c17e2d5f6
     restart: unless-stopped
     depends_on:
+      init:
+        condition: service_completed_successfully
       kraskus:
         condition: service_started
     environment:
-      CHTA_API_HOST: kraskus
-    read_only: true
-    tmpfs:
-      - /etc/nginx/conf.d
-      - /var/cache/nginx
-      - /var/run
-      - /tmp
-    cap_drop:
-      - ALL
-    cap_add:
-      - CHOWN
-      - SETGID
-      - SETUID
+      ADAPTER_HOST: kraskus
+    # The contract's ui_port (8080, plain HTTP, the only listener), published
+    # once on the manifest port. 5tratumOS P2 renders it on 127.0.0.1 only
+    # and reaches it through its authenticated HTTPS dashboard route, adding
+    # the per-app token; nginx relays the portal's header on /api/ only.
+    ports:
+      - "33064:8080/tcp"
+    # Foundation 1.1.2: the app-token fallback directory, read-only;
+    # kraskus-app-token.sh supplies that token only to /api/ requests that
+    # carry no token header (stock 5tratumOS, Umbrel). Under P2 the backend
+    # removes the app token, so the UI only relays the platform's header.
+    # (As Bitcoin SV 0.5.0, the UI is not read-only and keeps its default
+    # capabilities: the start script rewrites an nginx map and reads the
+    # 0400 token from the backend user's 0700 directory.)
+    volumes:
+      - ${APP_DATA_DIR}/config/app-token:/run/kraskus-app-token:ro
+    stop_grace_period: 5s
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8080/index.html"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     networks:
       - chta
     security_opt:
@@ -188,3 +235,12 @@ services:
 networks:
   chta:
     name: kraskus-chta-solo-v2-qualification
+
+# Read only by 5tratumOS with the P2 secure proxy: the ui service's port 8080
+# is published on 127.0.0.1 only and the token service gets the per-app token
+# mounted read-only at /run/5tratumos.
+x-5tratumos-secure-proxy:
+  version: 1
+  ui_service: ui
+  ui_port: 8080
+  token_services: [kraskus]
