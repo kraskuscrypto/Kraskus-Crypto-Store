@@ -1,8 +1,8 @@
 schemaVersion: 1
 status: approved
 appId: kraskus-prl-solo
-appVersion: 0.2.0
-reviewedAt: "2026-09-23"
+appVersion: 0.5.1
+reviewedAt: "2026-10-09"
 reviewedBy: "Kraskus Crypto"
 
 upstream:
@@ -42,6 +42,28 @@ security:
   networkEndpointsReviewed: true
 
 notes: >-
+  PRL 0.5.1 (miner compatibility): the stratum gateway sends its
+  pearl.challenge only to miners that stay silent for half a second after
+  connecting (AlphaMiner waits for it and is unchanged); miners that speak
+  first, like SRBMiner-MULTI, no longer receive an unsolicited method they
+  reject. One stratum line may now be up to 4 MiB (SRBMiner's shares are
+  about 1.07 MB); a larger line gets a clean "Request too large" error.
+  Tested: AlphaMiner 1.9.5, SRBMiner-MULTI 3.6.9. Known incompatible:
+  WildRig Multi 0.51.2 and 0.51.3 (they open with a non-JSON raw-hex
+  handshake; other WildRig versions untested). pearld, Oyster,
+  payout, difficulty, ports, wallet and the developer fee are unchanged.
+  PRL 0.5.0 (Kraskus V3 migration): the shared V3 UI and API contract, the
+  foundation app-token fallback (platform token or app token on every state
+  change and wallet read), the wallet password set as the last set-up step
+  (Oyster walletpassphrasechange from a random set-up passphrase) and the
+  standard payout destination (native wallet or an external address that
+  pearld validates, written to the gateway's payout-address file). pearld,
+  Oyster and gateway images are the unchanged 0.2.1 digests.
+  PRL 0.2.1 hotfix: node readiness uses pearld's lock-free RPCs, so a healthy
+  node validating blocks no longer reads as "Node unavailable" and the stratum
+  sync gate no longer closes during those stalls; a wallet restore scans its
+  history from the wallet birthday (or from genesis when unknown) and stays in
+  RESTORING, with no balance or payout, until the scan finishes.
   PRL 0.2.0 (release qualification). One authoritative readiness model:
   height 0, no peers, a lagging or stale tip never reads as synced, and the
   gateway hands out work only while the node is synced. Wallet creation runs
