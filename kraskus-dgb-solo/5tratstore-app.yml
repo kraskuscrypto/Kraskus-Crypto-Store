@@ -1,18 +1,20 @@
 id: kraskus-dgb-solo
 name: DigiByte
-tagline: DigiByte full node, backed-up wallet, and true solo mining on SHA-256, Scrypt and Skein
+tagline: DigiByte full node, recovery-phrase wallet, and true solo mining on SHA-256, Scrypt and Skein
 description: >-
   DigiByte runs a DigiByte Core full node that validates the
-  whole multi-algorithm DigiByte chain, a customer-owned descriptor wallet
-  with an encrypted backup, and three independent true-solo Stratum V1
+  whole multi-algorithm DigiByte chain, a customer-owned wallet with a
+  24-word recovery phrase (wallets from earlier versions keep their
+  encrypted backup file), and three independent true-solo Stratum V1
   endpoints: SHA-256 on port 1928, Scrypt on port 1929 and Skein on port
   1930. Each algorithm gets its own work, difficulty and share accounting
-  from your own node. Mining starts only after the wallet backup is
-  confirmed; rewards go straight to that wallet. A fixed 1 percent developer
+  from your own node and is shown on its own. Mining starts only after the
+  wallet is backed up and its password is set; rewards go straight to that
+  wallet, which can also receive and send DGB. A fixed 1 percent developer
   fee is applied only to successfully mined blocks as a coinbase split
   (0.50, 0.25 and 0.25 percent to three developer addresses); the miner
   receives the remaining 99 percent.
-version: 0.1.3
+version: 0.2.0
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/

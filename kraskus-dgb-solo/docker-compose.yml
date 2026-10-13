@@ -1,4 +1,12 @@
-# DigiByte Solo by Kraskus 0.1.3 -- 5tratumOS Store recipe.
+# DigiByte Solo by Kraskus 0.2.0 -- 5tratumOS Store recipe (Kraskus V3,
+# foundation 1.11.0).
+#
+# 0.2.0 (V3 migration, owner decisions 2026-10-13): the shared V3 UI (nginx,
+# plain HTTP 8080, published once on the manifest port 33071), the V3 API
+# contract served by the adapter (adapter/v3_api.py) behind the foundation
+# route policy, and the foundation 1.1.2 app-token fallback for platforms
+# without the P2 proxy token (stock 5tratumOS, Umbrel). DigiByte Core 9.26.7,
+# the three Stratum lanes, ports, networks and data paths are exactly as 0.1.3.
 #
 #   init             adapter image, one-shot as root: persistent layout,
 #                    per-component RPC credentials + rpcwhitelist, defaults
@@ -7,15 +15,19 @@
 #   stratum-sha256d  Kraskus Stratum lane, SHA-256   host 1928
 #   stratum-scrypt   Kraskus Stratum lane, Scrypt    host 1929
 #   stratum-skein    Kraskus Stratum lane, Skein     host 1930
-#   adapter          readiness, wallet, mining gate, ledger, API (internal)
-#   ui               Template V2 web UI (nginx) behind app_proxy
+#   adapter          readiness, wallet, mining gate, ledger, V3 API (internal);
+#                    token service of the P2 secure proxy: every state change
+#                    and every wallet-data read needs the platform (or app)
+#                    token; the wallet password guards backups, Forget and send
+#   ui               shared Kraskus V3 web UI (nginx, plain HTTP 8080)
 #
 # 1931 (Qubit) and 1932 (Odo) are reserved for DigiByte and not published.
 #
 # Persistent data (layout v1, independent of the DigiByte Core version, see
 # apps/dgb-solo/docs/node-upgrade.md): node/ (blocks, chainstate, indexes,
-# wallets), runtime/ (adapter state, node settings), stratum/<algo>/ (lane
-# state), secrets/<component>/ (each container mounts only its own).
+# wallets), runtime/ (adapter state, node settings, 0.2.0: app-token/ and
+# uploads/), stratum/<algo>/ (lane state), secrets/<component>/ (each
+# container mounts only its own).
 #
 # Networks: dgb_public (node P2P, published Stratum ports, UI port) and
 # dgb_private (internal: RPC, ZMQ, lane telemetry, adapter, UI). The UI is on
@@ -25,7 +37,10 @@
 # drops, so renaming one would leak an address-pool slot on every update.
 #
 # Image references are pinned to immutable digests at publication
-# (release-manifest.json records the same digests).
+# (release-manifest.json records the same digests). 0.2.0 reuses the released
+# 0.1.3 node (DigiByte Core 9.26.7) and stratum images byte for byte: their
+# source is unchanged, so consensus, PoW, lanes and the developer fee are the
+# exact 0.1.3 binaries. Only the adapter and UI images are new.
 services:
   app_proxy:
     environment:
@@ -35,7 +50,7 @@ services:
       - dgb_private
 
   init:
-    image: ghcr.io/kraskuscrypto/kraskus-dgb-solo-adapter:0.1.3@sha256:bbe4bc39c086749242f0f81dcc0cdd06cc5c5671a3d059c2c6f3383c66cd7cf9
+    image: ghcr.io/kraskuscrypto/kraskus-dgb-solo-adapter:0.2.0@sha256:6df62d6af8cadd79d32c2a9ca1bd293ffca5977276c829da183db163233e2e97
     pull_policy: missing
     restart: "no"
     user: "0:0"
@@ -210,10 +225,16 @@ services:
       - dgb_private
 
   adapter:
-    image: ghcr.io/kraskuscrypto/kraskus-dgb-solo-adapter:0.1.3@sha256:bbe4bc39c086749242f0f81dcc0cdd06cc5c5671a3d059c2c6f3383c66cd7cf9
+    image: ghcr.io/kraskuscrypto/kraskus-dgb-solo-adapter:0.2.0@sha256:6df62d6af8cadd79d32c2a9ca1bd293ffca5977276c829da183db163233e2e97
     pull_policy: missing
     restart: unless-stopped
     stop_grace_period: 20s
+    # Foundation 1.1.2 start step, as the image user 65532 (never root):
+    # without a platform token it creates the app token once (0400, in the
+    # 0700 runtime/app-token directory the init step created); with the P2
+    # token mounted it removes it. Then the adapter.
+    command: ["python", "-m", "kraskus_foundation.service_init", "--uid", "65532", "--gid", "2000", "--",
+              "python", "/app/adapter.py"]
     depends_on:
       init:
         condition: service_completed_successfully
@@ -226,12 +247,15 @@ services:
       KRASKUS_DGB_RPC_PASSWORD_FILE: /secrets/rpc-password
       KRASKUS_DGB_RUNTIME_DIR: /runtime
       KRASKUS_DGB_STRATUM_DIR: /stratum
+      # Foundation 1.1.2 app-token fallback (V3): used only while no P2
+      # platform token is mounted. Never logged.
+      KRASKUS_APP_TOKEN_FILE: /runtime/app-token/token
     volumes:
       - ${APP_DATA_DIR}/runtime:/runtime
       - ${APP_DATA_DIR}/stratum:/stratum:ro
       - ${APP_DATA_DIR}/secrets/adapter:/secrets:ro
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:18460/health', timeout=5).read()"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:18460/livez', timeout=5).read()"]
       interval: 20s
       timeout: 10s
       retries: 5
@@ -247,14 +271,29 @@ services:
       - dgb_private
 
   ui:
-    image: ghcr.io/kraskuscrypto/kraskus-dgb-solo-ui:0.1.3@sha256:af56a9c0bd8f56947a7a2414460e55f2ad27b07f10f806056af735f05a9e329f
+    image: ghcr.io/kraskuscrypto/kraskus-dgb-solo-ui:0.2.0@sha256:f6ae932715dffa16703d23201264a325001856f06c2687380f27aac46f477da8
     pull_policy: missing
     restart: unless-stopped
     depends_on:
       adapter:
         condition: service_healthy
+    environment:
+      ADAPTER_HOST: adapter
+    # The contract's ui_port (8080, plain HTTP, the only listener), published
+    # once on the manifest port. 5tratumOS P2 renders it on 127.0.0.1 only
+    # and reaches it through its authenticated HTTPS dashboard route, adding
+    # the per-app token; nginx relays the portal's header on /api/ only.
+    ports:
+      - "33071:8080/tcp"
+    # Foundation 1.1.2: the app-token fallback directory, read-only;
+    # kraskus-app-token.sh supplies that token only to /api/ requests that
+    # carry no token header (stock 5tratumOS, Umbrel). Under P2 the adapter
+    # removes the app token, so the UI only relays the platform's header.
+    volumes:
+      - ${APP_DATA_DIR}/runtime/app-token:/run/kraskus-app-token:ro
+    stop_grace_period: 5s
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health >/dev/null"]
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8080/index.html"]
       interval: 20s
       timeout: 10s
       retries: 5
@@ -271,3 +310,12 @@ networks:
   dgb_private:
     driver: bridge
     internal: true
+
+# Read only by 5tratumOS with the P2 secure proxy: the ui service's port 8080
+# is published on 127.0.0.1 only and the token service gets the per-app token
+# mounted read-only at /run/5tratumos.
+x-5tratumos-secure-proxy:
+  version: 1
+  ui_service: ui
+  ui_port: 8080
+  token_services: [adapter]
