@@ -1,7 +1,7 @@
 schemaVersion: 1
 status: proposed
 appId: kraskus-dgb-solo
-appVersion: 0.1.1
+appVersion: 0.1.3
 reviewedAt: ""
 reviewedBy: ""
 
@@ -42,9 +42,11 @@ security:
   networkEndpointsReviewed: true
 
 notes: >-
-  0.1.1 changes only the developer-fee coinbase outputs: the fixed 1 percent
-  (100 basis points of the block reward) is split into three pinned outputs,
-  0.50 / 0.25 / 0.25 percent, with integer atomic-unit arithmetic and every
-  rounding remainder paid to the miner (99 percent). DigiByte Core 9.26.6
-  (92330d95), wallet, node, adapter, UI layout, ports and the Stratum
-  protocol are unchanged from 0.1.0.
+  0.1.3 is a node-only maintenance release: DigiByte Core 9.26.7
+  (d7265fb0) replaces 9.26.6 before Thaw Day (mainnet block 24,490,000).
+  9.26.7 finishes pending DigiDollar index updates before shutdown, so a
+  stop while the first Thaw Day block is processed no longer ends in a
+  fatal error and exit status 1. No consensus, mining, block-template,
+  wallet-format or P2P change; no reindex. Wallet, adapter, Stratum lanes,
+  developer fee (0.50 / 0.25 / 0.25 percent), UI layout and ports are
+  unchanged from 0.1.1. Version 0.1.2 was never released.
