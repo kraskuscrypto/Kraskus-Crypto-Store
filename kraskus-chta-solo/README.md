@@ -42,6 +42,21 @@ from the Blocks page. Per-block share logs are not written.
 `assets/chta-official-emblem-v2.png` is the approved CHTA application emblem
 used by the Store listing.
 
+## 0.5.2
+
+- Network difficulty no longer sticks at about 20 billion. CheetahCoin Core's
+  block template inside the first 80 s after a block is a lottery between the
+  spike target (bits `1836f9bf`, powLimit / 2e10) and the chain's regular
+  work. 0.5.1 ignored that whole window; on a fast chain (blocks every few
+  seconds at low difficulty) the tip is almost never older than 80 s, so 0.5.1
+  kept the last value it had confirmed, which for long-running installs was
+  the spike work of the pre-fork post-spike lock (19,999,698,720.47). 0.5.2
+  takes the template's regular work whenever the lottery did not pick the
+  spike target, so the value follows every block and every retarget.
+- Unchanged: mining, CKPool and its ports (1926, and 1927 with the fixed
+  0.002 difficulty), payouts, the wallet, the 1% developer fee and
+  CheetahCoin Core 2.5.0.
+
 ## 0.5.1
 
 - Network difficulty: the app now reports the regular network difficulty from

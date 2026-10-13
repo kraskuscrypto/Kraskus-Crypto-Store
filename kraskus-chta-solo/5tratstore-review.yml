@@ -1,7 +1,7 @@
 schemaVersion: 1
 status: approved
 appId: kraskus-chta-solo
-appVersion: 0.5.1
+appVersion: 0.5.2
 reviewedAt: "2026-09-26"
 reviewedBy: "Kraskus Crypto"
 
@@ -44,6 +44,14 @@ security:
   networkEndpointsReviewed: true
 
 notes: >-
+  0.5.2 fixes a network difficulty that could stay stuck at about 20 billion:
+  when blocks arrive within 80 s of each other (the normal case at low
+  difficulty), 0.5.1 never accepted a new block template and kept the last
+  value it had seen during a pre-fork spike lock. 0.5.2 also reads the regular
+  work from templates inside Core's 80 s lottery window whenever the lottery did
+  not pick the spike target (bits 1836f9bf = powLimit / 2e10). Mining, payout,
+  ports (1926 and the 0.002 low-difficulty 1927), wallet and the 1% developer
+  fee are unchanged; Core 2.5.0 and CKPool are carried forward.
   0.5.1 corrects the network difficulty and Best share figures. The network
   difficulty now comes from CheetahCoin Core's block template, the regular
   work CKPool mines (81-240 s after the previous block, or at a retarget
