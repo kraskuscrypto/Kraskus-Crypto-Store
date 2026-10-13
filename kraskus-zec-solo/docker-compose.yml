@@ -1,41 +1,83 @@
-# Kraskus ZEC Solo 0.4.0.
+# 5tratumOS package for Zcash by Kraskus (Kraskus ZEC Solo) 0.5.2
+# (Kraskus V3, foundation 1.2.3).
 #
-# Every image below is pinned tag@sha256:digest, read back from GHCR after the
-# push. 0.4.0 rebuilds the controller, zallet-supervisor and UI images from
-# canonical source in Kraskus-Crypto-Apps at commit
-# d6444e29c3578382deaa48c5e9d95536c31291f7 (branch fix/zec-defect-resolution-v1),
-# and each carries org.opencontainers.image.version=0.4.0 and .revision set to
-# that commit.
+# 0.5.0 (V3 migration, owner-approved 2026-10-12): the shared V3 UI (nginx,
+# plain HTTP 8080, published once on the manifest port 33062), the V3 API of
+# the controller (kraskus:18400) with the foundation route policy, and the
+# foundation app-token fallback for platforms without the P2 proxy token.
+# Zebra is unchanged (same digest). Zallet is unchanged (0.1.0-beta.3); the
+# Kraskus supervisor around it gains the V3 wallet endpoints and now listens on
+# 127.0.0.1 only (zallet shares the kraskus network namespace).
 #
-# The 0.3.26 controller was `FROM` a published image of itself, so its
-# inherited metadata reported 0.3.2-beta and no image could be traced to a
-# commit. That is what the rebuild fixes; see docs/zec-image-provenance.md in
-# the apps repo.
+# Network (owner decision Z3): this package is **Mainnet only** -- there is no
+# user network setting. KRASKUS_ZEC_NETWORK is unset here (default Mainnet);
+# Testnet exists only as a QA-only override outside the published package.
+# Fail closed: the zebra service waits for /kraskus-config/zebra-start-allowed,
+# which the controller writes only after the storage preflight for the
+# effective network passes (Mainnet: 320 GiB free). Until then no chain sync
+# starts and the app reports the storage error.
 #
-# zebra is unchanged in this release and keeps its existing digest.
+# Services:
+#   zallet-init   one-shot (root): wallet directory (uid 10001, 0700) and the
+#                 empty app-token directory (0700) for the V3 app-token fallback
+#   kraskus       controller: V3 API (18400), Stratum (host 3335, Equihash),
+#                 Stratum status (127.0.0.1:18402); token service of the P2
+#                 secure proxy; the wallet password guards send, Forget and
+#                 payout changes
+#   zallet        upstream Zallet under the Kraskus supervisor (127.0.0.1:28233)
+#   zebra         Zcash node (unchanged image); starts only once allowed
+#   ui            shared Kraskus V3 web UI (nginx, plain HTTP 8080)
+#
+# Images are pinned tag@sha256:digest after publication
+# (scripts/write-release-manifest.py); the placeholders below are replaced then.
 services:
   app_proxy:
     environment:
       APP_HOST: ui
       APP_PORT: 8080
-  ui:
-    image: ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller:ui-0.4.0@sha256:69d8887d906e8d820a30ebc87d9af8b505b99e765e50fde94ef3bda3d5857532
-    restart: unless-stopped
-    depends_on:
-    - kraskus
+
+  zallet-init:
+    image: ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller:0.5.2@sha256:51c9eda6c7b601e200593f6a7b1cfab70f5fc31838508db88737f83038d1f157
+    user: 0:0
+    entrypoint:
+    - /bin/sh
+    - -c
+    command:
+    - 'mkdir -p /var/lib/zallet
+
+      chown 10001:10001 /var/lib/zallet
+
+      chmod 700 /var/lib/zallet
+
+      mkdir -p /kraskus-config/app-token
+
+      chown 0:0 /kraskus-config/app-token
+
+      chmod 700 /kraskus-config/app-token
+
+      '
+    volumes:
+    - ${APP_DATA_DIR}/kraskus/zallet:/var/lib/zallet
+    - ${APP_DATA_DIR}/config:/kraskus-config
+    restart: 'no'
+    network_mode: none
     security_opt:
     - no-new-privileges:true
     cap_drop:
     - ALL
     cap_add:
     - CHOWN
-    - SETGID
-    - SETUID
+    - DAC_OVERRIDE
+    - FOWNER
+
   kraskus:
-    image: ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller:0.4.0@sha256:b5045825e2a94bffc22a75e5f941423a6c848565fd0f6b2a64b328725dd9d2cb
+    image: ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller:0.5.2@sha256:51c9eda6c7b601e200593f6a7b1cfab70f5fc31838508db88737f83038d1f157
     restart: unless-stopped
     depends_on:
-    - zebra
+      zallet-init:
+        condition: service_completed_successfully
+      zebra:
+        condition: service_started
     environment:
       KRASKUS_BASE: /data
       KRASKUS_PACKAGED_MODE: '1'
@@ -50,6 +92,9 @@ services:
       KRASKUS_STRATUM_HEALTH_HOST: 127.0.0.1
       KRASKUS_STRATUM_HEALTH_PORT: 18402
       KRASKUS_STRATUM_STATUS_URL: http://127.0.0.1:18402/status
+      # Foundation app-token fallback (V3): used only while no P2 platform
+      # token is mounted. Never logged.
+      KRASKUS_APP_TOKEN_FILE: /kraskus-config/app-token/token
     volumes:
     - ${APP_DATA_DIR}/kraskus:/data
     - ${APP_DATA_DIR}/zebra:/zebra:ro
@@ -62,34 +107,9 @@ services:
     - ALL
     cap_add:
     - DAC_OVERRIDE
-  zallet-init:
-    image: ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller:0.4.0@sha256:b5045825e2a94bffc22a75e5f941423a6c848565fd0f6b2a64b328725dd9d2cb
-    user: 0:0
-    entrypoint:
-    - /bin/sh
-    - -c
-    command:
-    - 'mkdir -p /var/lib/zallet
 
-      chown 10001:10001 /var/lib/zallet
-
-      chmod 700 /var/lib/zallet
-
-      '
-    volumes:
-    - ${APP_DATA_DIR}/kraskus/zallet:/var/lib/zallet
-    restart: 'no'
-    network_mode: none
-    security_opt:
-    - no-new-privileges:true
-    cap_drop:
-    - ALL
-    cap_add:
-    - CHOWN
-    - DAC_OVERRIDE
-    - FOWNER
   zallet:
-    image: ghcr.io/kraskuscrypto/kraskus-zec-zallet-supervisor:0.4.0@sha256:fae84858116f38e8ad6f9e84783a4e829d623c4f3c1bcacb3c3a3bab56c49391
+    image: ghcr.io/kraskuscrypto/kraskus-zec-zallet-supervisor:0.5.2@sha256:9662c8cdee1d6e737c5b6c1765c3427499a0b17c2a7adc0700f55f4bfe54d99d
     restart: unless-stopped
     user: 10001:10001
     network_mode: service:kraskus
@@ -108,9 +128,18 @@ services:
     - no-new-privileges:true
     cap_drop:
     - ALL
+
   zebra:
     image: ghcr.io/kraskuscrypto/kraskus-zebra@sha256:abbbddd84563023df621f1eecceeb816da5c2951d9b60718133f131e1341c6d0
     restart: unless-stopped
+    # Z3 fail-closed start gate: the image's own supervisor falls back to
+    # Testnet when the network file is missing, so it must not run before the
+    # controller has passed the storage preflight and written both the network
+    # file and the start permission. Unchanged supervisor once allowed.
+    entrypoint:
+    - /bin/bash
+    - -c
+    - 'until [ -f /kraskus-config/zebra-start-allowed ]; do sleep 10; done; exec /usr/local/bin/kraskus-zebra-supervisor'
     environment:
       ZEBRA_NETWORK__LISTEN_ADDR: 0.0.0.0:18233
       ZEBRA_RPC__LISTEN_ADDR: 0.0.0.0:18232
@@ -123,3 +152,48 @@ services:
     - ${APP_DATA_DIR}/config:/kraskus-config:ro
     security_opt:
     - no-new-privileges:true
+
+  ui:
+    image: ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller:ui-0.5.2@sha256:86b0501190a6e97583de60a97168914a0409ac5bd4c2df61e60932513e9745c5
+    restart: unless-stopped
+    depends_on:
+      zallet-init:
+        condition: service_completed_successfully
+      kraskus:
+        condition: service_started
+    environment:
+      ADAPTER_HOST: kraskus
+    # The contract's ui_port (8080, plain HTTP, the only listener), published
+    # once on the manifest port. 5tratumOS P2 renders it on 127.0.0.1 only and
+    # reaches it through its authenticated HTTPS dashboard route, adding the
+    # per-app token; nginx relays the portal's header on /api/ only.
+    ports:
+    - 33062:8080/tcp
+    # Foundation app-token fallback directory, read-only; kraskus-app-token.sh
+    # supplies that token only to /api/ requests that carry no token header
+    # (stock 5tratumOS, Umbrel). Under P2 the controller removes it.
+    volumes:
+    - ${APP_DATA_DIR}/config/app-token:/run/kraskus-app-token:ro
+    stop_grace_period: 5s
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8080/index.html"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    cap_add:
+    - CHOWN
+    - SETGID
+    - SETUID
+
+# Read only by 5tratumOS with the P2 secure proxy: the ui service's port 8080
+# is published on 127.0.0.1 only and the token service gets the per-app token.
+x-5tratumos-secure-proxy:
+  version: 1
+  ui_service: ui
+  ui_port: 8080
+  token_services: [kraskus]
