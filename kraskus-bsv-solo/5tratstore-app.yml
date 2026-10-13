@@ -22,7 +22,7 @@ developer: Kraskus Crypto
 website: https://kraskuscrypto.com/
 repo: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
 support: https://kraskuscrypto.com/
-icon: assets/bsv-emblem-hero.png
+icon: assets/bitcoin_sv.png
 port: 18422
 path: /
 uiMode: proxy

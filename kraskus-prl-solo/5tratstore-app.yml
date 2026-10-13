@@ -18,7 +18,7 @@ developer: Kraskus Crypto
 website: https://kraskuscrypto.com/
 repo: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
 support: https://kraskuscrypto.com/
-icon: assets/prl-emblem-std-v1.png
+icon: assets/pearl.png
 port: 33068
 path: /
 uiMode: proxy

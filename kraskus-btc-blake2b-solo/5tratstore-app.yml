@@ -15,7 +15,7 @@ developer: Kraskus Crypto
 website: https://kraskuscrypto.com/
 repo: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
 support: https://kraskuscrypto.com/
-icon: assets/btc2b-emblem-std-v3.png
+icon: assets/btc2b.png
 port: 33066
 path: /
 uiMode: proxy

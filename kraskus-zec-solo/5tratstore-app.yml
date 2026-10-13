@@ -11,7 +11,7 @@ developer: Kraskus Crypto
 website: https://kraskuscrypto.com/
 repo: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
 support: https://kraskuscrypto.com/
-icon: assets/zec-emblem-std-v2.png
+icon: assets/zcash.png
 port: 33062
 path: /
 uiMode: proxy

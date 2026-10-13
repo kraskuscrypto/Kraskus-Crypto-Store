@@ -16,7 +16,7 @@ developer: Kraskus Crypto
 website: https://kraskuscrypto.com/
 repo: https://github.com/kraskuscrypto/Kraskus-Mining-Platform
 support: https://kraskuscrypto.com/
-icon: assets/kaspa-emblem-std-v2.png
+icon: assets/kaspa.png
 port: 33067
 path: /
 uiMode: proxy
