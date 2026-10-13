@@ -16,9 +16,18 @@ The 5tratumOS CLI gives DigiByte Core its 10-minute stop grace on `app update`, 
 
 ```bash
 sudo ./dgb-safe-stop.sh                  # stop the node and confirm a clean exit
-sudo ./dgb-safe-stop.sh --then update    # ...then update
 sudo ./dgb-safe-stop.sh --then reinstall # ...then uninstall (keep data) + install
 ```
+
+`--then reinstall` is the supported update path for installs from a Kraskus store. It installs from the
+Kraskus Dev Store channel by default; Kraskus Store (Main) installs set the channel:
+
+```bash
+sudo DGB_CHANNEL=custom-kraskus-crypto-store ./dgb-safe-stop.sh --then reinstall
+```
+
+`--then update` runs `5tratumos app update`, which on 5tratumOS releases before v0.8.31 refuses apps
+installed from a named custom store ("invalid channel") and leaves the app untouched.
 
 Never use `docker kill`, `docker rm -f` or `--purge`, and never delete `node/` or `runtime/` unless you intend to discard the chain and wallet.
 
