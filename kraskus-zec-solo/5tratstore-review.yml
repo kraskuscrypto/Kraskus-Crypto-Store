@@ -3,15 +3,24 @@ status: approved
 developer: Kraskus Crypto
 notes:
   - Self-contained Kraskus ZEC Solo runtime.
-  - Includes the Kraskus UI, API/controller, Stratum server, and supervised Zebra service.
+  - Includes the shared Kraskus V3 UI, the controller V3 API, the Equihash Stratum server, Zallet under the Kraskus supervisor, and Zebra.
   - No pre-existing host development runtime is required.
   - No Docker socket access is required by the application runtime.
   - Payout configuration is applied through the Kraskus UI and shared safely with Zebra.
-  - Testnet remains available for qualification and wallet-flow testing.
-  - Mainnet activation remains subject to storage safety requirements.
-appVersion: 0.4.0
+  - Mainnet only (since 0.5.0): there is no user network setting; Zebra does not start until the storage preflight (320 GiB free) passes, and the app reports the storage error instead.
+  - The wallet password is the only app credential (send, Forget and payout changes); every state change goes through the 5tratumOS dashboard (P2 proxy token or the app-token fallback).
+appVersion: 0.5.2
 
 releaseNotes:
+  - 0.5.2 corrects a misleading wallet message: when the wallet cannot build a transaction yet (for example while it is still catching up with the chain), Send preview now says so ("Zallet could not build this transaction right now. Try again shortly.") instead of reporting that the wallet password could not be checked. These attempts never count as wrong passwords. Password checks, the lock-out, the preview token, the fee preview, mining and the 1% developer fee are unchanged; this is still the pre-NU7 release.
+  - 0.5.1 fixes a fresh-start problem in 0.5.0: Zebra starts after the app's API (the storage preflight gates it), and the API kept sending its node queries without Zebra's newly written RPC credentials, so the dashboard stayed on "Waiting for Zebra" until the app was restarted. The node status now appears as soon as Zebra is running. The Stratum log banner reports the app version. Mining, the wallet, the 1% developer fee, the fixed share difficulty and Zebra 6.2.3 are unchanged; this is still the pre-NU7 release.
+  - 0.5.0 moves Zcash by Kraskus onto the Kraskus V3 template (foundation 1.2.3): the shared V3 interface (Home, Mining, Wallet, Blocks, Settings), one truthful readiness state, workers with state aging, share efficiency, Stratum health, data freshness, hashrate history in Sol/s, and copy-ready mining configuration.
+  - Wallet (Zallet 0.1.0-beta.3, unchanged): create with a 24-word recovery phrase shown once and a word challenge, restore by phrase, wallet password last, real balance, Send with a fee preview and password confirmation, Receive with QR, transaction activity, and Forget with the wallet password.
+  - Payout: the built-in wallet (its own transparent t-address) or your own external t-address. Mined coinbase becomes spendable after the 100-block maturity and automatic shielding into the wallet; it is never shown as spendable before.
+  - Mainnet only: the 0.4.0 Testnet toggle is removed. A host without the 320 GiB Mainnet storage requirement shows a clear storage error and does not start a partial sync.
+  - Mining issues work again: the controller image now contains the pre-NU7 coinbase helper (a bit-identical rebuild of the audited helper) that the 0.4.0 image was missing, so the Stratum can build every job with the 1% developer-fee output. If the helper fails, no job is issued.
+  - The Equihash Stratum on port 3335, the fixed share difficulty of 500,000, the 1% developer fee and its destination, and Zebra 6.2.3 are unchanged.
+  - Pre-NU7 release: Zebra 6.2.3, Zallet 0.1.0-beta.3 and the coinbase helper do not support the Zcash NU7 network upgrade, and Zebra 6.2.3 stops on Mainnet at its built-in end-of-support height (about 2026-11-08). A follow-up NU7 maintenance release is required before NU7 activates on Mainnet; install it when it is published.
   - Adds native 24-word Zallet wallet recovery with persistent restored account metadata and password setup support.
   - Finalizes Template V2 parity, ZEC Kraskus branding, native black Zcash hero mark, and zero-value balance presentation.
   - Removes the temporary recovery sidecar architecture; recovery now runs inside the packaged Zallet supervisor with no Docker socket access.

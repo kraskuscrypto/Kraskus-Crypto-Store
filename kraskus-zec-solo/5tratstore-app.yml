@@ -1,11 +1,19 @@
 id: kraskus-zec-solo
 name: Zcash by Kraskus
 tagline: Zcash full node and solo mining pool
-description: Kraskus ZEC Solo turns 5tratumOS into an easy-to-use Zcash full node
-  and local solo mining appliance. The app manages node synchronization, mining readiness,
-  worker connections, mining jobs, and block submissions from a single interface.
-  Normal users do not need to manage Zebra, RPC, Docker, Linux, JSON, or Stratum configuration.
-version: 0.4.0
+description: >-
+  Zcash by Kraskus turns 5tratumOS into a self-contained Zcash Mainnet full node
+  (Zebra), Zallet wallet and Equihash solo-mining appliance on the Kraskus V3
+  interface. It shows node synchronization, one truthful mining-readiness state,
+  workers, shares and node-confirmed blocks. Miners connect on port 3335; no
+  work is issued until the node is synchronized and a payout is configured.
+  The built-in wallet is created or restored with a 24-word recovery phrase,
+  protected by a wallet password, and can receive, send and act as the mining
+  payout. Zebra needs about 320 GiB of free storage for Mainnet; on a smaller
+  host the app reports it and does not start syncing. A required 1% developer
+  fee is paid directly from successful block coinbases. This is the pre-NU7
+  release: a follow-up update is required for the Zcash NU7 network upgrade.
+version: 0.5.2
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/
