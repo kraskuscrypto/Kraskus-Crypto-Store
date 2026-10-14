@@ -19,8 +19,13 @@ Upstream: https://github.com/xmrig/xmrig-proxy
 License: GNU General Public License v3.0 (GPL-3.0)
 
 The miner gateway image includes the official XMRig Proxy static binary,
-verified by pinned SHA-256 during image build. The corresponding upstream
-source and GPLv3 license are available at the project URL above.
+verified by pinned SHA-256 during image build
+(`xmrig-proxy-6.26.0-linux-static-x64.tar.gz`, SHA-256
+`73cceb10be474ba8ce20faddb9d2c6af0cb50bce84e72f7d36a326f7147c01c4`), and is not
+modified. Its complete corresponding source is XMRig Proxy v6.26.0, commit
+`0dc23f69b546ae973ae0ae6fb65593f998256589`:
+https://github.com/xmrig/xmrig-proxy/tree/0dc23f69b546ae973ae0ae6fb65593f998256589 .
+The full GPLv3 text is in `THIRD-PARTY-NOTICES.md`.
 
 ## Kraskus application components
 
@@ -30,3 +35,11 @@ are Kraskus Crypto project assets.
 ## Base images
 
 Container base images retain their respective upstream licenses and notices.
+
+## Third-party notices, source and Kraskus licence
+
+- The complete licence texts and attribution notices of the third-party
+  software in this app's images are in [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).
+- Release records and published corresponding source: https://github.com/kraskuscrypto/Kraskus-Crypto-Release-Sources
+- Kraskus Crypto components are proprietary software of 4KM Ventures LLC,
+  licensed under https://github.com/kraskuscrypto/Kraskus-Crypto-Release-Sources/blob/kraskus-licence-2026-10-14/LICENSE-KRASKUS.md

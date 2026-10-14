@@ -25,8 +25,8 @@ recipe, listing text and CHTA artwork are maintained by Kraskus Crypto.
 CheetahCoin Core is upstream software distributed under the MIT license.
 
 - Upstream project: https://github.com/ShorelineCrypto/cheetahcoin
-- Release used: v2.4.0, `cheetahcoin_2.4.0_x86_64_linux-gnu.tgz`,
-  SHA-256 `05f8cdbb39367e68c3a71b446ec9b5d0f961c26b0a6e6a5c1a39b7024303c74d`
+- Release used: v2.5.0, `cheetahcoin_2.5.0_x86_64_linux-gnu.tgz`,
+  SHA-256 `1379ef7c9d8395691680c1699f63e016178be97c3ba870cd8ff2674606646928`
   (verified at build time; only `cheetahcoind` and `cheetahcoin-cli` are
   installed, unmodified).
 - Image: `ghcr.io/kraskuscrypto/kraskus-cheetahcoin-core`.
@@ -44,10 +44,20 @@ CKPool fork:
 - Kraskus modifications (configurable developer-fee address, fee-address
   validation made fatal, fractional-difficulty accounting fixes, portable
   SHA-256 build) are applied as scripted, verified edits in
-  `apps/chta-solo/packaging/ckpool/Dockerfile` in the repository above,
+  `apps/chta-solo/packaging/ckpool/Dockerfile` (published, with the
+  complete modified source, at
+  https://github.com/kraskuscrypto/Kraskus-Crypto-Release-Sources/tree/chta-ckpool-0.3.1/chta/ckpool/0.3.1 ),
   which together with the upstream commit is the complete corresponding
   source.
 - Image: `ghcr.io/kraskuscrypto/kraskus-chta-ckpool` (the GPLv3 text is
   shipped at `/usr/share/licenses/ckpool/COPYING`).
 
 CKPool's GPLv3 terms remain applicable.
+
+## Third-party notices, source and Kraskus licence
+
+- The complete licence texts and attribution notices of the third-party
+  software in this app's images are in [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).
+- Release records and published corresponding source: https://github.com/kraskuscrypto/Kraskus-Crypto-Release-Sources
+- Kraskus Crypto components are proprietary software of 4KM Ventures LLC,
+  licensed under https://github.com/kraskuscrypto/Kraskus-Crypto-Release-Sources/blob/kraskus-licence-2026-10-14/LICENSE-KRASKUS.md
