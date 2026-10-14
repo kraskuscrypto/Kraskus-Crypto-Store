@@ -8,13 +8,14 @@ description: >-
   encrypted backup file), and three independent true-solo Stratum V1
   endpoints: SHA-256 on port 1928, Scrypt on port 1929 and Skein on port
   1930. Each algorithm gets its own work, difficulty and share accounting
-  from your own node and is shown on its own. Mining starts only after the
-  wallet is backed up and its password is set; rewards go straight to that
-  wallet, which can also receive and send DGB. A fixed 1 percent developer
+  from your own node and is shown on its own. Rewards go to that wallet or
+  to an external DigiByte address you choose, and you can switch at any time;
+  mining starts only once the chosen payout destination is ready. The wallet
+  can also receive and send DGB. A fixed 1 percent developer
   fee is applied only to successfully mined blocks as a coinbase split
   (0.50, 0.25 and 0.25 percent to three developer addresses); the miner
   receives the remaining 99 percent.
-version: 0.2.0
+version: 0.2.1
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/

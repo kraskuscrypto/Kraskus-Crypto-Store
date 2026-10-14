@@ -10,7 +10,7 @@ A DigiByte Core full node, a customer-owned wallet, and true solo mining on thre
 
 Point each miner at the port for its algorithm. The username is the worker name; `<anything>.<worker>` is shown as `<worker>`. Addresses are never displayed. Qubit (1931) and Odocrypt (1932) are validated by the node but not mined in this release.
 
-Mining starts only after the wallet is backed up and its password is set. Block rewards pay this app's own wallet directly (there is no external payout address), less a fixed 1% developer fee taken as a coinbase split on found blocks only (0.50%, 0.25% and 0.25% of the block reward to three developer addresses; you receive the remaining 99%). The wallet itself never pays a fee to the developer.
+Block rewards pay the payout destination you choose on the Wallet page: this app's own wallet (once it is backed up and its password is set) or an external DigiByte address. You can switch between them, or turn payouts off, at any time; once the wallet has its password, every change needs it. Mining stops while payouts are off. Rewards are paid less a fixed 1% developer fee taken as a coinbase split on found blocks only (0.50%, 0.25% and 0.25% of the block reward to three developer addresses; you receive the remaining 99%). The wallet itself never pays a fee to the developer.
 
 ## Wallet (0.2.0)
 

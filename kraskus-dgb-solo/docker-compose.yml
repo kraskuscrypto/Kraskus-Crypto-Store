@@ -1,4 +1,4 @@
-# DigiByte Solo by Kraskus 0.2.0 -- 5tratumOS Store recipe (Kraskus V3,
+# DigiByte Solo by Kraskus 0.2.1 -- 5tratumOS Store recipe (Kraskus V3,
 # foundation 1.11.0).
 #
 # 0.2.0 (V3 migration, owner decisions 2026-10-13): the shared V3 UI (nginx,
@@ -50,7 +50,7 @@ services:
       - dgb_private
 
   init:
-    image: ghcr.io/kraskuscrypto/kraskus-dgb-solo-adapter:0.2.0@sha256:6df62d6af8cadd79d32c2a9ca1bd293ffca5977276c829da183db163233e2e97
+    image: ghcr.io/kraskuscrypto/kraskus-dgb-solo-adapter:0.2.1@sha256:93bb7ad48dd75e01a49c52973ca31bc6c255220cbe9f09a83a3492a87e05e88c
     pull_policy: missing
     restart: "no"
     user: "0:0"
@@ -225,7 +225,7 @@ services:
       - dgb_private
 
   adapter:
-    image: ghcr.io/kraskuscrypto/kraskus-dgb-solo-adapter:0.2.0@sha256:6df62d6af8cadd79d32c2a9ca1bd293ffca5977276c829da183db163233e2e97
+    image: ghcr.io/kraskuscrypto/kraskus-dgb-solo-adapter:0.2.1@sha256:93bb7ad48dd75e01a49c52973ca31bc6c255220cbe9f09a83a3492a87e05e88c
     pull_policy: missing
     restart: unless-stopped
     stop_grace_period: 20s
@@ -271,7 +271,7 @@ services:
       - dgb_private
 
   ui:
-    image: ghcr.io/kraskuscrypto/kraskus-dgb-solo-ui:0.2.0@sha256:f6ae932715dffa16703d23201264a325001856f06c2687380f27aac46f477da8
+    image: ghcr.io/kraskuscrypto/kraskus-dgb-solo-ui:0.2.1@sha256:7347bfe94fe2fe4063dee7d5297edcf2c46bc25b5473b091f9dd1118c88fda1b
     pull_policy: missing
     restart: unless-stopped
     depends_on:
