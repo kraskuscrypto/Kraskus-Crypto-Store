@@ -163,3 +163,15 @@ Kraskus brand asset vault.
 - Difficulty suffixes in miner usernames (`name+difficulty`) are no longer supported. A login or rig ID containing `+` is refused with "Difficulty suffixes are no longer supported. Configure worker difficulty in XMR Solo → Workers."
 - **Action for miners that used a `+difficulty` suffix:** after updating, remove the suffix from the miner configuration (use the plain worker name) and, if you want a fixed difficulty, set it for that worker under Workers. Existing wallet, node data, settings, and worker history are kept; no reset is needed.
 - Pins the rebuilt miner-gateway and UI images from GitHub Actions run 36457837012, source commit `9b3831e487c8f8d6aa2606ffed978a516c2bc14f`; wallet-api (0.1.19), monerod and adapter are unchanged.
+
+## 0.1.22
+
+Security release (0.1.21 was an internal candidate and was never published).
+
+- Showing the pending recovery seed, confirming the backup while a seed is pending, Reset and Send now need the wallet (spend) password. Reset of a watch-only wallet needs its secret view key.
+- Wrong passwords are rate limited: after 5 failures from one address the check locks for 1 minute, doubling up to 1 hour; 30 failures in 15 minutes lock it for everyone for 15 minutes. The counters survive a restart and a Reset.
+- The wallet API and the settings changes (default share difficulty, per-worker difficulty, appearance) are accepted only as same-origin JSON from an allowed LAN host: requests from another website, non-JSON bodies, bodies over 64 KiB and non-LAN host names are refused. Reads stay open.
+- Watch-only setup checks that the secret view key belongs to the address and refuses a subaddress; before, a mismatched key gave a wallet that saw nothing while mining paid the address.
+- A lost wallet password can be cleared only from the host: `docker exec <wallet-api container> python3 /app/wallet_api.py --reset-wallet --confirm RESET` (removes only this app's wallet files; restore from the 25-word seed afterwards).
+- Wallet, payout, worker and share difficulty settings, statistics, logs, the developer-fee ledger and the chain are kept unchanged on update.
+- Pins the rebuilt wallet-api and UI images from GitHub Actions run 38496523092, source commit `17381804e6124f4ee0ab952c276dfa4d2a00a25c`; miner-gateway (0.1.20), monerod and adapter (0.1.16) are unchanged.
