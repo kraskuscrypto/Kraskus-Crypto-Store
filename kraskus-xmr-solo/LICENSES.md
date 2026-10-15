@@ -10,7 +10,9 @@ Upstream: https://github.com/monero-project/monero
 
 The Monero software is distributed under its upstream license. The package
 downloads the official Monero release artifact and verifies its pinned
-SHA-256 during the image build.
+SHA-256 during the image build. Since 0.2.0 the Monero licence (BSD-3-Clause)
+from that release archive is also inside the image, at
+`/usr/share/licenses/monero/LICENSE`.
 
 ## XMRig Proxy
 
@@ -25,7 +27,9 @@ verified by pinned SHA-256 during image build
 modified. Its complete corresponding source is XMRig Proxy v6.26.0, commit
 `0dc23f69b546ae973ae0ae6fb65593f998256589`:
 https://github.com/xmrig/xmrig-proxy/tree/0dc23f69b546ae973ae0ae6fb65593f998256589 .
-The full GPLv3 text is in `THIRD-PARTY-NOTICES.md`.
+The full GPLv3 text is in `THIRD-PARTY-NOTICES.md`, and since 0.2.0 also
+inside the miner gateway image, with these source directions, at
+`/usr/share/licenses/xmrig-proxy/` (`LICENSE`, `SOURCE.md`).
 
 ## Kraskus application components
 

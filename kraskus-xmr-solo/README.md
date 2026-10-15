@@ -175,3 +175,18 @@ Security release (0.1.21 was an internal candidate and was never published).
 - A lost wallet password can be cleared only from the host: `docker exec <wallet-api container> python3 /app/wallet_api.py --reset-wallet --confirm RESET` (removes only this app's wallet files; restore from the 25-word seed afterwards).
 - Wallet, payout, worker and share difficulty settings, statistics, logs, the developer-fee ledger and the chain are kept unchanged on update.
 - Pins the rebuilt wallet-api and UI images from GitHub Actions run 38496523092, source commit `17381804e6124f4ee0ab952c276dfa4d2a00a25c`; miner-gateway (0.1.20), monerod and adapter (0.1.16) are unchanged.
+
+## 0.2.0
+
+Kraskus V3: the shared Kraskus app experience (Overview, Mining, Workers, Blocks, Wallet, Settings) on the same node, Stratum port and data.
+
+- **Update keeps everything:** chain, both wallets, the wallet password, a pending backup, the payout address, share difficulty, saved per-worker Fixed difficulties, worker and share statistics, block and send logs, and the developer-fee ledger. Mining continues to the same address. Your theme choice is kept (it lives in your browser).
+- **Wallet password:** the wallet password protects showing a pending recovery phrase, confirming the backup, Forget and Send. A 0.1.x full wallet keeps its existing password. A 0.1.x **watch-only** wallet sets its password once after the update, and that step asks for the wallet's secret view key; wrong keys count towards the same lock-out as wrong passwords.
+- **New wallets:** create (25-word phrase, confirm 4 words, then set the password), restore (25 words, optional restore height) or watch-only (address + secret view key). Creation runs in the background, so a slow node no longer times it out.
+- **Send** shows the exact amount, network fee and total from the transaction that will be relayed; the wallet password confirms it. Watch-only wallets cannot send.
+- **Wallet status no longer goes "busy" after a restart:** balances and activity are served from a background snapshot with its age shown.
+- **Payouts:** rewards go only to this app's own wallet. Turning payouts off stops mining (miners are refused) until they are turned on again with the wallet password.
+- **Difficulty:** Settings → Mining sets one share difficulty (Automatic = the app default 1000, or a fixed value). Per-worker Fixed difficulties saved in 0.1.20–0.1.22 keep applying, but 0.2.0 has no per-worker editor. Network difficulty is shown only from a synchronized node; nothing is estimated.
+- The `+difficulty` username suffix stays unsupported.
+- The images now carry their third-party licences under `/usr/share/licenses` (Monero, XMRig Proxy with source directions).
+- Pins five images built from Kraskus-Mining-Platform `v3/xmr`: monerod, miner-gateway, adapter and ui from source commit `7b8a5fcda8a9c7481e8905b183bbb3724acce517`, wallet-api from `1636d970d834059d2c0ef3067e20b719e6dfc584`.
