@@ -5,6 +5,18 @@ Bitcoin SV (SV Node 1.2.2, pruned) node and private solo-mining controller for
 rewards pay the address configured in the app (external address or the
 built-in wallet). 1% of each block reward is a developer-fee coinbase output.
 
+## 0.5.3
+
+Packaging-only maintenance release adding the required Open BSV License v5
+notice to the SV Node image. No functional application changes.
+
+- **SV Node image:** now ships `/usr/share/licenses/sv-node/NOTICE`
+  (© BSV Association) and `/usr/share/licenses/sv-node/LICENSE` (the full,
+  unmodified Open BSV License Version 5 from SV Node 1.2.2).
+- SV Node 1.2.2, node settings, ports, data paths, Stratum, wallet, payout,
+  developer fee and the interface are unchanged. The backend and interface
+  images are the 0.5.2 images, so the app itself still reports version 0.5.2.
+
 ## 0.5.2
 
 Display-only cleanup; Stratum, payout, wallet and the node are as in 0.5.1.
