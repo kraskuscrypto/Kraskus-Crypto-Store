@@ -36,9 +36,25 @@ document.querySelectorAll('[data-close-logs]').forEach(button=>button.addEventLi
 logsModal.addEventListener('click',event=>{if(event.target===logsModal)logsModal.querySelector('[data-close-logs]').click();});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&modal.classList.contains('open'))document.querySelector('.modal-close').click();if(event.key==='Escape'&&logsModal.classList.contains('open'))logsModal.querySelector('[data-close-logs]').click();});
 document.querySelectorAll('.range-switch button').forEach(button=>button.addEventListener('click',()=>{button.parentElement.querySelectorAll('button').forEach(item=>item.classList.remove('active'));button.classList.add('active');}));
-document.querySelectorAll('.toggle').forEach(toggle=>toggle.addEventListener('click',event=>{const button=event.currentTarget;if(button.disabled)return;button.classList.toggle('active');button.setAttribute('aria-pressed',String(button.classList.contains('active')));const servicePanel=button.closest('.service-settings');if(servicePanel){const count=servicePanel.querySelectorAll('.toggle.active').length;servicePanel.querySelector('.health-score').textContent=count+' enabled';}}));
+// Runtime switches are read-only status indicators; changes stay in the official Node UI.
+document.querySelectorAll('.toggle').forEach(button=>{button.disabled=true;button.title='Manage in the official Node UI';});
 
-document.querySelectorAll('.identity-address button').forEach(button=>button.addEventListener('click',async()=>{const value=button.closest('.identity-address').dataset.fullIdentity;try{await navigator.clipboard.writeText(value);showToast('Complete node identity copied.');}catch{showToast('Copy unavailable in this preview.');}}));
+async function copyIdentity(button){
+ const value=button.closest('.identity-address')?.dataset.fullIdentity;
+ if(!value){showToast('Identity is not available yet.');return false;}
+ try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(value);showToast('Complete node identity copied.');return true;}}catch{}
+ const previous=document.activeElement;const field=document.createElement('textarea');field.value=value;field.readOnly=true;field.setAttribute('aria-label','Complete node identity — select and copy');field.className='manual-copy';button.closest('.identity-address').append(field);field.focus();field.select();field.setSelectionRange(0,value.length);
+ try{if(document.execCommand('copy')){field.remove();previous?.focus();showToast('Complete node identity copied.');return true;}}catch{}
+ showToast('Select the identity below, then use your device’s Copy command.');return false;
+}
+document.querySelectorAll('.identity-address button').forEach(button=>button.addEventListener('click',()=>copyIdentity(button)));
+const preference=(key,fallback)=>{try{return localStorage.getItem(key)||fallback;}catch{return fallback;}};
+const savePreference=(key,value)=>{try{localStorage.setItem(key,value);}catch{}};
+function applyAppearance(mode,theme){document.documentElement.dataset.mode=mode==='light'?'light':'dark';document.documentElement.dataset.theme=['kraskus','divinity','mysterium'].includes(theme)?theme:'mysterium';const toggle=document.getElementById('appearanceToggle');toggle.textContent=mode==='light'?'Dark mode':'Light mode';toggle.setAttribute('aria-label','Switch to '+(mode==='light'?'dark':'light')+' mode');document.getElementById('appearanceMode').value=document.documentElement.dataset.mode;document.getElementById('appearanceTheme').value=document.documentElement.dataset.theme;savePreference('mystnodes-mode',document.documentElement.dataset.mode);savePreference('mystnodes-theme',document.documentElement.dataset.theme);}
+applyAppearance(preference('mystnodes-mode','dark'),preference('mystnodes-theme','mysterium'));
+document.getElementById('appearanceToggle').addEventListener('click',()=>applyAppearance(document.documentElement.dataset.mode==='light'?'dark':'light',document.documentElement.dataset.theme));
+for(const id of ['appearanceMode','appearanceTheme'])document.getElementById(id).addEventListener('change',()=>applyAppearance(document.getElementById('appearanceMode').value,document.getElementById('appearanceTheme').value));
+
 
 document.querySelectorAll('[data-earnings-range]').forEach(button=>{
   const range=button.dataset.earningsRange;
@@ -50,3 +66,9 @@ document.querySelectorAll('[data-earnings-range]').forEach(button=>{
 document.querySelectorAll('.session-row.expandable').forEach(row=>{const toggle=()=>{const record=row.closest('.session-record');const open=record.classList.toggle('open');row.setAttribute('aria-expanded',String(open));};row.addEventListener('click',toggle);row.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();toggle();}});});
 
 document.getElementById('sessionFilter').addEventListener('change',event=>{let visible=0;document.querySelectorAll('.session-record').forEach(record=>{const show=event.target.value==='all'||record.dataset.service===event.target.value;record.hidden=!show;if(show)visible++;});document.getElementById('sessionEmpty').style.display=visible?'none':'flex';});
+
+const collapse=document.querySelector('.collapse-button');
+function setCollapsed(value){document.body.classList.toggle('nav-collapsed',value);collapse.setAttribute('aria-label',value?'Expand navigation':'Collapse navigation');collapse.setAttribute('aria-expanded',String(!value));collapse.textContent=value?'›':'‹';savePreference('mystnodes-nav-collapsed',String(value));}
+collapse.addEventListener('click',()=>setCollapsed(!document.body.classList.contains('nav-collapsed')));setCollapsed(preference('mystnodes-nav-collapsed','false')==='true');
+
+document.getElementById('checkDiagnostics').addEventListener('click',()=>{openTab('overview');document.getElementById('readinessTitle').setAttribute('tabindex','-1');document.getElementById('readinessTitle').focus();document.getElementById('readinessTitle').scrollIntoView({block:'start'});});

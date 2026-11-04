@@ -1,26 +1,20 @@
 id: mysterium-node
 name: MystNodes by Kraskus
 tagline: Official MystNodes node fully integrated inside 5tratumOS
-description: MystNodes by Kraskus installs and runs the official upstream Mysterium
-  node container while preserving the node identity in persistent 5tratumOS app storage.
-  The Kraskus onboarding experience guides new users through a disclosed MystNodes
-  referral signup path, while existing MystNodes users can bypass signup and go directly
-  to the official Node UI with their own account and API key. The underlying node
-  software is provided by Mysterium Network. Participation may expose the host's residential
-  IP to third-party traffic; review Mysterium's terms and enable only service types
-  appropriate for your location and risk tolerance. v2.6.13 throttles provider-quality and
-  analytics polling to protect the upstream Mysterium quality API from dashboard-driven rate limits,
-  spaces provider requests, prevents retry storms, and updates the official node runtime to 1.39.7.
-  v2.6.12 repaired Store packaging so installs and updates deliver the intended dashboard. v2.6.11 corrects dashboard data mappings,
-  provider-quality scaling, runtime uptime, session counts, identity wording, and service filters. v2.6.11 refreshes preserved portal assets
-  during Store updates, improves live-metric labeling and sparse-data charts, anchors the
-  provider-quality ring correctly, repairs the sidebar runtime status, and reliably resets
-  embedded navigation to the top. It opens the official Node UI on its verified host endpoint.
-  v2.6.0 added a redesigned responsive
-  control center backed by read-only snapshots from the local Mysterium API. v2.5.1
-  fixed 5tratumOS runtime packaging for the portal, status agent, and updater. v2.5.0 added one-click node updates
-  with automatic backup, immutable image verification, health checks, and rollback.
-version: 2.6.13
+description: >-
+  Official Mysterium node with a Kraskus dashboard for provider readiness,
+  earnings, traffic and sessions. Version 2.7.0 adds timestamped snapshots,
+  stale-data diagnostics, real provider-series charts with accessible point
+  details, matching-period earnings per GB, reliable identity Copy controls,
+  independent light/dark mode and three themes. Missing data stays explicit.
+  Mysterium identity, payment handling, settlements and withdrawals remain in
+  the official node and MystNodes dashboard; this update does not replace them.
+  The upstream node remains pinned to its existing 1.39.7 image. New-user signup
+  uses a disclosed Kraskus referral; existing users can open the official Node UI.
+  Participation shares your connection with third-party traffic. Review Mysterium
+  terms and choose appropriate services in the official Node UI.
+
+version: 2.7.0
 category: Networking
 developer: Kraskus
 website: https://www.mysterium.network/

@@ -13,6 +13,7 @@ COMPOSE="$APP_DIR/docker-compose.yml"
 
 # source file (relative to the recipe) -> path written inside the migrator
 SOURCES=(
+  "portal/insights.js:/portal/insights.js.new"
   "portal/app.js:/portal/app.js.new"
   "portal/live.js:/portal/live.js.new"
   "portal/styles.css:/portal/styles.css.new"

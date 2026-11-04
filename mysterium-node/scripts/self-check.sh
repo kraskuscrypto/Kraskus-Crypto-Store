@@ -32,7 +32,7 @@ grep -q 'status-agent' "$APP_DIR/docker-compose.yml"
 grep -q 'update-agent' "$APP_DIR/docker-compose.yml"
 grep -q '/var/run/docker.sock:/var/run/docker.sock' "$APP_DIR/docker-compose.yml"
 grep -q '0.0.0.0:33060:80' "$APP_DIR/docker-compose.yml"
-grep -q 'mysteriumnetwork/myst:1.39.5-alpine@sha256:d0c270c6bcb50c1004ba355c264f85aa16b3a5a414f8b9f8f5b0f449ea85a142' "$APP_DIR/docker-compose.yml"
+grep -q 'mysteriumnetwork/myst:1.39.7-alpine@sha256:9b3cbf9aab301f618be7c2f88b0bcaa0a19ccb6c09c0527dfa5ccad3490c59a6' "$APP_DIR/docker-compose.yml"
 grep -q 'http://127.0.0.1:4050' "$APP_DIR/status-agent/status.sh"
 grep -q '/node/provider/series/earnings' "$APP_DIR/status-agent/status.sh"
 grep -q '/node/provider/sessions' "$APP_DIR/status-agent/status.sh"
@@ -46,8 +46,14 @@ cmp "$APP_DIR/portal/updater.js" "$APP_DIR/data/portal/updater.js"
 cmp "$APP_DIR/nginx/default.conf" "$APP_DIR/data/nginx/default.conf"
 cmp "$APP_DIR/status-agent/status.sh" "$APP_DIR/data/status-agent/status.sh"
 
-node --check "$APP_DIR/portal/app.js"
-node --check "$APP_DIR/portal/live.js"
+node_check() {
+  if command -v node >/dev/null; then node --check "$APP_DIR/$1"; else
+    docker run --rm --network none --read-only --memory 128m --cpus .25 -v "$APP_DIR:/qa:ro" node@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 node --check "/qa/$1"
+  fi
+}
+node_check portal/insights.js
+node_check portal/app.js
+node_check portal/live.js
 sh -n "$APP_DIR/status-agent/status.sh"
 
 python3 - "$APP_DIR" "$VERSION" <<'PY'
@@ -85,6 +91,7 @@ check_payload() {
   [ -n "$payload" ] || { echo "FAIL: no embedded payload for ${target}" >&2; exit 1; }
   printf '%s' "$payload" | base64 -d | gzip -dc | cmp -s - "$APP_DIR/$src" || { echo "FAIL: embedded payload for ${target} differs from ${src}" >&2; exit 1; }
 }
+check_payload portal/insights.js /portal/insights.js.new
 check_payload portal/app.js /portal/app.js.new
 check_payload portal/live.js /portal/live.js.new
 check_payload portal/styles.css /portal/styles.css.new
@@ -98,7 +105,7 @@ grep -Fq "app.js?v=$VERSION" "$APP_DIR/portal/index.html"
 grep -Fq "live.js?v=$VERSION" "$APP_DIR/portal/index.html"
 grep -Fq "Kraskus App $VERSION" "$APP_DIR/portal/index.html"
 grep -Fq "$VERSION presentation and embedded-window refinements" "$APP_DIR/portal/styles.css"
-grep -Fq "STATUS_APP_VERSION:-$VERSION" "$APP_DIR/status-agent/status.sh"
+grep -Fq 'APP_VERSION="2.7.0"' "$APP_DIR/status-agent/status.sh"
 grep -Fq "STATUS_APP_VERSION: $VERSION" "$APP_DIR/docker-compose.yml"
 grep -Fq "$VERSION presentation and embedded-window refinements' /portal/styles.css" "$APP_DIR/docker-compose.yml"
 grep -Fq "styles.css?v=$VERSION' /portal/index.html" "$APP_DIR/docker-compose.yml"

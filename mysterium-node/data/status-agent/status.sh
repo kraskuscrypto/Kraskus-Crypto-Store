@@ -10,7 +10,7 @@ TEQUILAPI="${TEQUILAPI_URL:-http://127.0.0.1:4050}"
 INTERVAL="${STATUS_INTERVAL:-30}"
 PROVIDER_INTERVAL="${PROVIDER_INTERVAL:-900}"
 PROVIDER_LAST_FILE="$OUT_DIR/.provider-last"
-APP_VERSION="${STATUS_APP_VERSION:-2.6.13}"
+APP_VERSION="2.7.0" # Collector release; independent of an older container environment.
 
 mkdir -p "$OUT_DIR" "$API_DIR"
 
@@ -96,6 +96,10 @@ collect_tequilapi() {
         snapshot_api data-series-7d "/node/provider/series/data?range=7d" || true
         sleep 2
         snapshot_api earnings-series-30d "/node/provider/series/earnings?range=30d" || true
+        sleep 2
+        snapshot_api earnings-series-7d "/node/provider/series/earnings?range=7d" || true
+        sleep 2
+        snapshot_api data-series-30d "/node/provider/series/data?range=30d" || true
     fi
 }
 human_bytes() {
@@ -125,6 +129,13 @@ collect() {
 
     collect_tequilapi
     collect_myst_price || true
+    meta="$API_DIR/snapshot-meta.json"
+    { printf '{"generated_at":%s,"snapshots":{' "$(date +%s)"; sep=""; for file in "$API_DIR"/*.json; do
+        [ -f "$file" ] || continue; name="${file##*/}"; [ "$name" = snapshot-meta.json ] && continue
+        case "$name" in *[!a-z0-9.-]*) continue;; esac
+        printf '%s"%s":%s' "$sep" "${name%.json}" "$(stat -c %Y "$file")"; sep=,
+      done; printf '}}\n'; } > "$meta.tmp"
+    mv "$meta.tmp" "$meta"
 
     #
     # CPU LOAD

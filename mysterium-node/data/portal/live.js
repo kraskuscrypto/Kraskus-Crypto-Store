@@ -1,15 +1,18 @@
 (() => {
   'use strict';
 
-  const APP_RELEASE = '2.6.11';
+  const APP_RELEASE = '2.7.0';
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
-  const api = name => fetch(`/live-api/${name}.json`, {cache: 'no-store'})
-    .then(response => response.ok ? response.json() : null)
-    .catch(() => null);
-  const statusApi = () => fetch('/status.json', {cache: 'no-store'})
-    .then(response => response.ok ? response.json() : null)
-    .catch(() => null);
+  let snapshotMeta = null;
+  let selectedTrafficDays=7, selectedEarningsDays=30;
+  const localSnapshots=new Set(['healthcheck','identities','identity','services','nat']);
+  const readJSON=url=>{const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),7000);return fetch(url,{cache:'no-store',signal:controller.signal}).then(r=>r.ok?r.json():null).catch(()=>null).finally(()=>clearTimeout(timer));};
+  const api = name => {
+    if(!MystInsights.fresh(snapshotMeta,name,localSnapshots.has(name)?180:1800))return Promise.resolve(null);
+    return readJSON(`/live-api/${name}.json`);
+  };
+  const statusApi = () => readJSON('/status.json');
   const safe = (value, fallback = 'Unavailable') => value === undefined || value === null || value === '' ? fallback : value;
   const number = value => Number.parseFloat(value || 0) || 0;
   const token = value => number(value?.human ?? value?.ether ?? value);
@@ -38,7 +41,7 @@
   };
   const html = value => String(value ?? '').replace(/[&<>'"]/g, character => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[character]));
   let priceSnapshot = null;
-  let selectedCurrency = localStorage.getItem('mystnodes-currency') || 'USD';
+  let selectedCurrency = preference('mystnodes-currency','USD');
   const supportedCurrencies = new Set(['USD', 'EUR', 'GBP', 'CAD', 'AUD']);
   if (!supportedCurrencies.has(selectedCurrency)) selectedCurrency = 'USD';
   const fiatRate = () => number(priceSnapshot?.mysterium?.[selectedCurrency.toLowerCase()]);
@@ -48,7 +51,7 @@
     const amount = token(value) * rate;
     return new Intl.NumberFormat(undefined, {style: 'currency', currency: selectedCurrency, minimumFractionDigits: 2, maximumFractionDigits: 2}).format(amount);
   };
-  const estimatedFiatText = value => fiatRate() ? `≈ ${fiatText(value)}` : 'Fiat estimate unavailable';
+  const estimatedFiatText = value => value!==null && value!==undefined && fiatRate() ? `≈ ${fiatText(value)}` : 'Fiat estimate unavailable';
 
 
   function bytes(value) {
@@ -107,52 +110,39 @@
     });
   }
 
-  function renderTrafficTrend(sessions, days) {
-    const rows = dailySeries(sessions, days, session => session.transferred_bytes);
-    drawSeries($('#overview .chart svg'), rows.map(row => row.value), 'purple');
-    setTrafficLabels(rows);
+  function chartRows(series,days){return MystInsights.series(series,days);}
+  function renderTrafficTrend(series, days) {
+    const rows=chartRows(series,days);
+    drawSeries($('#overview .chart svg'),rows,'purple',bytes);
+    const summary=$('#overview .chart-summary strong');
+    set(summary,rows.length?bytes(rows.reduce((a,r)=>a+(r.value??0),0)):'—');
+    set($('#overview .chart-summary span'),`Reported traffic · ${days} days · UTC`);
+    const labels=$$('#overview .chart-labels span');const start=rows[0]?.time,end=rows[rows.length-1]?.time,slots=rows.length?Math.min(labels.length,Math.floor((end-start)/86400000)+1):0;labels.forEach((l,i)=>{l.hidden=i>=slots;if(i<slots)set(l,new Date(start+(end-start)*i/Math.max(slots-1,1)).toLocaleDateString(undefined,{month:'short',day:'numeric',timeZone:'UTC'}));});
   }
-
-  function renderEarningsFromSessions(sessions, days, title) {
-    const rows = dailySeries(sessions, days, session => token(session.earnings));
-    renderEarningsBars({data: rows.map(row => ({value: row.value, date: row.key}))}, title);
-    const labels = $('#earningsLabels');
-    if (labels) {
-      labels.hidden = false;
-      const nodes = [...labels.children];
-      const formatter = new Intl.DateTimeFormat(undefined, {month: 'short', day: 'numeric', timeZone: 'UTC'});
-      nodes.forEach((label, index) => {
-        const pos = nodes.length === 1 ? 0 : Math.round(index * (rows.length - 1) / (nodes.length - 1));
-        set(label, formatter.format(rows[pos].date));
-      });
-    }
-    const earned = rows.reduce((sum, row) => sum + row.value, 0);
-    set($('#earningsChange'), `${formatToken(earned)} MYST · ${estimatedFiatText(earned)}`);
+  function renderEarningsFromSeries(series,days){
+    const rows=chartRows(series,days);
+    renderEarningsBars({data:rows.map(r=>({value:r.value,date:new Date(r.time).toISOString().slice(0,10)}))},`Last ${days} days · UTC`);
+    const total=rows.reduce((n,r)=>n+(r.value??0),0);
+    set($('#earningsChange'),rows.length?`${formatToken(total)} MYST · ${estimatedFiatText(total)}`:'Current earnings history unavailable');
+    set($('#earningsSource'),rows.length?'Reported history; missing dates are not assumed to be zero. Currency amounts are estimates.':'History snapshot is missing or stale. Payments remain available through the official dashboard.');
   }
-
-  function drawSeries(svg, values, className) {
-    if (!svg) return;
-    const chart = svg.closest('.chart');
-    chart?.querySelector('.chart-empty')?.remove();
-    const clean = (values || []).filter(Number.isFinite);
-    if (clean.length < 2 || clean.every(value => value === 0)) {
-      svg.replaceChildren();
-      const empty = document.createElement('div');
-      empty.className = 'chart-empty';
-      empty.innerHTML = `<strong>${clean.length ? 'Trend building' : 'Waiting for trend data'}</strong><span>${clean.length ? 'More reporting points are needed to draw this chart.' : 'The chart will appear after the collector reports activity.'}</span>`;
-      chart?.append(empty);
-      return;
-    }
-    const width = 720;
-    const height = 145;
-    const max = Math.max(...clean, 1);
-    const points = clean.map((value, index) => `${index * width / Math.max(clean.length - 1, 1)},${height - (value / max * 120)}`).join(' ');
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-    path.setAttribute('points', points);
-    path.setAttribute('class', `line ${className}`);
-    svg.replaceChildren(path);
+  function drawSeries(svg, rows, className, format) {
+    if(!svg)return;
+    const focused=svg.contains(document.activeElement)?document.activeElement.getAttribute('data-time'):null;
+    const chart=svg.closest('.chart');chart?.querySelector('.chart-empty')?.remove();chart?.querySelector('.chart-caption')?.remove();svg.replaceChildren();
+    const good=rows.filter(r=>r.value!==null);
+    if(!good.length){const e=document.createElement('div');e.className='chart-empty';e.innerHTML='<strong>Current traffic history unavailable</strong><span>No current reporting points. Check snapshot freshness below.</span>';chart?.append(e);return;}
+    const width=720,height=145,max=Math.max(...good.map(r=>r.value),1),from=rows[0].time,to=rows[rows.length-1].time;
+    svg.setAttribute('viewBox','0 0 720 145');svg.setAttribute('role','group');svg.setAttribute('aria-label','Reported traffic history; focus a point for its date and value');
+    const ns='http://www.w3.org/2000/svg';let segment=[];let previous=null;
+    const flush=()=>{if(segment.length>1){const l=document.createElementNS(ns,'polyline');l.setAttribute('points',segment.join(' '));l.setAttribute('class',`line ${className}`);svg.append(l);}segment=[];};
+    for(const row of rows){if(row.value===null){flush();previous=null;continue;}if(previous!==null&&row.time-previous>36*3600000)flush();const x=to===from?width/2:(row.time-from)/(to-from)*(width-16)+8,y=height-8-row.value/max*(height-20);segment.push(`${x},${y}`);previous=row.time;}
+    flush();const caption=document.createElement('p');caption.className='chart-caption';caption.textContent=`0 – ${format(max)} · UTC · focus or touch a point for details`;chart?.append(caption);
+    const dots=[];
+    for(const row of good){const dot=document.createElementNS(ns,'circle');dot.setAttribute('cx',String(to===from?width/2:(row.time-from)/(to-from)*(width-16)+8));dot.setAttribute('cy',String(height-8-row.value/max*(height-20)));dot.setAttribute('data-time',String(row.time));dot.setAttribute('r','5');dot.setAttribute('class','chart-point');dot.setAttribute('tabindex',dots.length?'-1':'0');const label=new Date(row.time).toLocaleDateString(undefined,{month:'short',day:'numeric',timeZone:'UTC'})+' UTC · '+format(row.value);dot.setAttribute('aria-label',label);const title=document.createElementNS(ns,'title');title.textContent=label;dot.append(title);const reveal=()=>{caption.textContent=label;};dot.addEventListener('focus',reveal);dot.addEventListener('pointerenter',reveal);dot.addEventListener('pointerdown',()=>{dot.focus();reveal();});dots.push(dot);svg.append(dot);}
+    if(focused){const target=dots.find(d=>d.getAttribute('data-time')===focused);if(target){dots.forEach(d=>d.setAttribute('tabindex',d===target?'0':'-1'));target.focus();}}
+    dots.forEach((d,i)=>d.addEventListener('keydown',e=>{if(['ArrowRight','ArrowLeft','Home','End'].includes(e.key)){e.preventDefault();const next=e.key==='Home'?0:e.key==='End'?dots.length-1:(i+(e.key==='ArrowRight'?1:-1)+dots.length)%dots.length;dots.forEach((v,j)=>v.setAttribute('tabindex',j===next?'0':'-1'));dots[next].focus();}}));
   }
-
   function renderSessionRows(container, sessions, limit) {
     if (!container) return;
     const header = $('.session-row.header', container);
@@ -217,22 +207,22 @@
   function renderEarnings(identity, earnings, sessions30) {
     const root = $('#earnings');
     if (!root) return;
-    const lifetime = identity ? token(identity.earnings_total_tokens) : null;
-    const unsettled = identity ? token(identity.earnings_tokens) : null;
-    const balance = identity ? token(identity.balance_tokens) : null;
+    const lifetime = MystInsights.tokenValue(identity?.earnings_total_tokens);
+    const unsettled = MystInsights.tokenValue(identity?.earnings_tokens);
+    const balance = MystInsights.tokenValue(identity?.balance_tokens);
     set($('.earnings-hero h2', root), lifetime === null ? '— MYST' : tokenText(lifetime));
     set($('#lifetimeFiat', root), lifetime === null ? '—' : estimatedFiatText(lifetime));
     const cards = $$('.detail-grid.thirds .metric-card', root);
-    const labels = ['On-chain balance', 'Unsettled earnings', 'Lifetime earnings'];
+    const labels = ['Identity balance', 'Unsettled earnings', 'Total earned'];
     const values = [balance, unsettled, lifetime];
-    const notes = ['Current identity balance', 'Awaiting settlement', 'All recorded earnings'];
+    const notes = ['Reported on-chain balance; not a withdrawal quote', 'Not yet settled; settlement is handled by Mysterium', 'Reported total; not a settled/withdrawn total'];
     cards.forEach((card, index) => {
       set($('.metric-head span', card), labels[index]);
       set($(':scope > strong', card), values[index] === null ? '— MYST' : tokenText(values[index]));
       set($('.fiat-estimate', card), values[index] === null ? '—' : estimatedFiatText(values[index]));
       set($(':scope > p', card), notes[index]);
     });
-    renderEarningsFromSessions(sessions30, 30, 'Last 30 days');
+    // History is rendered from current provider series, not old session caches.
   }
 
   function renderServiceEarnings(earnings) {
@@ -262,9 +252,9 @@
       const value = number(item.value);
       const bar = document.createElement('i');
       bar.style.height = `${value ? Math.max(5, value / max * 100) : 2}%`;
-      bar.dataset.value = tokenText(value);
+      bar.dataset.value = (item.date||'Unknown date')+' UTC · '+tokenText(item.value);
       bar.tabIndex = 0;
-      bar.setAttribute('aria-label', tokenText(value));
+      bar.setAttribute('aria-label',bar.dataset.value);bar.title=bar.dataset.value;
       chart.append(bar);
     });
     chart.classList.toggle('sparse', data.length > 0 && data.length < 6);
@@ -323,22 +313,33 @@
     set($('.logs-modal .health-score'), 'Snapshot');
   }
 
+  let refreshing=false,pendingRefresh=false;
   async function refresh() {
+    if(refreshing){pendingRefresh=true;return;}refreshing=true;
+    try {
+    snapshotMeta=await readJSON('/live-api/snapshot-meta.json');
+    if(!snapshotMeta||Date.now()/1000-Number(snapshotMeta.generated_at)>180)snapshotMeta=null;
     const [status, healthcheck, identityList, identity, services, nat, monitoring, quality, activity, earnings, sessions1d, sessions7d, sessions30d, transfer7d, transfer30d, mystPrice] = await Promise.all([
       statusApi(), api('healthcheck'), api('identities'), api('identity'), api('services'), api('nat'), api('monitoring-status'), api('quality'), api('activity'), api('service-earnings'), api('sessions-1d'), api('sessions-7d'), api('sessions-30d'), api('transferred-7d'), api('transferred-30d'), api('myst-price')
     ]);
-    if (mystPrice?.mysterium) priceSnapshot = mystPrice;
-    const online = status?.mysterium === 'Healthy';
+    priceSnapshot=mystPrice?.mysterium?mystPrice:null;
+    const online = status?.mysterium === 'Healthy' && MystInsights.fresh(snapshotMeta,'healthcheck',180);
     const currentIdentity = identity || (identityList?.identities?.[0] ? {id: identityList.identities[0].id} : null);
     const sessions = Array.isArray(sessions1d?.sessions) ? sessions1d.sessions : null;
     const sessions7 = Array.isArray(sessions7d?.sessions) ? sessions7d.sessions : null;
     const sessions30 = Array.isArray(sessions30d?.sessions) ? sessions30d.sessions : null;
     const recentCount = sessions ? sessions.length : null;
-    const count30 = sessions30 ? sessions30.length : null;
+    const countSnapshot=await api('sessions-count-30d');
+    const count30=Number.isFinite(Number(countSnapshot?.count))&&countSnapshot?.count!==undefined?Number(countSnapshot.count):null;
     const runningServices = Array.isArray(services) ? services.filter(service => String(service.status).toLowerCase() === 'running') : [];
     const trafficServices = runningServices.filter(service => String(service.type).toLowerCase() !== 'monitoring');
     const monitorHealthy = monitoringOk(monitoring?.status);
-    const providerReady = online && monitorHealthy && trafficServices.length > 0;
+    const readiness=MystInsights.readiness({status,meta:snapshotMeta,services,monitoring,identity:currentIdentity});
+    const providerReady=readiness.ready;
+    set($('#readinessTitle'),readiness.label);
+    const checks=$('#readinessChecks');checks.replaceChildren();
+    readiness.checks.forEach(c=>{const li=document.createElement('li');li.className=c.ok?'check-pass':'check-wait';const name=document.createElement('strong');name.textContent=(c.ok?'✓ ':'! ')+c.name;const detail=document.createElement('span');detail.textContent=c.detail;li.append(name,detail);checks.append(li);});
+    set($('#snapshotAge'),snapshotMeta?`Local snapshot ${Math.max(0,Math.floor(Date.now()/1000-snapshotMeta.generated_at))}s ago · provider checks ~15 min`:'Collector snapshot missing or stale');
     const providerLocation = runningServices.find(service => service?.proposal?.location)?.proposal?.location || null;
     const q = qualityDisplay(quality?.quality);
     const overviewCards = $$('#overview .metric-grid .metric-card');
@@ -353,10 +354,13 @@
     set($(':scope > strong', overviewCards[3]), activity ? `${number(activity.online_percent).toFixed(1)}%` : safe(status?.host_uptime));
     set($(':scope > p', overviewCards[3]), activity ? 'Provider activity metric' : 'Host uptime');
 
-    set($('#overview .status-pill'), providerReady ? '● Provider available' : online ? '● Runtime online · provider check needed' : '● Node attention needed');
+    set($('#overview .status-pill'), '● '+readiness.label);
     set($('#overview .hero-copy > p'), online ? 'Live data is flowing from the official Mysterium runtime through a private local collector.' : 'The dashboard is waiting for the official Mysterium runtime.');
     set($('#overview .chart-summary strong'), bytes(transfer7d?.transferred_data_bytes));
-    renderTrafficTrend(sessions7, 7);
+    const [trafficHistory,earningsHistory,traffic30,earned30]=await Promise.all([api('data-series-'+selectedTrafficDays+'d'),api('earnings-series-'+selectedEarningsDays+'d'),api('data-series-30d'),api('earnings-series-30d')]);
+    renderTrafficTrend(trafficHistory,selectedTrafficDays);
+    renderEarningsFromSeries(earningsHistory,selectedEarningsDays);
+    renderEfficiency(earned30,traffic30);
     set($('#overview .health-score'), q.raw ? `Provider quality: ${q.text}` : q.text);
     const healthRing = $('#overview .health-ring');
     if (healthRing) healthRing.style.background = `conic-gradient(var(--green) 0 ${q.percent}%, rgba(255,255,255,.06) ${q.percent}% 100%)`;
@@ -365,7 +369,7 @@
     const healthValues = $$('#overview .health-list strong');
     set(healthValues[0], online ? '● Running' : '● Offline');
     set(healthValues[1], natLabel(nat?.type));
-    set(healthValues[2], status?.identity === 'Protected' ? '● Secured' : safe(status?.identity));
+    set(healthValues[2], status?.identity === 'Protected' ? '● Files detected' : safe(status?.identity));
     set(healthValues[3], status?.updated_at ? new Date(status.updated_at).toLocaleTimeString() : 'Waiting');
     renderSessionRows($('#overview .sessions-preview'), sessions, 3);
 
@@ -426,8 +430,10 @@
     set($('#settings .account-setting p:last-of-type'), 'The local node API does not disclose MystNodes claim status. Open the dashboard to review or claim this node.');
     renderServices(services);
     renderLogs(status, monitoring, services);
+    document.documentElement.dataset.liveReady='true';
     set($('.node-mini strong'), online ? 'Node online' : 'Node offline');
     set($('.node-mini > div > span'), `Official runtime · ${safe(status?.node_version)}`);
+    }catch(error){set($('#readinessTitle'),'Dashboard data could not be read');set($('#snapshotAge'),'Refresh will retry automatically. Payment handling is unchanged.');}finally{refreshing=false;if(pendingRefresh){pendingRefresh=false;refresh();}}
   }
 
   $('#sessionFilter')?.addEventListener('change', event => {
@@ -438,26 +444,16 @@
     if (empty) empty.style.display = visible ? 'none' : 'flex';
   });
 
-  $$('[data-earnings-range="7d"], [data-earnings-range="30d"]').forEach(button => button.addEventListener('click', async () => {
-    const range = button.dataset.earningsRange;
-    const days = range === '7d' ? 7 : 30;
-    const data = await api(`sessions-${range}`);
-    const sessions = Array.isArray(data?.sessions) ? data.sessions : [];
-    renderEarningsFromSessions(sessions, days, range === '7d' ? 'Last 7 days' : 'Last 30 days');
-  }));
-
-  const trafficButtons = $$('#overview .traffic-panel .range-switch button');
-  trafficButtons.forEach((button, index) => {
-    if (index > 1) { button.disabled = true; button.title = 'The pinned runtime provides up to 30 days of series data'; return; }
-    button.addEventListener('click', async () => {
-      const range = index === 0 ? '7d' : '30d';
-      const days = index === 0 ? 7 : 30;
-      const [sessionData, total] = await Promise.all([api(`sessions-${range}`), api(`transferred-${range}`)]);
-      const sessions = Array.isArray(sessionData?.sessions) ? sessionData.sessions : [];
-      renderTrafficTrend(sessions, days);
-      set($('#overview .chart-summary strong'), bytes(total?.transferred_data_bytes));
-    });
-  });
+  function renderEfficiency(earned,traffic){
+    const a=chartRows(earned,30),b=chartRows(traffic,30);const bytesByDay=new Map(b.filter(r=>r.value!==null).map(r=>[new Date(r.time).toISOString().slice(0,10),r.value]));
+    let money=0,total=0,days=0;
+    a.filter(r=>r.value!==null).forEach(r=>{const key=new Date(r.time).toISOString().slice(0,10);if(bytesByDay.has(key)){money+=r.value;total+=bytesByDay.get(key);days++;}});
+    let field=$('#earningsEfficiency');if(!field){field=document.createElement('p');field.id='earningsEfficiency';$('#earnings .earnings-chart')?.append(field);}
+    const ratio=MystInsights.revenuePerGB(money,total);set(field,ratio===null?'Earnings per GB: waiting for matching traffic and earnings reports.':`${formatToken(ratio)} MYST / GB · ${days} matched reported UTC days · excludes unreported dates, not a payout quote`);
+  }
+  $$('[data-earnings-range="7d"], [data-earnings-range="30d"]').forEach(button=>button.addEventListener('click',()=>{selectedEarningsDays=button.dataset.earningsRange==='7d'?7:30;refresh();}));
+  const trafficButtons=$$('#overview .traffic-panel .range-switch button');
+  trafficButtons.forEach((button,index)=>{if(index>1){button.disabled=true;button.title='Only 7- and 30-day provider series are collected';return;}button.addEventListener('click',()=>{selectedTrafficDays=index===0?7:30;refresh();});});
 
   $$('[data-earnings-range="90d"], [data-earnings-range="all"]').forEach(button => {
     button.disabled = true;
@@ -469,7 +465,7 @@
     currencySelect.value = selectedCurrency;
     currencySelect.addEventListener('change', () => {
       selectedCurrency = supportedCurrencies.has(currencySelect.value) ? currencySelect.value : 'USD';
-      localStorage.setItem('mystnodes-currency', selectedCurrency);
+      savePreference('mystnodes-currency', selectedCurrency);
       refresh();
     });
   }
