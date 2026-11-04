@@ -1,0 +1,27 @@
+{
+  "app": "xmr",
+  "version": "0.3.5",
+  "images": [
+    {
+      "app": "xmr",
+      "role": "node",
+      "version": "0.3.5",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-5trat-xmr-ui",
+      "image_id": "sha256:8a4f3700702913d422a7037c08184c0264101ae4b17bccdc94f502641efeafb7",
+      "source_commit": "2a9eea9f27a289911a555da21a3939ad77f732f5",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-5trat-xmr-ui@sha256:e0f6b573c1c307e50564ff664d32e0c3b6222446392bb297acfc1981e176ee0c",
+      "tag": "ghcr.io/kraskuscrypto/kraskus-5trat-xmr-ui:node-0.3.5"
+    },
+    {
+      "app": "kaspa",
+      "role": "metrics",
+      "version": "0.5.4",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter",
+      "image_id": "sha256:22c4299cc3ef792fb670dc9d5e4af08abc00a76d123fb976aec86f801faf78de",
+      "source_commit": "2a9eea9f27a289911a555da21a3939ad77f732f5",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter@sha256:1a0efc2e5728a88568f1052283fce46e96adb8d32751f04c176201af1351dec1",
+      "tag": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter:metrics-0.5.4"
+    }
+  ],
+  "security_refresh": "base libraries; application/mining binaries verified unchanged"
+}

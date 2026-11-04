@@ -7,9 +7,13 @@
 # own fleet manager) and are not referenced anywhere in this file.
 #
 # Conventions confirmed against this box's real first-party packages:
-#   - the UI service publishes NO host port itself — app_proxy (platform-managed)
-#     is the only thing bound to the manifest's `port:` (33067), reaching the UI
-#     container over the app's own internal network via APP_HOST/APP_PORT
+#   - the UI service publishes the manifest's `port:` (33067) to its plain-HTTP
+#     container port 80, exactly once (x-5tratumos-secure-proxy at the end).
+#     5tratumOS with the P2 secure proxy renders it on 127.0.0.1 only and
+#     reaches the app solely through its authenticated HTTPS dashboard route
+#     (/apps/<id>/), adding the per-app proxy token. app_proxy below is kept for
+#     the platform CLI's UI-service detection (it removes app_proxy and maps
+#     the same 33067 -> ui:80 that is declared on the ui service).
 #   - only ports with a real external requirement are published to the host:
 #     the miner-facing Stratum port, and kaspad's P2P port (needed for normal
 #     node operation, same as the current working VM100 reference)
@@ -18,21 +22,67 @@
 #   - persistent data under ${APP_DATA_DIR}/<subpath>, never a hardcoded /srv path
 #   - app-scoped bridge networks only, no shared/external network of any kind
 #
-# Approved ports for this package: UI 33067 (app_proxy, in 5tratstore-app.yml),
-# Stratum 1900 (host) -> 5556 (bridge internal).
+# Approved ports for this package: UI 33067 (127.0.0.1 under P2, in
+# 5tratstore-app.yml), Stratum 1900 (host) -> 5556 (bridge internal),
+# kaspad P2P 16111. Port 33077 (the 0.3.3-candidate app HTTPS listener) is
+# retired: the app has no TLS listener of its own (Standards/port-registry.md).
 
 services:
+  # Display-only node statistics; no wallet mounts or host ports.
+  mempool-metrics: {"image": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter@sha256:1a0efc2e5728a88568f1052283fce46e96adb8d32751f04c176201af1351dec1", "restart": "unless-stopped", "environment": {"METRICS_COIN": "kaspa"}, "read_only": true, "user": "10001:10001", "cap_drop": ["ALL"], "security_opt": ["no-new-privileges:true"], "mem_limit": "96m", "cpus": 0.15, "pids_limit": 48, "networks": ["internal"], "healthcheck": {"test": ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:18429/healthz',timeout=3).read()"], "interval": "30s", "timeout": "5s", "retries": 3, "start_period": "10s"}}
   app_proxy:
     environment:
       APP_HOST: ui
       APP_PORT: 80
+
+  # One-shot data preparation, the only root step of this package (0.3.3 round
+  # 3). It runs the wallet-api image as 0:0 with nothing but the wallet volume:
+  # no proxy-token mount (it is not a token service, so the platform never
+  # mounts /run/5tratumos here), no environment, no network. It creates the
+  # private state dir and hands every file under /wallet that is not yet
+  # 10001:10001 to the service user -- needed once for installs written by
+  # 0.3.0 / 0.3.1, which ran as root; a no-op afterwards. lchown only: file
+  # modes (0600 wallet files, secrets) are never changed, symlinks are never
+  # followed. It then exits; adapter and wallet-api start only after it
+  # completed successfully and run as 10001:10001 from their first
+  # instruction, so no root process ever exists in a container that holds the
+  # token. 5tratumOS treats a service named "init" as a one-shot helper.
+  # 0.4.0 (owner decision 2026-10-08): it also creates the EMPTY app-token
+  # directory, so it exists (10001:10001, 0700, via the same hand-over) before
+  # the ui starts and dockerd never creates the ui's bind source as root. init
+  # never reads, creates or writes the token itself: adapter and wallet-api do.
+  init:
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter@sha256:2c40bfc9fdac5cbbf08d360ae10244033456ba2bac921930d6afb5bbb912a786
+    restart: "no"
+    user: "0:0"
+    entrypoint:
+      - python
+      - -m
+      - kraskus_foundation.service_init
+      - --data
+      - /wallet
+      - --private
+      - /wallet/.kraskus:0o711
+      - --private
+      - /wallet/.kraskus/app-token:0o700
+      - --uid
+      - "10001"
+      - --gid
+      - "10001"
+      - --
+      - "true"
+    volumes:
+      - ${APP_DATA_DIR}/wallet:/wallet
+    network_mode: none
+    security_opt:
+      - no-new-privileges:true
 
   kaspad:
     # Pinned to the exact digest currently running successfully in production
     # (kaspad reports version 2.0.1) — official kaspanet image, publicly
     # pullable, confirmed via the public Docker Hub API. Pruned by default:
     # no --archival flag, same as the current working VM100 node.
-    image: kaspanet/rusty-kaspad@sha256:db36449e2f41cf33ab7c26683ce390cb71bdea9c403eefd2e740a7d5605bcd8b
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter@sha256:b286aea4732568e3aaa8c05a0fd25fb533b43cf1ed484edbc4765f805bba2adf
     restart: unless-stopped
 
     command:
@@ -51,11 +101,30 @@ services:
     # kaspad flushes its database on SIGTERM; compose's default 10 s grace
     # period is far too short for that and lets `app down`/uninstall SIGKILL
     # the node mid-flush (observed on VM120, 2026-09-23: "Error while
-    # Stopping ... forcing containers down"). Give it time to shut down cleanly,
-    # but stay inside the 5tratumOS CLI's own 120 s `docker compose down` budget:
-    # a grace longer than that gets the compose client killed instead, which is
-    # worse than compose sending SIGKILL itself (observed on VM120 with 180 s).
-    stop_grace_period: 100s
+    # Stopping ... forcing containers down"). Give it time to shut down cleanly.
+    # 0.4.0 (owner decision 2026-10-08, V3 Step 6 decision C): the grace is the
+    # plain Compose value, 300 s, and the package no longer declares
+    # x-5tratumos-stop-policy, so an update from 0.3.x never runs the platform's
+    # stop-policy migration (on VM100 it refused 0.3.0 -> 0.3.3 because the old
+    # wallet-api exited 143 on SIGTERM). During IBD on slow storage kaspad
+    # finishes its in-flight batch before closing its DB; it needed 81 s and
+    # more than 100 s on the VM125 USB-HDD test (2026-10-02, F-3). Needs
+    # 5tratumOS v0.8.23 or newer (no outer 120 s `compose down` timeout); V3
+    # targets stock v0.8.31 (named-store updates).
+    stop_grace_period: 300s
+    # No healthcheck here on purpose: a node that is syncing is alive, and
+    # nothing in this package restarts a container for not being ready.
+
+    # F-6 (0.3.3 QA, VM125 2026-10-07): the image's entrypoint ends in
+    # `exec su-exec ... kaspad`, which made kaspad PID 1 of the container.
+    # During its start-up utxoindex resync kaspad has no SIGTERM handler yet,
+    # and the kernel drops an unhandled signal sent to a namespace's PID 1, so
+    # every stop in that phase waited the full 300 s and ended in SIGKILL.
+    # Docker's init (tini) is PID 1 instead and forwards SIGTERM: during the
+    # resync kaspad then exits on the default action within seconds (clean
+    # container termination, not kaspad's own graceful shutdown, which still
+    # runs once its handler is installed). Grace values are unchanged.
+    init: true
 
     # P2P is published — a solo node needs normal network participation to
     # sync, same as the current working VM100 reference. RPC (16110/17110/18110)
@@ -69,7 +138,7 @@ services:
       - internal
 
   stratum:
-    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-stratum@sha256:66fb4ac265f12a12a389c3de561fd4544b766187c9f15ebd904355afb51d6043
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter@sha256:40969eb0a1369758551f389a715b5020b76979901600dcfcdb447e77d2f0b4d7
     restart: unless-stopped
 
     command:
@@ -92,8 +161,6 @@ services:
     volumes:
       - ${APP_DATA_DIR}/wallet/.kraskus:/run/kraskus:ro
 
-    ports:
-      - "1900:5556/tcp"
 
     networks:
       - public
@@ -102,10 +169,20 @@ services:
     depends_on:
       - kaspad
 
+    stop_grace_period: 5s
+
   adapter:
-    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter@sha256:ed7b4e9d2e1f1d023879d5c1b42d081184229e244409dfb4c951a4ff20307fb5
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter@sha256:859ce7db4a4435cbafa631e835d8bc445f16e14121aa9ebc4e5ce6d23463d6af
 
     restart: unless-stopped
+
+    # Token service of the secure-proxy contract. Runs as the unprivileged
+    # service user from its first instruction (never root): the root-only
+    # wallet-tree hand-over is the "init" service above, which has no token.
+    # The numeric group is what the platform needs: it mounts
+    # /run/5tratumos/proxy-token as 0440 root:10001 (dir 0750 root:10001), so
+    # only this uid/gid can read it.
+    user: "10001:10001"
 
     environment:
       KASPA_STRATUM_API: http://stratum:3030
@@ -113,22 +190,59 @@ services:
       KASPA_MINER_PORT: "1900"
       KASPAD_GRPC_ADDR: "kaspad:16110"
       KASPA_WALLET_API: "http://wallet-api:18422"
+      # Foundation 1.1.2 app-token fallback (owner decision 2026-10-08): used
+      # only while no P2 platform token is mounted. This service's start step
+      # (service_init, as 10001) creates it once when there is no platform
+      # token (one lock, so adapter and wallet-api always agree) and removes
+      # it when there is one. Never logged.
+      KRASKUS_APP_TOKEN_FILE: "/wallet/.kraskus/app-token/token"
 
     volumes:
       - ${APP_DATA_DIR}/wallet:/wallet
 
-    # No host port — only "ui" (same "internal" network) talks to this.
+    ports:
+      - "1900:5556/tcp"
+
+    # Paused-by-default adapter gate; the bridge protocol and reward engine are unchanged.
     networks:
+      - public
       - internal
 
     depends_on:
-      - stratum
-      - kaspad
+      init:
+        condition: service_completed_successfully
+      stratum:
+        condition: service_started
+      kaspad:
+        condition: service_started
+
+    stop_grace_period: 5s
+
+    # Liveness only (process answers HTTP; never consults kaspad, stratum or
+    # wallet-api). Readiness, sync stage and mining readiness are reported by
+    # the app itself (/api/readiness), not by Docker. Informational: Docker
+    # does not restart an unhealthy container and this package adds nothing
+    # that would.
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:18420/livez', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
 
   wallet-api:
-    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-wallet-api@sha256:c100782d78df0a0cb3d32549e8f0ac775d6d2baad3fe561c9232c95386ac60e0
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter@sha256:2c40bfc9fdac5cbbf08d360ae10244033456ba2bac921930d6afb5bbb912a786
 
     restart: unless-stopped
+
+    # Token service of the secure-proxy contract, like the adapter (owner
+    # decision 2026-10-06): wallet-api refuses every call without the per-app
+    # proxy token, whoever the caller is, and the adapter forwards the token
+    # it reads on every call. Same model as the adapter: runs as uid/gid
+    # 10001 from its first instruction (the kaspa-wallet CLI too); the root
+    # hand-over is the token-less "init" service; the numeric group lets it
+    # read /run/5tratumos/proxy-token (0440 root:10001).
+    user: "10001:10001"
 
     environment:
       LISTEN_PORT: "18422"
@@ -138,36 +252,94 @@ services:
       KRASKUS_DEV_FEE_AUTO_PAY: "false"
       KRASKUS_SETTLEMENT_ENABLED: "true"
       KRASKUS_SETTLEMENT_WALLET_NAME: "kraskus-settlement"
+      KRASKUS_APP_TOKEN_FILE: "/wallet/.kraskus/app-token/token"
       HOME: "/wallet"
 
     volumes:
       - ${APP_DATA_DIR}/wallet:/wallet
 
-    # No host port — only "adapter" talks to this, over "internal".
+    # No host port — only "adapter" talks to this, over "internal". No
+    # internal-network trust: a request from any other container on
+    # "internal" (kaspad, stratum, ui) without the token is refused like any
+    # other. Only /livez and a data-free /health answer without it.
     networks:
       - internal
 
     depends_on:
-      - kaspad
+      init:
+        condition: service_completed_successfully
+      kaspad:
+        condition: service_started
+
+    # F-5 (0.3.3 QA): wallet-api's atomic state writes fsync; one blocked
+    # > 10 s on a throttled disk and was SIGKILLed at 5 s. 0.4.0: 60 s as the
+    # plain Compose value (decision C; previously x-5tratumos-stop-policy).
+    stop_grace_period: 60s
+
+    # Liveness only (process answers HTTP, token-free, no data; never
+    # consults kaspad or the CLI). Informational: Docker does not restart an
+    # unhealthy container and this package adds nothing that would.
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:18422/livez', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
 
   ui:
-    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-ui@sha256:e1459c20a262305a20f5553ab02468b65144480f8a2669247074fa10c2ee0bca
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-ui@sha256:599bc2f395c1cd1a1e901a736b9642f99b5c8bc88ec2bc09a3d295916e45e7fd
 
     restart: unless-stopped
 
-    # No ports: here — app_proxy (above) is the only public entry point,
-    # matching every sibling Kraskus 5tratumOS app. On "public" too (not
-    # published to the host) so the platform's app_proxy — which is not part
-    # of this compose file and lives on its own network — can still reach
-    # this service; a container that lives only on "internal" (internal:
-    # true, no gateway) is unreachable from outside this compose project at
-    # all, confirmed by the clean-install test.
+    # The contract's ui_port (80, plain HTTP, the only listener): published
+    # once on the manifest port. 5tratumOS P2 rewrites this to
+    # 127.0.0.1:33067:80 in production (QA direct-port mode: all interfaces;
+    # the adapter still refuses every state change without the token). On
+    # "public" too so the published port has a gateway; a container that
+    # lives only on "internal" (internal: true) is unreachable from outside
+    # this compose project at all, confirmed by the clean-install test.
+    # The UI never receives the platform token file: it only relays the
+    # portal's header to the adapter on /api/ (foundation nginx snippets).
+    # 0.4.0: it reads the app-token fallback directory read-only;
+    # kraskus-app-token.sh supplies that token only to /api/ requests that
+    # carry no token header (stock 5tratumOS, Umbrel). Under P2 the token
+    # services remove the app token, so the UI only relays. Its start script
+    # waits for the adapter's /livez first: the adapter settles the token
+    # before it serves.
+    ports:
+      - "33067:80/tcp"
+
     networks:
       - public
       - internal
 
+    volumes:
+      - ${APP_DATA_DIR}/wallet/.kraskus/app-token:/run/kraskus-app-token:ro
+
     depends_on:
       - adapter
+
+    stop_grace_period: 5s
+
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/index.html"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+# Read only by 5tratumOS with the P2 secure proxy (daemon/app_secure_proxy.py),
+# at install, update, rollback and `app up`: the ui service's port 80 is
+# published on 127.0.0.1 only and each token service gets the per-app token
+# mounted read-only at /run/5tratumos (proxy-token). The portal adds the token
+# to every /apps/<id>/ request behind its login; the adapter refuses every
+# state change and every wallet-data read without it (foundation 1.1), and
+# wallet-api refuses every call without it (the adapter forwards it).
+x-5tratumos-secure-proxy:
+  version: 1
+  ui_service: ui
+  ui_port: 80
+  token_services: [adapter, wallet-api]
 
 networks:
   # Only where miner/node P2P exposure requires it (stratum, kaspad).

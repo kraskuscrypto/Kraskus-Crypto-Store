@@ -1,22 +1,25 @@
 id: kraskus-xmr-solo
 name: Monero by Kraskus
-tagline: Monero full node, wallet, and RandomX solo mining appliance
+tagline: Monero node and RandomX solo mining to your external wallet
 description: >-
-  Monero by Kraskus turns 5tratumOS into a self-contained Monero
-  node, wallet, and true solo mining appliance. The wallet has a 25-word
-  recovery phrase (or watch-only with the secret view key) and a wallet
-  password that protects backup, send and forget. XMRig connects to a
-  RandomX Stratum endpoint on port 1921, with real worker, share, hashrate,
-  and submitted-difficulty telemetry while only network-valid blocks are
-  forwarded to the local monerod. Wallet state and blockchain data remain
-  in persistent 5tratumOS app storage. An automatic 1% developer fee applies
-  only to successfully mined block rewards after 60-block maturity; miner
-  hashrate is never diverted.
-version: 0.2.0
+  BEFORE UPDATING: send any crypto held in the app native wallet to another wallet
+  you control, confirm receipt, and back up the old wallet and recovery information.
+  This version removes native-wallet access from the app. Never delete legacy wallet
+  data or assume uninstalling will preserve it.
+  Run a Monero node and connect your RandomX miners on TCP 1921.
+  Use an external primary address or subaddress you control. Each found block
+  pays 99% directly to that address and a separate fixed 1% developer output,
+  rounded down to whole piconero. No hashrate is diverted and the app never
+  requests your seed or private keys. Includes live worker telemetry, hashrate
+  history, block records, appearance choices and read-only chain lookup.
+  Native-wallet access is removed. Existing wallet files are preserved during
+  an upgrade; they are never deleted, automatically swept or exposed by this app.
+  Kraskus Pool remains under development.
+version: 0.3.5
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/
-repo: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
+repo: https://github.com/kraskuscrypto/Kraskus-Mining-Platform/tree/d2e118347f219f46bc27552db2a79839cc3d29c7/releases/ui-consistency-20261103/ui/xmr
 support: https://kraskuscrypto.com/
 icon: assets/monero.png
 port: 33065

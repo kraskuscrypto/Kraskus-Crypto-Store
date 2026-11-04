@@ -6,7 +6,7 @@ Release records, licence texts and published source: https://github.com/kraskusc
 
 ## Monero 0.18.5.1 — BSD-3-Clause
 
-Official release binaries from https://github.com/monero-project/monero/releases/tag/v0.18.5.1 (unmodified; images `kraskus-5trat-xmr-monerod`, also used for the wallet RPC services).
+Official release binaries from https://github.com/monero-project/monero/releases/tag/v0.18.5.1 (unmodified daemon binary in `kraskus-5trat-xmr-monerod`; this edition does not ship wallet executables or wallet RPC services).
 
 ```text
 Copyright (c) 2014-2022, The Monero Project
@@ -53,9 +53,9 @@ developers, distributed under the MIT licence:
 
 ## XMRig Proxy 6.26.0 — GNU General Public License v3.0
 
-XMRig Proxy is redistributed unmodified, as the official static release binary `xmrig-proxy-6.26.0-linux-static-x64.tar.gz` (sha256 `73cceb10be474ba8ce20faddb9d2c6af0cb50bce84e72f7d36a326f7147c01c4`), installed at `/usr/local/bin/xmrig-proxy` in the `kraskus-5trat-xmr-miner-gateway` image.
+XMRig Proxy is built from upstream v6.26.0, with the Kraskus modification dated2026-11-02 to `src/base/tools/cryptonote/BlockTemplate.cpp`: bounded parsing of Monero HF16 two-output coinbase templates, per-output transaction public keys and padding. The GPL-3.0 licence remains in force for this component.
 
-**Corresponding source:** XMRig Proxy v6.26.0, commit `0dc23f69b546ae973ae0ae6fb65593f998256589`, https://github.com/xmrig/xmrig-proxy/tree/0dc23f69b546ae973ae0ae6fb65593f998256589 . If that source ever becomes unavailable there, ask Kraskus Crypto (https://kraskuscrypto.com/) and we will provide it.
+**Corresponding source:** upstream commit `0dc23f69b546ae973ae0ae6fb65593f998256589`, https://github.com/xmrig/xmrig-proxy/tree/0dc23f69b546ae973ae0ae6fb65593f998256589 . The gateway image includes the exact upstream archive (`sha256:ad64e78c95b811f188f470b8fa67c90275aed31a47bbbd93a5c172833582699c`), the modification patch, build recipe and licence under `/usr/share/licenses/xmrig-proxy/`. No proprietary application source is needed to rebuild this component.
 
 ```text
                     GNU GENERAL PUBLIC LICENSE
@@ -737,3 +737,15 @@ Public License instead of this License.  But first, please read
 ## Operating-system packages
 
 Debian, Alpine, Python and nginx base-image packages are unmodified. Their copyright and licence notices are inside each image (Debian: `/usr/share/doc/<package>/copyright`) and their sources are available from the respective distributions (Debian: https://snapshot.debian.org/).
+
+
+## Cryptographic Python dependencies
+
+The adapter and gateway include the following unmodified packages. Their supplied licence files travel inside each installed distribution:
+
+- PyNaCl1.6.2 — Apache-2.0; `pynacl-1.6.2.dist-info/licenses/LICENSE`. The bundled libsodium notice is `licenses/LICENSE.libsodium.txt` in that same directory.
+- PyCryptodome3.23.0 — BSD/Public Domain; `pycryptodome-3.23.0.dist-info/LICENSE.rst`.
+- cffi2.0.0 — MIT; `cffi-2.0.0.dist-info/licenses/LICENSE` and `AUTHORS`.
+- pycparser2.23 — BSD-3-Clause; `pycparser-2.23.dist-info/LICENSE`.
+
+These paths are below `/usr/local/lib/python3.13/site-packages/` in the adapter and gateway images.

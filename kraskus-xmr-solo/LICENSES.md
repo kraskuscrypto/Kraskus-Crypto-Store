@@ -9,8 +9,9 @@ Project: Monero
 Upstream: https://github.com/monero-project/monero
 
 The Monero software is distributed under its upstream license. The package
-downloads the official Monero release artifact and verifies its pinned
-SHA-256 during the image build. Since 0.2.0 the Monero licence (BSD-3-Clause)
+retains the exact daemon binary from the prior digest-pinned image, whose
+official release archive was verified by SHA-256. Wallet executables are not
+included in this external-wallet edition. Since 0.2.0 the Monero licence (BSD-3-Clause)
 from that release archive is also inside the image, at
 `/usr/share/licenses/monero/LICENSE`.
 
@@ -20,20 +21,17 @@ Project: XMRig Proxy
 Upstream: https://github.com/xmrig/xmrig-proxy
 License: GNU General Public License v3.0 (GPL-3.0)
 
-The miner gateway image includes the official XMRig Proxy static binary,
-verified by pinned SHA-256 during image build
-(`xmrig-proxy-6.26.0-linux-static-x64.tar.gz`, SHA-256
-`73cceb10be474ba8ce20faddb9d2c6af0cb50bce84e72f7d36a326f7147c01c4`), and is not
-modified. Its complete corresponding source is XMRig Proxy v6.26.0, commit
-`0dc23f69b546ae973ae0ae6fb65593f998256589`:
-https://github.com/xmrig/xmrig-proxy/tree/0dc23f69b546ae973ae0ae6fb65593f998256589 .
-The full GPLv3 text is in `THIRD-PARTY-NOTICES.md`, and since 0.2.0 also
-inside the miner gateway image, with these source directions, at
-`/usr/share/licenses/xmrig-proxy/` (`LICENSE`, `SOURCE.md`).
+The miner gateway builds XMRig Proxy6.26.0 from its checksum-pinned upstream source archive with the Kraskus HF16 two-output template patch (modified2026-11-02). Upstream commit: `0dc23f69b546ae973ae0ae6fb65593f998256589`.
+
+The exact upstream source archive, patch, build recipe, GPL text and source directions are in `/usr/share/licenses/xmrig-proxy/` inside the gateway image. The package's `THIRD-PARTY-NOTICES.md` includes the full GPL text and identifies the modification.
+
+## Cryptographic dependencies
+
+PyNaCl1.6.2 (Apache-2.0, including libsodium's supplied notice), PyCryptodome3.23.0 (BSD/Public Domain), cffi2.0.0 (MIT) and pycparser2.23 (BSD-3-Clause) retain their supplied licence files in the installed Python distributions. See `THIRD-PARTY-NOTICES.md` for exact paths.
 
 ## Kraskus application components
 
-The UI, adapter, miner gateway, wallet API, packaging, and Divinity artwork
+The UI, adapter, Kraskus gateway policy, packaging, and Divinity artwork
 are Kraskus Crypto project assets.
 
 ## Base images

@@ -2,15 +2,21 @@ id: kraskus-kaspa-solo
 name: Kaspa by Kraskus
 tagline: Kaspa full node and solo mining node
 description: >-
+  BEFORE UPDATING: send any crypto held in the app native wallet to another wallet
+  you control, confirm receipt, and back up the old wallet and recovery information.
+  This version removes native-wallet access from the app. Never delete legacy wallet
+  data or assume uninstalling will preserve it.
   Kaspa by Kraskus turns 5tratumOS into an easy-to-use Kaspa
   full node and local solo mining appliance. The app manages
   node synchronization, mining readiness, worker connections,
-  a real native Kaspa wallet, and confirmed block detection
-  from a single interface. Normal users do not need to manage
+  external reward destinations, and confirmed block detection
+  from a single interface. Native wallet access is not exposed; the existing
+  internal settlement wallet forwards matured rewards after the approved fee
+  and transaction costs. Legacy wallet data is preserved. Normal users do not need to manage
   kaspad, RPC, Docker, Linux, JSON, or Stratum configuration.
   An automatic 1% developer fee applies only to successfully mined
   block rewards after coinbase maturity; miner hashrate is never diverted.
-version: 0.3.1
+version: 0.5.4
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/

@@ -1,0 +1,67 @@
+{
+  "app": "kaspa",
+  "version": "0.5.4",
+  "images": [
+    {
+      "app": "kaspa",
+      "role": "wallet",
+      "version": "0.5.4",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter",
+      "image_id": "sha256:3527e6c8b9cd5c5e2c5e0f24e0075de56c85760f1e45032dde148a7467c67c7c",
+      "source_commit": "2a9eea9f27a289911a555da21a3939ad77f732f5",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter@sha256:2c40bfc9fdac5cbbf08d360ae10244033456ba2bac921930d6afb5bbb912a786",
+      "tag": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter:wallet-0.5.4"
+    },
+    {
+      "app": "kaspa",
+      "role": "node",
+      "version": "0.5.4",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter",
+      "image_id": "sha256:2775554e03344ac6841960b09435c41705a1d2c44dc29732d2b57587bbb46cc3",
+      "source_commit": "2a9eea9f27a289911a555da21a3939ad77f732f5",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter@sha256:b286aea4732568e3aaa8c05a0fd25fb533b43cf1ed484edbc4765f805bba2adf",
+      "tag": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter:node-0.5.4"
+    },
+    {
+      "app": "kaspa",
+      "role": "stratum",
+      "version": "0.5.4",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter",
+      "image_id": "sha256:fcf514f86950a527aaaa6f7b1b71bda73420d710a43102866628930349819943",
+      "source_commit": "2a9eea9f27a289911a555da21a3939ad77f732f5",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter@sha256:40969eb0a1369758551f389a715b5020b76979901600dcfcdb447e77d2f0b4d7",
+      "tag": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter:stratum-0.5.4"
+    },
+    {
+      "app": "kaspa",
+      "role": "adapter",
+      "version": "0.5.4",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter",
+      "image_id": "sha256:0dac22ff21eeb2c0f25618b4729493beddf31148c7bbb87fe21e731fda912605",
+      "source_commit": "2a9eea9f27a289911a555da21a3939ad77f732f5",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter@sha256:859ce7db4a4435cbafa631e835d8bc445f16e14121aa9ebc4e5ce6d23463d6af",
+      "tag": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter:0.5.4"
+    },
+    {
+      "app": "kaspa",
+      "role": "metrics",
+      "version": "0.5.4",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter",
+      "image_id": "sha256:22c4299cc3ef792fb670dc9d5e4af08abc00a76d123fb976aec86f801faf78de",
+      "source_commit": "2a9eea9f27a289911a555da21a3939ad77f732f5",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter@sha256:1a0efc2e5728a88568f1052283fce46e96adb8d32751f04c176201af1351dec1",
+      "tag": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter:metrics-0.5.4"
+    },
+    {
+      "app": "kaspa",
+      "role": "ui",
+      "version": "0.5.4",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-ui",
+      "image_id": "sha256:41eaf02a5fe434692de626fee29ff4572157f1704cab424495cec7194f1cafbc",
+      "source_commit": "2a9eea9f27a289911a555da21a3939ad77f732f5",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-ui@sha256:599bc2f395c1cd1a1e901a736b9642f99b5c8bc88ec2bc09a3d295916e45e7fd",
+      "tag": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-ui:ui-0.5.4"
+    }
+  ],
+  "security_refresh": "base libraries; application/mining binaries verified unchanged"
+}

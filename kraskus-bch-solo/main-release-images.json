@@ -1,0 +1,27 @@
+{
+  "app": "bch",
+  "version": "0.5.12",
+  "images": [
+    {
+      "app": "bch",
+      "role": "adapter",
+      "version": "0.5.12",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-bch-solo",
+      "image_id": "sha256:b2878ce7362acbb96c3fc4a759409bdbc982982fdd749490f01304329b397850",
+      "source_commit": "2a9eea9f27a289911a555da21a3939ad77f732f5",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-bch-solo@sha256:c47e7642bd46c03a239b9cb0dfc0e736d0860be81ca74b1761e8d61fc159130d",
+      "tag": "ghcr.io/kraskuscrypto/kraskus-bch-solo:0.5.12"
+    },
+    {
+      "app": "bch",
+      "role": "node",
+      "version": "0.5.12",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-bch-solo-node",
+      "image_id": "sha256:7f703e0bad5f6db6a5496bcb5df73e70a0a998eed768473646dafc2570fe187f",
+      "source_commit": "2a9eea9f27a289911a555da21a3939ad77f732f5",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-bch-solo-node@sha256:d1ccc1360e7db7a8b84bacd2fac1521c0837d6ffcd2b6add6e19ccf1d0bfff51",
+      "tag": "ghcr.io/kraskuscrypto/kraskus-bch-solo-node:0.5.12"
+    }
+  ],
+  "security_refresh": "base libraries; application/mining binaries verified unchanged"
+}

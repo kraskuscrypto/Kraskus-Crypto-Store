@@ -1,0 +1,73 @@
+schemaVersion: 1
+status: approved
+appId: kraskus-bch-solo
+appVersion: 0.5.12
+reviewedAt: "2026-11-04"
+reviewedBy: "Owner-authorized promotion; Codex release verification"
+
+upstream:
+  sourceUrl: https://github.com/kraskuscrypto/Kraskus-Mining-Platform/tree/ea5f14e7dc48124027a31f20ab9b2a343c1f9b23/apps/bch-solo
+  license: mixed
+  licenseEvidence: https://github.com/kraskuscrypto/Kraskus-Crypto-Dev-Store/blob/main/kraskus-bch-solo/LICENSES.md
+
+rights:
+  packageOriginal: true
+  softwareDistributionCleared: true
+  containerUseCleared: true
+  listingTextCleared: true
+  artworkCleared: true
+  noticesIncluded: true
+
+delivery:
+  mode: immutable-container-appliance
+  storePayload: recipe-only
+  mirrorsThirdPartyPayload: false
+
+compatibility:
+  osVersions:
+    - Debian-13-5tratumOS-clean-room
+  architectures:
+    - amd64
+  installTested: false
+  startTested: false
+  updateTested: false
+  uninstallTested: false
+
+security:
+  privileged: false
+  hostNetwork: false
+  dockerSocket: false
+  hostMountsReviewed: true
+  devicesReviewed: true
+  networkEndpointsReviewed: true
+
+notes: >-
+  Owner-authorized Main Store promotion on 2026-11-04. Published immutable images
+  passed anonymous pull checks, shipped-application/mining-binary equality and
+  fresh actual-bind creation, initialization, recreation and synthetic legacy-file
+  preservation. Security refresh changes base libraries only; no mining economics,
+  consensus code or external destinations changed. Current UI/control checks and
+  original coin-specific hardware/reward evidence are retained. BCH134 backend
+  tests and isolated BCHN reward/restart checks pass. Kaspa159 wallet/settlement
+  tests pass; final settlement6 and external gate15 tests pass. Monero retains
+  independent primary/subaddress reward ownership and exact99/1 fee-bearing block
+  qualification. Refreshed images have no critical or fixable scan findings;
+  unfixed Debian findings remain. Full clean-room OS lifecycle was not rerun.
+  See MAIN-RELEASE.md for exact evidence scope and migration warning.
+
+uiConsistency:
+  source: d2e118347f219f46bc27552db2a79839cc3d29c7
+  responsivePages: 18
+  bestShareFormattingCases: 9
+  runtimeChange: UI-only
+
+mainPromotion:
+  date: "2026-11-04"
+  scope: "Exact Dev Store images; no backend rebuild"
+  freshBindCreation: passed
+  initialization: passed
+  recreation: passed
+  legacySentinelsPreserved: passed
+  anonymousImagePulls: passed
+  fullCleanRoomOsLifecycle: not-rerun
+  evidence: MAIN-RELEASE.md
