@@ -1,25 +1,19 @@
 id: kraskus-btc-blake2b-solo
-name: BTC2b by Kraskus
-tagline: BTC2b Bitcoin Knots node, backed-up wallet, and true solo mining
+name: XBT by Kraskus
+tagline: External-wallet solo mining
 description: >-
-  BTC2b by Kraskus runs a pruned Bitcoin Knots node on the BTC2b chain (the
-  Knots BLAKE2b hard fork of Bitcoin at block 961640), a customer-owned
-  descriptor wallet with an encrypted backup, and a CONVOY DATUM true-solo
-  Stratum V1 endpoint for BLAKE2b miners on port 1923. Mining starts only
-  after the wallet backup is confirmed; rewards go straight to that wallet.
-  A fixed 1 percent developer fee is applied only to successfully mined
-  blocks as a coinbase split.
-version: 0.2.6
+  BEFORE UPDATING: move any funds held in the old native wallet to another wallet you control, confirm receipt, and securely back up the wallet and recovery information. This release removes native-wallet controls. Never purge legacy app data to upgrade.
+  XBT solo mining on the existing Bitcoin Knots BLAKE2b fork (activation height961640), not ordinary Bitcoin SHA-256. External payout address with a required1% developer fee paid directly in the coinbase. Node-derived coinbase maturity is retained, including the long-maturity rule. Simple Home, Mining, Blocks, Blockchain and Settings pages; themes, live worker telemetry and safe pruning controls. No user-facing native wallet. Existing wallet files are preserved during migration. Mining starts paused; set an external payout address and wait for node readiness before choosing Start mining. Kraskus Pool forwarding is under development.
+version: 0.3.3
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/
-repo: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
+repo: https://github.com/kraskuscrypto/Kraskus-Mining-Platform/tree/d2e118347f219f46bc27552db2a79839cc3d29c7/releases/ui-consistency-20261103/ui/xbt
 support: https://kraskuscrypto.com/
-icon: assets/btc2b.png
+icon: assets/xbt.png
 port: 33066
 path: /
 uiMode: proxy
-
 services:
   app_proxy:
     environment:

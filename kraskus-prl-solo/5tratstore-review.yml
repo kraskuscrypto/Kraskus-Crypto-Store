@@ -1,9 +1,9 @@
 schemaVersion: 1
 status: approved
 appId: kraskus-prl-solo
-appVersion: 0.5.1
-reviewedAt: "2026-10-09"
-reviewedBy: "Kraskus Crypto"
+appVersion: 0.6.4
+reviewedAt: "2026-11-04"
+reviewedBy: "Owner-authorized Main promotion; Codex verification"
 
 upstream:
   sourceUrl: https://github.com/pearl-research-labs/pearl
@@ -28,10 +28,10 @@ compatibility:
     - Debian-13-5tratumOS-clean-room
   architectures:
     - amd64
-  installTested: true
-  startTested: true
-  updateTested: true
-  uninstallTested: true
+  installTested: false
+  startTested: false
+  updateTested: false
+  uninstallTested: false
 
 security:
   privileged: false
@@ -42,39 +42,25 @@ security:
   networkEndpointsReviewed: true
 
 notes: >-
-  PRL 0.5.1 (miner compatibility): the stratum gateway sends its
-  pearl.challenge only to miners that stay silent for half a second after
-  connecting (AlphaMiner waits for it and is unchanged); miners that speak
-  first, like SRBMiner-MULTI, no longer receive an unsolicited method they
-  reject. One stratum line may now be up to 4 MiB (SRBMiner's shares are
-  about 1.07 MB); a larger line gets a clean "Request too large" error.
-  Tested: AlphaMiner 1.9.5, SRBMiner-MULTI 3.6.9. Known incompatible:
-  WildRig Multi 0.51.2 and 0.51.3 (they open with a non-JSON raw-hex
-  handshake; other WildRig versions untested). pearld, Oyster,
-  payout, difficulty, ports, wallet and the developer fee are unchanged.
-  PRL 0.5.0 (Kraskus V3 migration): the shared V3 UI and API contract, the
-  foundation app-token fallback (platform token or app token on every state
-  change and wallet read), the wallet password set as the last set-up step
-  (Oyster walletpassphrasechange from a random set-up passphrase) and the
-  standard payout destination (native wallet or an external address that
-  pearld validates, written to the gateway's payout-address file). pearld,
-  Oyster and gateway images are the unchanged 0.2.1 digests.
-  PRL 0.2.1 hotfix: node readiness uses pearld's lock-free RPCs, so a healthy
-  node validating blocks no longer reads as "Node unavailable" and the stratum
-  sync gate no longer closes during those stalls; a wallet restore scans its
-  history from the wallet birthday (or from genesis when unknown) and stays in
-  RESTORING, with no balance or payout, until the scan finishes.
-  PRL 0.2.0 (release qualification). One authoritative readiness model:
-  height 0, no peers, a lagging or stale tip never reads as synced, and the
-  gateway hands out work only while the node is synced. Wallet creation runs
-  in the background and persists the recovery phrase to a 0600 artifact
-  before the wallet is reported, so a lost HTTP response cannot orphan it;
-  mining payout activates only after the phrase is confirmed (or the wallet
-  was restored). Customer Forget wallet (typed FORGET WALLET) removes only
-  the customer wallet. Blocks come from the gateway's found-block ledger,
-  verified against the node. Send is not offered. All four images are built
-  from committed source by apps/prl-solo/build.sh with OCI version/revision
-  labels and are pinned by digest. Stratum is exposed on TCP 1902; node RPC,
-  Oyster RPC, gateway telemetry (1903), API and UI backend traffic remain
-  app-internal. The fixed required 1.00% developer-fee coinbase split is
-  unchanged and applies only to successfully mined blocks.
+  Main promotion authorized by owner on 2026-11-04 after beta feedback.
+  Fresh bind-mounted creation, initializer, recreation and synthetic legacy-file
+  preservation passed. Application code and mining binaries match previously
+  qualified images; base packages refreshed and exact images rescanned.
+  BTC explicit Start capability approved; new installs remain paused.
+  DGB native wallet disabled; external mining lanes retain their existing rules.
+  Security exceptions are image/package-specific and documented with reachability
+  evidence, not a zero-vulnerability claim. No new physical-miner test or full
+  clean-room OS lifecycle is claimed. See MAIN-RELEASE.md.
+
+uiConsistency:
+  source: d2e118347f219f46bc27552db2a79839cc3d29c7
+  responsivePages: 18
+  bestShareFormattingCases: 9
+  runtimeChange: previously-qualified-PRL-external-wallet-recipe
+
+upgradeRecipeFix:
+  source: c8db170
+  version: 0.6.3
+  issue: Missing bind source directories prevent the initializer from running during an older-app upgrade.
+  runtimeImagesChanged: false
+  validation: Real bind mounts, preserved legacy data, no payout adoption, paused mining and restart persistence.

@@ -1,15 +1,13 @@
 schemaVersion: 1
 status: approved
 appId: kraskus-chta-solo
-appVersion: 0.5.2
-reviewedAt: "2026-09-26"
-reviewedBy: "Kraskus Crypto"
-
+appVersion: 0.6.2
+reviewedAt: "2026-11-04"
+reviewedBy: "Owner-authorized Main promotion; Codex verification"
 upstream:
-  sourceUrl: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
+  sourceUrl: https://github.com/kraskuscrypto/Kraskus-Mining-Platform
   license: mixed
   licenseEvidence: LICENSES.md
-
 rights:
   packageOriginal: true
   softwareDistributionCleared: true
@@ -17,24 +15,19 @@ rights:
   listingTextCleared: true
   artworkCleared: true
   noticesIncluded: true
-
 delivery:
   mode: immutable-container-appliance
   storePayload: recipe-only
   mirrorsThirdPartyPayload: false
-
 compatibility:
   osVersions:
-    - Debian-13-5tratumOS-clean-room
+  - Debian-13-5tratumOS-clean-room
   architectures:
-    - amd64
-  # Qualified on VM120 through the 5tratumOS customer CLI: fresh install,
-  # start, 0.2.35 -> 0.3.0 update, uninstall, purge and reinstall.
-  installTested: true
-  startTested: true
-  updateTested: true
-  uninstallTested: true
-
+  - amd64
+  installTested: false
+  startTested: false
+  updateTested: false
+  uninstallTested: false
 security:
   privileged: false
   hostNetwork: false
@@ -42,65 +35,19 @@ security:
   hostMountsReviewed: true
   devicesReviewed: true
   networkEndpointsReviewed: true
-
 notes: >-
-  0.5.2 fixes a network difficulty that could stay stuck at about 20 billion:
-  when blocks arrive within 80 s of each other (the normal case at low
-  difficulty), 0.5.1 never accepted a new block template and kept the last
-  value it had seen during a pre-fork spike lock. 0.5.2 also reads the regular
-  work from templates inside Core's 80 s lottery window whenever the lottery did
-  not pick the spike target (bits 1836f9bf = powLimit / 2e10). Mining, payout,
-  ports (1926 and the 0.002 low-difficulty 1927), wallet and the 1% developer
-  fee are unchanged; Core 2.5.0 and CKPool are carried forward.
-  0.5.1 corrects the network difficulty and Best share figures. The network
-  difficulty now comes from CheetahCoin Core's block template, the regular
-  work CKPool mines (81-240 s after the previous block, or at a retarget
-  height). It is never the tip block's cheetah figure (0.0025, shown "0.002")
-  or a spike, share, port or worker difficulty, and it shows "Updating" until
-  confirmed. Best share (this session) is CKPool's current-round best
-  (including the block-finding share after a found block), not the all-time
-  best. Mining, payout, ports, wallet and the 1% developer fee are unchanged;
-  Core 2.5.0 (0.5.0 image) and CKPool (0.3.1 image) are carried forward.
-  0.5.0 moves the app onto the Kraskus V3 template (foundation 1.2.0): the
-  shared V3 interface, the V3 API served by the backend, and the V3 security
-  model -- every state change and wallet-data read must arrive through the
-  5tratumOS dashboard (P2 proxy token, or an app token created at start on
-  platforms without one), and the wallet password, now set at the end of
-  wallet set-up, is the only credential (backups, sending, Forget and later
-  payout changes; persisted lock-out). The wallet keeps its encrypted
-  complete-file backup; set-up downloads it and uploads it back to verify.
-  Existing 0.3.x wallets keep their password. Settings gains the V3
-  Difficulty control for port 1926's minimum share difficulty; port 1927 is
-  unchanged. CheetahCoin Core is the official 2.5.0 release (SHA-256
-  verified; same chain, wallet and RPC, no reindex). CKPool, the Stratum
-  ports, the payout logic, the wallet file format and the 1% developer fee
-  are unchanged; the CKPool image is the 0.3.1 one.
-  0.3.1 corrects the rejected-share count: it is now the number of
-  submissions CKPool rejected (a count added to the pool's status file by a
-  small reviewed patch), not CKPool's difficulty-weighted reject total that
-  0.3.0 displayed and that inflated port 1926's rejects and reject percentage.
-  Share acceptance, accepted counts, payout and the 1% developer fee are
-  unchanged; the new counter starts at zero after the update.
-  0.3.0 was a release-qualification rebuild. Every custom image (backend/init,
-  UI, CheetahCoin Core, CKPool) is built from committed source with
-  version/revision labels; the 0.2.x backend's chain of images built on top of
-  earlier images is gone, and the Core image now downloads the official
-  CheetahCoin 2.4.0 release and verifies its SHA-256. Wallet: the built-in
-  wallet stays in a backup-required state (no send, no native payout, receive
-  address withheld) until an encrypted backup of the complete wallet file has
-  been downloaded and verified; customers can reset the wallet and restore the
-  exact same wallet from that backup. The wallet password can no longer be
-  replaced by a second setup request. Readiness: one model reports Starting,
-  Syncing, Synced, Stratum not ready, Ready, Degraded, No peers or Error from
-  real node, payout, developer-fee and per-port Stratum observations; zero
-  peers or a stale chain tip is never reported as synced, and each Stratum
-  port's state is shown separately. Both Stratum ports now stay closed until
-  the node is synchronized and the payout is ready. Port 1927 is a fixed
-  0.002-difficulty low-diff entrance that no longer inherits normal-port
-  settings; port 1926 keeps min 1024 / start 4096 and its minimum can no
-  longer be set below 1. Upgrades now correctly restore the documented 1%
-  Kraskus developer-fee coinbase split when upgrading from configurations
-  that omitted it; an invalid developer-fee address now stops mining with a
-  visible error instead of silently mining at 0%. Blocks distinguish "no
-  blocks found" from "block data unavailable" and apply the solo-era filter
-  to both ports. The UI shows the release version in Settings > About.
+  Main promotion authorized by owner on 2026-11-04 after beta feedback.
+  Fresh bind-mounted creation, initializer, recreation and synthetic legacy-file
+  preservation passed. Application code and mining binaries match previously
+  qualified images; base packages refreshed and exact images rescanned.
+  BTC explicit Start capability approved; new installs remain paused.
+  DGB native wallet disabled; external mining lanes retain their existing rules.
+  Security exceptions are image/package-specific and documented with reachability
+  evidence, not a zero-vulnerability claim. No new physical-miner test or full
+  clean-room OS lifecycle is claimed. See MAIN-RELEASE.md.
+
+uiConsistency:
+  source: d2e118347f219f46bc27552db2a79839cc3d29c7
+  responsivePages: 18
+  bestShareFormattingCases: 9
+  runtimeChange: UI-only

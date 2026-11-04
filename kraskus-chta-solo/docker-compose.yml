@@ -1,246 +1,240 @@
-# 5tratumOS package for CheetahCoin by Kraskus (Kraskus CHTA Solo) 0.5.2
-# (Kraskus V3, foundation 1.2.0).
-#
-# 0.5.0 (V3 migration, owner design 2026-10-09): the shared V3 UI (nginx,
-# plain HTTP 8080, published once on the manifest port 33064), the V3 API
-# contract served by the backend (coins/chta/v3_api.py) behind the foundation
-# route policy, and the foundation 1.1.2 app-token fallback for platforms
-# without the P2 proxy token (stock 5tratumOS, Umbrel). CheetahCoin Core is
-# the official v2.5.0 release (owner-approved node baseline). CKPool runs the
-# unchanged 0.3.1 image. Services, networks and data paths are exactly as
-# 0.3.1.
-#
-# Every custom image is built by apps/chta-solo/build.sh from committed source
-# and pinned here by tag + digest after publication (release-manifest.json).
-#
-#   init          backend image, one-shot: secrets, Core config, both CKPool
-#                 configs (developer fee re-asserted on every start/upgrade),
-#                 the empty config/app-token directory (0700, uid 1000)
-#   cheetahcoin   CheetahCoin Core 2.5.0 + wallet-swap supervisor
-#   pool          CKPool NORMAL entrance    host 1926 (min 1024 / start 4096)
-#   pool_lowhash  CKPool LOW-DIFF entrance  host 1927 (fixed 0.002, NMMiner)
-#   kraskus       backend API (V3 contract), readiness monitor, Stratum gate,
-#                 wallet; token service of the P2 secure proxy: every state
-#                 change and every wallet-data read needs the platform (or
-#                 app) token, the wallet password guards backups, Forget,
-#                 send and payout changes
-#   ui            shared Kraskus V3 web UI (nginx, plain HTTP 8080)
-#
-# Both CKPool supervisors serve only while the backend's Stratum gate is open
-# (node synced with peers, valid payout, wallet backup confirmed when the
-# payout is the native wallet, developer-fee config intact).
-#
-# Networks: identical to 0.2.x on purpose. `init` uses the project default
-# network and every long-running service uses the `chta` network, whose
-# Docker name keeps its historical value (kraskus-chta-solo-v2-qualification).
-# The 5tratumOS CLI updates with `up --remove-orphans` and never removes a
-# network the new compose file no longer declares, so renaming or dropping
-# either network would orphan it -- and leak an address-pool slot -- on every
-# upgraded install. Published host ports: 1926 and 1927 (Stratum) and the UI
-# 33064 (127.0.0.1 under P2); Core RPC/P2P, the backend and the
-# wallet-transfer directory are internal.
-
-services:
-  app_proxy:
-    environment:
-      APP_HOST: ui
-      APP_PORT: 8080
-
-  init:
-    image: ghcr.io/kraskuscrypto/kraskus-chta-solo:0.5.2@sha256:94fd7d89bba150cc08cce65e21d49fbac4e0cc1541ed0adb91f6d5979847416b
-    restart: "no"
-    user: "0:0"
-    command:
-      - python3
-      - -m
-      - kraskus_solo.coins.chta.init_config
-    volumes:
-      - ${APP_DATA_DIR}/config:/kraskus-config
-      - ${APP_DATA_DIR}/secrets:/run/secrets
-      - ${APP_DATA_DIR}/pool:/ckpool-data
-      - ${APP_DATA_DIR}/pool-lowhash:/ckpool-lowhash-data
-      - ${APP_DATA_DIR}/node:/node-data
-      - ${APP_DATA_DIR}/wallet-transfer:/wallet-transfer
-    security_opt:
-      - no-new-privileges:true
-
-  cheetahcoin:
-    image: ghcr.io/kraskuscrypto/kraskus-cheetahcoin-core:0.5.0@sha256:2a4a4d30010f04fd4304a0241d51ad0027502e59d0728d464533aad2b3e08742
-    restart: unless-stopped
-    depends_on:
-      init:
-        condition: service_completed_successfully
-    volumes:
-      - ${APP_DATA_DIR}/node:/data
-      - ${APP_DATA_DIR}/config:/kraskus-config:ro
-      - ${APP_DATA_DIR}/wallet-transfer:/wallet-transfer
-    stop_grace_period: 90s
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - /usr/local/bin/cheetahcoin-cli -datadir=/data -conf=/kraskus-config/cheetahcoin.conf getblockchaininfo >/dev/null 2>&1
-      interval: 30s
-      timeout: 10s
-      retries: 10
-      start_period: 120s
-    networks:
-      - chta
-    security_opt:
-      - no-new-privileges:true
-
-  pool:
-    image: ghcr.io/kraskuscrypto/kraskus-chta-ckpool:0.3.1@sha256:2355f9ca770776dcaa3f4091cb57af827b58338f80065a3d3ecf9b92c8618082
-    restart: unless-stopped
-    depends_on:
-      init:
-        condition: service_completed_successfully
-      cheetahcoin:
-        condition: service_healthy
-    command:
-      - normal
-      - /kraskus-config/ckpool.conf
-    ports:
-      - "1926:3333"
-    volumes:
-      - ${APP_DATA_DIR}/config:/kraskus-config:ro
-      - ${APP_DATA_DIR}/pool:/www
-    networks:
-      - chta
-    security_opt:
-      - no-new-privileges:true
-
-  pool_lowhash:
-    image: ghcr.io/kraskuscrypto/kraskus-chta-ckpool:0.3.1@sha256:2355f9ca770776dcaa3f4091cb57af827b58338f80065a3d3ecf9b92c8618082
-    restart: unless-stopped
-    depends_on:
-      init:
-        condition: service_completed_successfully
-      cheetahcoin:
-        condition: service_healthy
-    command:
-      - lowdiff
-      - /kraskus-config/ckpool-lowdiff.conf
-    ports:
-      - "1927:3333"
-    volumes:
-      - ${APP_DATA_DIR}/config:/kraskus-config:ro
-      - ${APP_DATA_DIR}/pool-lowhash:/www
-    networks:
-      - chta
-    security_opt:
-      - no-new-privileges:true
-
-  kraskus:
-    image: ghcr.io/kraskuscrypto/kraskus-chta-solo:0.5.2@sha256:94fd7d89bba150cc08cce65e21d49fbac4e0cc1541ed0adb91f6d5979847416b
-    restart: unless-stopped
-    # Foundation 1.1.2 start step, as the image user 1000 (never root):
-    # without a platform token it creates the app token once (0400, in the
-    # 0700 directory the init step created); with the P2 token mounted it
-    # removes it. Then the backend.
-    command:
-      - python3
-      - -m
-      - kraskus_foundation.service_init
-      - --uid
-      - "1000"
-      - --gid
-      - "1000"
-      - --
-      - python3
-      - -m
-      - kraskus_solo.coins.chta.main
-    depends_on:
-      init:
-        condition: service_completed_successfully
-      cheetahcoin:
-        condition: service_healthy
-    environment:
-      KRASKUS_APP_NAME: CHTA Kraskus
-      KRASKUS_CHTA_RPC_URL: http://cheetahcoin:8536/
-      KRASKUS_CHTA_RPC_USER_FILE: /run/secrets/rpc-user
-      KRASKUS_CHTA_RPC_PASSWORD_FILE: /run/secrets/rpc-password
-      KRASKUS_CHTA_SETTINGS_FILE: /kraskus-config/settings.json
-      KRASKUS_CHTA_CKPOOL_CONFIG: /kraskus-config/ckpool.conf
-      KRASKUS_CHTA_LOWDIFF_CKPOOL_CONFIG: /kraskus-config/ckpool-lowdiff.conf
-      KRASKUS_CHTA_STRATUM_GATE_FILE: /kraskus-config/stratum-gate.json
-      KRASKUS_CHTA_WALLET_TRANSFER_DIR: /wallet-transfer
-      KRASKUS_CHTA_STRATUM_PORT: "1926"
-      KRASKUS_CHTA_POOL_HOST: pool
-      KRASKUS_CHTA_SHARELOG_DIR: /ckpool-data
-      KRASKUS_CHTA_USERS_DIR: /ckpool-data/users
-      KRASKUS_CHTA_CKPOOL_STATUS_FILE: /ckpool-data/pool/pool.status
-      KRASKUS_CHTA_SUPERVISOR_STATE_FILE: /ckpool-data/supervisor-state.json
-      KRASKUS_CHTA_LOWHASH_STRATUM_PORT: "1927"
-      KRASKUS_CHTA_LOWHASH_POOL_HOST: pool_lowhash
-      KRASKUS_CHTA_LOWHASH_SHARELOG_DIR: /ckpool-lowhash-data
-      KRASKUS_CHTA_LOWHASH_USERS_DIR: /ckpool-lowhash-data/users
-      KRASKUS_CHTA_LOWHASH_CKPOOL_STATUS_FILE: /ckpool-lowhash-data/pool/pool.status
-      KRASKUS_CHTA_LOWHASH_SUPERVISOR_STATE_FILE: /ckpool-lowhash-data/supervisor-state.json
-      # Foundation 1.1.2 app-token fallback (V3): used only while no P2
-      # platform token is mounted. Never logged.
-      KRASKUS_APP_TOKEN_FILE: /kraskus-config/app-token/token
-    volumes:
-      - ${APP_DATA_DIR}/config:/kraskus-config
-      - ${APP_DATA_DIR}/secrets:/run/secrets:ro
-      - ${APP_DATA_DIR}/pool:/ckpool-data:ro
-      - ${APP_DATA_DIR}/pool-lowhash:/ckpool-lowhash-data:ro
-      - ${APP_DATA_DIR}/wallet-transfer:/wallet-transfer
-    read_only: true
-    tmpfs:
-      - /tmp
-    cap_drop:
-      - ALL
-    networks:
-      - chta
-    security_opt:
-      - no-new-privileges:true
-
-  ui:
-    image: ghcr.io/kraskuscrypto/kraskus-chta-ui:0.5.2@sha256:2a5b36c2681db4681164f73dcf07cb03eabb86203e2b683377a8f2df7e7a2ac0
-    restart: unless-stopped
-    depends_on:
-      init:
-        condition: service_completed_successfully
-      kraskus:
-        condition: service_started
-    environment:
-      ADAPTER_HOST: kraskus
-    # The contract's ui_port (8080, plain HTTP, the only listener), published
-    # once on the manifest port. 5tratumOS P2 renders it on 127.0.0.1 only
-    # and reaches it through its authenticated HTTPS dashboard route, adding
-    # the per-app token; nginx relays the portal's header on /api/ only.
-    ports:
-      - "33064:8080/tcp"
-    # Foundation 1.1.2: the app-token fallback directory, read-only;
-    # kraskus-app-token.sh supplies that token only to /api/ requests that
-    # carry no token header (stock 5tratumOS, Umbrel). Under P2 the backend
-    # removes the app token, so the UI only relays the platform's header.
-    # (As Bitcoin SV 0.5.0, the UI is not read-only and keeps its default
-    # capabilities: the start script rewrites an nginx map and reads the
-    # 0400 token from the backend user's 0700 directory.)
-    volumes:
-      - ${APP_DATA_DIR}/config/app-token:/run/kraskus-app-token:ro
-    stop_grace_period: 5s
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8080/index.html"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-    networks:
-      - chta
-    security_opt:
-      - no-new-privileges:true
-
-networks:
-  chta:
-    name: kraskus-chta-solo-v2-qualification
-
-# Read only by 5tratumOS with the P2 secure proxy: the ui service's port 8080
-# is published on 127.0.0.1 only and the token service gets the per-app token
-# mounted read-only at /run/5tratumos.
-x-5tratumos-secure-proxy:
-  version: 1
-  ui_service: ui
-  ui_port: 8080
-  token_services: [kraskus]
+{
+  "services": {
+    "app_proxy": {
+      "environment": {
+        "APP_HOST": "ui",
+        "APP_PORT": 8080
+      }
+    },
+    "init": {
+      "image": "ghcr.io/kraskuscrypto/kraskus-chta-ui@sha256:29184caacc0c243369f761ed994ab41efa1f3ac1a09f82150f233106bb702dd0",
+      "restart": "no",
+      "user": "0:0",
+      "command": [
+        "python3",
+        "-m",
+        "kraskus_solo.coins.chta.init_config"
+      ],
+      "volumes": [
+        "${APP_DATA_DIR}/config:/kraskus-config",
+        "${APP_DATA_DIR}/secrets:/run/secrets",
+        "${APP_DATA_DIR}/pool:/ckpool-data",
+        "${APP_DATA_DIR}/pool-lowhash:/ckpool-lowhash-data",
+        "${APP_DATA_DIR}/node:/node-data",
+        "${APP_DATA_DIR}/wallet-transfer:/wallet-transfer"
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ]
+    },
+    "cheetahcoin": {
+      "image": "ghcr.io/kraskuscrypto/kraskus-chta-ui@sha256:05542ca802f8f0295dd452d0db4afa067e6f7af404777749d00a69ff3ccccc8c",
+      "restart": "unless-stopped",
+      "depends_on": {
+        "init": {
+          "condition": "service_completed_successfully"
+        }
+      },
+      "volumes": [
+        "${APP_DATA_DIR}/node:/data",
+        "${APP_DATA_DIR}/config:/kraskus-config:ro",
+        "${APP_DATA_DIR}/wallet-transfer:/wallet-transfer"
+      ],
+      "stop_grace_period": "90s",
+      "healthcheck": {
+        "test": [
+          "CMD-SHELL",
+          "/usr/local/bin/cheetahcoin-cli -datadir=/data -conf=/kraskus-config/cheetahcoin.conf getblockchaininfo >/dev/null 2>&1"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 10,
+        "start_period": "120s"
+      },
+      "networks": [
+        "chta"
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ]
+    },
+    "pool": {
+      "image": "ghcr.io/kraskuscrypto/kraskus-chta-ui@sha256:09c8ecf0168c1cb0ef8938f67b7358c2687cd98a4433c53f31537a33195ba80e",
+      "restart": "unless-stopped",
+      "depends_on": {
+        "init": {
+          "condition": "service_completed_successfully"
+        },
+        "cheetahcoin": {
+          "condition": "service_healthy"
+        }
+      },
+      "command": [
+        "normal",
+        "/kraskus-config/ckpool.conf"
+      ],
+      "ports": [
+        "1926:3333"
+      ],
+      "volumes": [
+        "${APP_DATA_DIR}/config:/kraskus-config:ro",
+        "${APP_DATA_DIR}/pool:/www"
+      ],
+      "networks": [
+        "chta"
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ]
+    },
+    "pool_lowhash": {
+      "image": "ghcr.io/kraskuscrypto/kraskus-chta-ui@sha256:09c8ecf0168c1cb0ef8938f67b7358c2687cd98a4433c53f31537a33195ba80e",
+      "restart": "unless-stopped",
+      "depends_on": {
+        "init": {
+          "condition": "service_completed_successfully"
+        },
+        "cheetahcoin": {
+          "condition": "service_healthy"
+        }
+      },
+      "command": [
+        "lowdiff",
+        "/kraskus-config/ckpool-lowdiff.conf"
+      ],
+      "ports": [
+        "1927:3333"
+      ],
+      "volumes": [
+        "${APP_DATA_DIR}/config:/kraskus-config:ro",
+        "${APP_DATA_DIR}/pool-lowhash:/www"
+      ],
+      "networks": [
+        "chta"
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ]
+    },
+    "kraskus": {
+      "image": "ghcr.io/kraskuscrypto/kraskus-chta-solo@sha256:c7f42ca98fda18bc4dee91b94c6039626c5909e384f3ff5d73e9d5c04937288a",
+      "restart": "unless-stopped",
+      "command": [
+        "python3",
+        "-m",
+        "kraskus_foundation.service_init",
+        "--uid",
+        "1000",
+        "--gid",
+        "1000",
+        "--",
+        "python3",
+        "-m",
+        "kraskus_solo.coins.chta.main"
+      ],
+      "depends_on": {
+        "init": {
+          "condition": "service_completed_successfully"
+        },
+        "cheetahcoin": {
+          "condition": "service_healthy"
+        }
+      },
+      "environment": {
+        "KRASKUS_APP_NAME": "CHTA Kraskus",
+        "KRASKUS_CHTA_RPC_URL": "http://cheetahcoin:8536/",
+        "KRASKUS_CHTA_RPC_USER_FILE": "/run/secrets/rpc-user",
+        "KRASKUS_CHTA_RPC_PASSWORD_FILE": "/run/secrets/rpc-password",
+        "KRASKUS_CHTA_SETTINGS_FILE": "/kraskus-config/settings.json",
+        "KRASKUS_CHTA_CKPOOL_CONFIG": "/kraskus-config/ckpool.conf",
+        "KRASKUS_CHTA_LOWDIFF_CKPOOL_CONFIG": "/kraskus-config/ckpool-lowdiff.conf",
+        "KRASKUS_CHTA_STRATUM_GATE_FILE": "/kraskus-config/stratum-gate.json",
+        "KRASKUS_CHTA_WALLET_TRANSFER_DIR": "/wallet-transfer",
+        "KRASKUS_CHTA_STRATUM_PORT": "1926",
+        "KRASKUS_CHTA_POOL_HOST": "pool",
+        "KRASKUS_CHTA_SHARELOG_DIR": "/ckpool-data",
+        "KRASKUS_CHTA_USERS_DIR": "/ckpool-data/users",
+        "KRASKUS_CHTA_CKPOOL_STATUS_FILE": "/ckpool-data/pool/pool.status",
+        "KRASKUS_CHTA_SUPERVISOR_STATE_FILE": "/ckpool-data/supervisor-state.json",
+        "KRASKUS_CHTA_LOWHASH_STRATUM_PORT": "1927",
+        "KRASKUS_CHTA_LOWHASH_POOL_HOST": "pool_lowhash",
+        "KRASKUS_CHTA_LOWHASH_SHARELOG_DIR": "/ckpool-lowhash-data",
+        "KRASKUS_CHTA_LOWHASH_USERS_DIR": "/ckpool-lowhash-data/users",
+        "KRASKUS_CHTA_LOWHASH_CKPOOL_STATUS_FILE": "/ckpool-lowhash-data/pool/pool.status",
+        "KRASKUS_CHTA_LOWHASH_SUPERVISOR_STATE_FILE": "/ckpool-lowhash-data/supervisor-state.json",
+        "KRASKUS_APP_TOKEN_FILE": "/kraskus-config/app-token/token"
+      },
+      "volumes": [
+        "${APP_DATA_DIR}/config:/kraskus-config",
+        "${APP_DATA_DIR}/secrets:/run/secrets:ro",
+        "${APP_DATA_DIR}/pool:/ckpool-data:ro",
+        "${APP_DATA_DIR}/pool-lowhash:/ckpool-lowhash-data:ro",
+        "${APP_DATA_DIR}/wallet-transfer:/wallet-transfer"
+      ],
+      "read_only": true,
+      "tmpfs": [
+        "/tmp"
+      ],
+      "cap_drop": [
+        "ALL"
+      ],
+      "networks": [
+        "chta"
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ]
+    },
+    "ui": {
+      "image": "ghcr.io/kraskuscrypto/kraskus-chta-ui@sha256:516ad6b71952762c1d4ccaa0a1f47cb1248f3346bae25925301dd9fcd25349e3",
+      "restart": "unless-stopped",
+      "depends_on": {
+        "init": {
+          "condition": "service_completed_successfully"
+        },
+        "kraskus": {
+          "condition": "service_started"
+        }
+      },
+      "environment": {
+        "ADAPTER_HOST": "kraskus"
+      },
+      "ports": [
+        "127.0.0.1:33064:8080/tcp"
+      ],
+      "volumes": [
+        "${APP_DATA_DIR}/config/app-token:/run/kraskus-app-token:ro"
+      ],
+      "stop_grace_period": "5s",
+      "healthcheck": {
+        "test": [
+          "CMD-SHELL",
+          "wget -q --spider http://127.0.0.1:8080/index.html"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "10s"
+      },
+      "networks": [
+        "chta"
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ]
+    }
+  },
+  "networks": {
+    "chta": {
+      "name": "kraskus-chta-solo-v2-qualification"
+    }
+  },
+  "x-5tratumos-secure-proxy": {
+    "version": 1,
+    "ui_service": "ui",
+    "ui_port": 8080,
+    "token_services": [
+      "kraskus"
+    ]
+  }
+}

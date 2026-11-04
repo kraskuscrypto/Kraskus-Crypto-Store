@@ -1,22 +1,17 @@
 id: kraskus-prl-solo
 name: Pearl by Kraskus
-tagline: Pearl solo mining node with native Oyster wallet
+tagline: Pearl solo mining directly to your external wallet
 description: >-
-  Pearl by Kraskus runs a real Pearl v1.4.8 mainnet node, the native Oyster
-  wallet and the Kraskus Pearl Stratum gateway on port 1902, with the Kraskus
-  V3 interface: node synchronization, one truthful mining-readiness state,
-  workers, shares and blocks confirmed by the node. Miners are refused until
-  the node is synchronized and a payout destination is set. The built-in
-  wallet shows its 12-word recovery phrase once, confirms it with a word
-  challenge and then asks for a wallet password, which protects payout
-  changes and Forget; payouts can also go to your own external Pearl address.
-  Sending from the built-in wallet is not available. A required 1% developer
-  fee is paid directly from each successful block coinbase.
-version: 0.5.1
+  BEFORE UPDATING: move any funds held in the old native wallet to another wallet you control, confirm receipt, and securely back up the wallet and recovery information. This release removes native-wallet controls. Never purge legacy app data to upgrade.
+  Pearl 1.5.5 solo mining to your external wallet, with the shared Kraskus
+  interface and fixed 1% developer fee. Fresh installs start paused.
+  Native-wallet access is removed; legacy data must be preserved.
+  The physical GPU miner test was waived by the owner.
+version: 0.6.4
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/
-repo: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
+repo: https://github.com/kraskuscrypto/Kraskus-Mining-Platform/tree/c8db170/releases/prl-upgrade-0.6.3
 support: https://kraskuscrypto.com/
 icon: assets/pearl.png
 port: 33068

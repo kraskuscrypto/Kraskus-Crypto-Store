@@ -2,31 +2,26 @@ id: kraskus-chta-solo
 name: CheetahCoin by Kraskus
 tagline: CheetahCoin full node and SHA256 solo mining
 description: >-
-  CheetahCoin by Kraskus turns 5tratumOS into a self-contained CheetahCoin
-  full node (CheetahCoin Core 2.5.0) and solo-mining appliance. The Kraskus
-  V3 interface shows node synchronization, one truthful mining-readiness
-  state, workers, accepted and rejected shares, and blocks independently
-  confirmed by the node. Normal miners connect on port 1926; NMMiner and
-  other very-low-hash devices use port 1927 with a fixed 0.002 difficulty.
-  Both ports stay closed until the node is synchronized and a valid payout is
-  configured. The built-in CheetahCoin wallet can receive, send and act as
-  the mining payout once you have downloaded and verified an encrypted backup
-  of the complete wallet file; the same backup restores the exact wallet on
-  any install. Wallet and settings changes are made through the 5tratumOS
-  dashboard; a wallet password you set at the end of wallet set-up protects
-  backups, sending, Forget and payout changes. A required 1% developer fee is
-  paid directly from successful block coinbases.
-version: 0.5.2
+  BEFORE UPDATING: move any funds held in the old native wallet to another wallet you control, confirm receipt, and securely back up the wallet and recovery information. This release removes native-wallet controls. Never purge legacy app data to upgrade. CheetahCoin Core node and solo mining with external payout addresses.
+  Home, Mining, Blocks, Blockchain, Kraskus Pool (under development), and Settings
+  use the BCH-standard interaction template with CHTA artwork and themes. Normal miners
+  use port 1926; very-low-hash devices use port 1927 at difficulty 0.002. Enter and
+  confirm your external CHTA reward address, wait for node readiness and explicitly
+  start mining. The fixed 1% developer fee is allocated by the existing CKPool coinbase
+  policy. There is no user-facing native wallet, seed or send function. Existing wallet
+  data and funds are retained during the protected migration. Core 2.5.0 and both
+  CKPool images are unchanged. Existing storage settings are preserved; prune changes
+  are not supported by this supervisor.
+version: 0.6.2
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/
-repo: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
+repo: https://github.com/kraskuscrypto/Kraskus-Mining-Platform/tree/d2e118347f219f46bc27552db2a79839cc3d29c7/releases/ui-consistency-20261103/ui/chta
 support: https://kraskuscrypto.com/
 icon: assets/cheetahcoin.png
 port: 33064
 path: /
 uiMode: proxy
-
 services:
   app_proxy:
     environment:

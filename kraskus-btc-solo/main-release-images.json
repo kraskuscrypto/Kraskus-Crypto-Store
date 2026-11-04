@@ -1,0 +1,55 @@
+{
+  "app": "btc",
+  "version": "0.5.6",
+  "refreshed_images": [
+    {
+      "app": "btc",
+      "role": "adapter",
+      "service": "init",
+      "version": "0.5.6",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-btc-solo-ui",
+      "base": "ghcr.io/kraskuscrypto/kraskus-btc-solo@sha256:6851765a0c7d9f11bf035c0fb0fd170e3c087d4fd4940a385cc3c431a2f69626",
+      "update": "all",
+      "remove_legacy_kaspactl": false,
+      "local_tag": "kraskus-main-btc-adapter:0.5.6",
+      "image_id": "sha256:1d4b568422e3f34f23e65ca6d5e84000ebca826a8fe94d6be4e13c34f465ed24",
+      "source_commit": "af1c008177a5d4231cd3123ca21aa20a638fab02",
+      "unchanged_application_files": 29,
+      "tag": "ghcr.io/kraskuscrypto/kraskus-btc-solo-ui:adapter-0.5.6",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-btc-solo-ui@sha256:5bdff8216eb7f09888323740905803fb7802e4611e1d01263e4fba70ca047509"
+    },
+    {
+      "app": "btc",
+      "role": "node",
+      "service": "node",
+      "version": "0.5.6",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-btc-solo-ui",
+      "base": "ghcr.io/kraskuscrypto/kraskus-btc-solo-node:0.5.0-dev@sha256:3321ad408515a5a3168e3c7e60f6942d2de49dce079d99dd884dab1aa20ab76e",
+      "update": "all",
+      "remove_legacy_kaspactl": false,
+      "local_tag": "kraskus-main-btc-node:0.5.6",
+      "image_id": "sha256:fdc2bd9725fbe1abbbae98058acbda4d0114ab38e460f338cc14ee573ad3f1a9",
+      "source_commit": "af1c008177a5d4231cd3123ca21aa20a638fab02",
+      "unchanged_application_files": 2,
+      "tag": "ghcr.io/kraskuscrypto/kraskus-btc-solo-ui:node-0.5.6",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-btc-solo-ui@sha256:81b0068708202f7fe8e6bd5957ddbe1d7714d9cb8d027dac4fb91bbfe95f7c18"
+    },
+    {
+      "app": "btc",
+      "role": "ui",
+      "service": "ui",
+      "version": "0.5.6",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-btc-solo-ui",
+      "base": "ghcr.io/kraskuscrypto/kraskus-btc-solo-ui@sha256:b83e4f0c08eceb47881205cda5fdb2d592890c811561b2bee4b8a1e655f62a8a",
+      "update": "all",
+      "remove_legacy_kaspactl": false,
+      "local_tag": "kraskus-main-btc-ui:0.5.6",
+      "image_id": "sha256:73dbfee415a64602a9187bfab48e0b8a8548aa147c2f6317846e5368282391d1",
+      "source_commit": "af1c008177a5d4231cd3123ca21aa20a638fab02",
+      "unchanged_application_files": 2,
+      "tag": "ghcr.io/kraskuscrypto/kraskus-btc-solo-ui:ui-0.5.6",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-btc-solo-ui@sha256:7cf0f87d290806ab838de4ba55f6941d3e1db191f811c02418ec2f69535dc07a"
+    }
+  ],
+  "unchanged_images": "Other recipe digests retained from qualified Dev release; full compose is authoritative."
+}

@@ -1,0 +1,71 @@
+{
+  "app": "xbt",
+  "version": "0.3.3",
+  "refreshed_images": [
+    {
+      "app": "xbt",
+      "role": "init",
+      "service": "runtime-init",
+      "version": "0.3.3",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-xbt-ui",
+      "base": "ghcr.io/kraskuscrypto/kraskus-xbt-adapter@sha256:f93eec2d3a4469f6c4c9c94ef8fe98d751780121512bfedbaba8dcd4e0c24afd",
+      "update": "all",
+      "remove_legacy_kaspactl": false,
+      "local_tag": "kraskus-main-xbt-init:0.3.3",
+      "image_id": "sha256:c935e1ef0d75a9806b937d32d6392b6a710a26898d5f5c58b55acc7dbb9876c8",
+      "source_commit": "af1c008177a5d4231cd3123ca21aa20a638fab02",
+      "unchanged_application_files": 21,
+      "tag": "ghcr.io/kraskuscrypto/kraskus-xbt-ui:init-0.3.3",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-xbt-ui@sha256:bcbdb6a0151c839c908263cde1ca93bddeba9c28626656acadb498a9de50de4c"
+    },
+    {
+      "app": "xbt",
+      "role": "node",
+      "service": "knots",
+      "version": "0.3.3",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-xbt-ui",
+      "base": "ghcr.io/kraskuscrypto/kraskus-xbt-knots@sha256:c7db7854e3136775321d0bdea085bf135a68f80dac0382a665d1f6c288a4f0c6",
+      "update": "all",
+      "remove_legacy_kaspactl": false,
+      "local_tag": "kraskus-main-xbt-node:0.3.3",
+      "image_id": "sha256:ae11b9cf3d2b2b8a7857797f9a7afa0651756d1b5f8ba0abbf0af5597bdfb088",
+      "source_commit": "af1c008177a5d4231cd3123ca21aa20a638fab02",
+      "unchanged_application_files": 3,
+      "tag": "ghcr.io/kraskuscrypto/kraskus-xbt-ui:node-0.3.3",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-xbt-ui@sha256:846c962b76e563eb731d5a9cb692e44f65233b23b6f4284fe0b857026308157a"
+    },
+    {
+      "app": "xbt",
+      "role": "gateway",
+      "service": "datum",
+      "version": "0.3.3",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-xbt-ui",
+      "base": "ghcr.io/kraskuscrypto/kraskus-xbt-datum@sha256:1562a53f580bf0ea2e65dd225d3ffaeb6acb82c04afcb942c18e51b8dda59e99",
+      "update": "all",
+      "remove_legacy_kaspactl": false,
+      "local_tag": "kraskus-main-xbt-gateway:0.3.3",
+      "image_id": "sha256:37a63f8f8618cbf495e42dc1cc78461b59268dbd40bd5c1fb9c08533b6fd9a1a",
+      "source_commit": "af1c008177a5d4231cd3123ca21aa20a638fab02",
+      "unchanged_application_files": 16,
+      "tag": "ghcr.io/kraskuscrypto/kraskus-xbt-ui:gateway-0.3.3",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-xbt-ui@sha256:ffa7b4e81acaebb1f4bc8321a80333758c7181108f0e267f26455c833c993316"
+    },
+    {
+      "app": "xbt",
+      "role": "adapter",
+      "service": "adapter",
+      "version": "0.3.3",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-xbt-ui",
+      "base": "ghcr.io/kraskuscrypto/kraskus-xbt-adapter@sha256:c7be02c3384d86afe83dea17068569b361584917e9b7e793d17490589cb00f09",
+      "update": "all",
+      "remove_legacy_kaspactl": false,
+      "local_tag": "kraskus-main-xbt-adapter:0.3.3",
+      "image_id": "sha256:9df84e36f96ba365ca9564055d2ade24689516024c7167ba2c69f78a4d9ae493",
+      "source_commit": "af1c008177a5d4231cd3123ca21aa20a638fab02",
+      "unchanged_application_files": 21,
+      "tag": "ghcr.io/kraskuscrypto/kraskus-xbt-ui:adapter-0.3.3",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-xbt-ui@sha256:d8d3dbf3e1d00fa4595f331659f65419eaa942a6369b0b46de3196d22bf9e83b"
+    }
+  ],
+  "unchanged_images": "Other recipe digests retained from qualified Dev release; full compose is authoritative."
+}

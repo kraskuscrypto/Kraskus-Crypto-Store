@@ -1,0 +1,39 @@
+{
+  "app": "prl",
+  "version": "0.6.4",
+  "refreshed_images": [
+    {
+      "app": "prl",
+      "role": "api",
+      "service": "api",
+      "version": "0.6.4",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-prl-solo-ui",
+      "base": "ghcr.io/kraskuscrypto/kraskus-prl-solo-ui@sha256:d3d7576811b2cc84f344b990f0800bd3faeeb864b6fd1e1488f67f5e27d6beab",
+      "update": "all",
+      "remove_legacy_kaspactl": false,
+      "local_tag": "kraskus-main-prl-api:0.6.4",
+      "image_id": "sha256:3c7eb0b38023559e4a021ba3a97e5a3cda30e15228c2271bd9e57451eb297eca",
+      "source_commit": "af1c008177a5d4231cd3123ca21aa20a638fab02",
+      "unchanged_application_files": 35,
+      "tag": "ghcr.io/kraskuscrypto/kraskus-prl-solo-ui:api-0.6.4",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-prl-solo-ui@sha256:f622bfa701a9c92f8ea217ff902318c8ea773bc791f14cb7cda84ee32d5a0bf3"
+    },
+    {
+      "app": "prl",
+      "role": "gateway",
+      "service": "gateway",
+      "version": "0.6.4",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-prl-solo-ui",
+      "base": "ghcr.io/kraskuscrypto/kraskus-prl-solo-ui@sha256:22f362063383074f8f6f989afd4d01db6f20930b1013adae90381115215c308d",
+      "update": "all",
+      "remove_legacy_kaspactl": false,
+      "local_tag": "kraskus-main-prl-gateway:0.6.4",
+      "image_id": "sha256:9d2bc79c78b9a4418706fb57d68086a57b114e6c9634476c7c3c76975dbfb11f",
+      "source_commit": "af1c008177a5d4231cd3123ca21aa20a638fab02",
+      "unchanged_application_files": 10,
+      "tag": "ghcr.io/kraskuscrypto/kraskus-prl-solo-ui:gateway-0.6.4",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-prl-solo-ui@sha256:91ac1ee8f286a2423bdff8ad3c5dc398e45dd5a9f2a3ae94d02c28ebd06065e9"
+    }
+  ],
+  "unchanged_images": "Other recipe digests retained from qualified Dev release; full compose is authoritative."
+}

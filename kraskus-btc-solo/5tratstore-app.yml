@@ -1,0 +1,24 @@
+id: kraskus-btc-solo
+name: Bitcoin by Kraskus
+tagline: Bitcoin node and external-wallet solo-mining dashboard
+description: >-
+  BEFORE UPDATING: move any funds held in the old native wallet to another wallet you control, confirm receipt, and securely back up the wallet and recovery information. This release removes native-wallet controls. Never purge legacy app data to upgrade. Run a pruned Bitcoin Core node with an external-wallet dashboard, live
+  worker telemetry, an interactive hashrate graph, block records, Bitcoin themes and
+  safe pruning controls. A fixed 1% developer fee is a separate output in each found
+  block; the miner receives the remainder. No native wallet, seed or private-key controls.
+  Start mining requires a synchronized node and confirmed external address. New installs remain paused. Kraskus Pool remains under development.
+version: 0.5.6
+category: Mining
+developer: Kraskus Crypto
+website: https://kraskuscrypto.com/
+repo: https://github.com/kraskuscrypto/Kraskus-Mining-Platform/tree/d2e118347f219f46bc27552db2a79839cc3d29c7/releases/ui-consistency-20261103/ui/btc
+support: https://kraskuscrypto.com/
+icon: assets/btc-store-emblem-v2.png
+port: 33079
+path: /
+uiMode: proxy
+services:
+  app_proxy:
+    environment:
+      APP_HOST: ui
+      APP_PORT: 8080

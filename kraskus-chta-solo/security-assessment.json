@@ -1,0 +1,66 @@
+{
+  "raw_scans_retained": true,
+  "exceptions": [
+    {
+      "image_id": "sha256:398a80dcde14fcd1db396c5fc08ff3f892b0e545e7814c6b7fbcd88ab672d9cd",
+      "vulnerability": "CVE-2023-45853",
+      "package": "zlib1g",
+      "installed": "1:1.2.13.dfsg-1",
+      "status": "not_affected_in_shipped_configuration",
+      "reason": "Debian bookworm zlib binary does not build the vulnerable contrib/minizip code; no minizip package installed.",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2023-45853"
+    },
+    {
+      "image_id": "sha256:f3b1f5c6aabfff06a783501abb4398f9281ce128e5153ee4ead1958d95824fd1",
+      "vulnerability": "CVE-2025-7458",
+      "package": "libsqlite3-0",
+      "installed": "3.40.1-2+deb12u2",
+      "status": "not_affected_in_shipped_configuration",
+      "reason": "No arbitrary-SQL interface. Shipped DGB node wallet disabled and verified; Stratum source has no SQLite import. Native-wallet API/RPC inaccessible.",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2025-7458"
+    },
+    {
+      "image_id": "sha256:f3b1f5c6aabfff06a783501abb4398f9281ce128e5153ee4ead1958d95824fd1",
+      "vulnerability": "CVE-2023-45853",
+      "package": "zlib1g",
+      "installed": "1:1.2.13.dfsg-1",
+      "status": "not_affected_in_shipped_configuration",
+      "reason": "Debian bookworm zlib binary does not build the vulnerable contrib/minizip code; no minizip package installed.",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2023-45853"
+    },
+    {
+      "image_id": "sha256:4fb9743f548d283c42e6afaec3e55ef932b4bc1d2bfc40d5fcea389b7142916e",
+      "vulnerability": "CVE-2025-7458",
+      "package": "libsqlite3-0",
+      "installed": "3.40.1-2+deb12u2",
+      "status": "not_affected_in_shipped_configuration",
+      "reason": "No arbitrary-SQL interface. Shipped DGB node wallet disabled and verified; Stratum source has no SQLite import. Native-wallet API/RPC inaccessible.",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2025-7458"
+    },
+    {
+      "image_id": "sha256:4fb9743f548d283c42e6afaec3e55ef932b4bc1d2bfc40d5fcea389b7142916e",
+      "vulnerability": "CVE-2023-45853",
+      "package": "zlib1g",
+      "installed": "1:1.2.13.dfsg-1",
+      "status": "not_affected_in_shipped_configuration",
+      "reason": "Debian bookworm zlib binary does not build the vulnerable contrib/minizip code; no minizip package installed.",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2023-45853"
+    },
+    {
+      "binary": "pearld",
+      "vulnerability": "GO-2026-5932",
+      "status": "affected_openpgp_package_not_linked",
+      "reason": "Official govulncheck binary analysis found module metadata only, no affected package or symbols; both binary analyses exited 0.",
+      "source": "https://vuln.go.dev/ID/GO-2026-5932.json"
+    },
+    {
+      "binary": "prlctl",
+      "vulnerability": "GO-2026-5932",
+      "status": "affected_openpgp_package_not_linked",
+      "reason": "Official govulncheck binary analysis found module metadata only, no affected package or symbols; both binary analyses exited 0.",
+      "source": "https://vuln.go.dev/ID/GO-2026-5932.json"
+    }
+  ],
+  "fixable_findings": 0,
+  "unassessed_critical_findings": 0
+}

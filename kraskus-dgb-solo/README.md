@@ -1,52 +1,27 @@
-# DigiByte Solo by Kraskus
+> **BEFORE UPDATING: move any funds held in the old native wallet to another wallet you control, confirm receipt, and securely back up the wallet and recovery information. This release removes native-wallet controls. Never purge legacy app data to upgrade.**
 
-A DigiByte Core full node, a customer-owned wallet, and true solo mining on three DigiByte algorithms. Each algorithm has its own Stratum endpoint, and the app shows each one on its own (Mining has a lane selector; nothing is added up across algorithms):
+# DigiByte by Kraskus0.3.1
 
-| Algorithm | Stratum |
-|---|---|
-| SHA-256 | `stratum+tcp://<host>:1928` |
-| Scrypt | `stratum+tcp://<host>:1929` |
-| Skein | `stratum+tcp://<host>:1930` |
+Shared six-page mining interface with Home, Mining, Blocks, Blockchain, Kraskus Pool and Settings. A fixed blue DigiByte coin, matching header emblem, true light/dark modes, Kraskus/Divinity/coin themes, orbiting dots and responsive navigation follow the common app standard.
 
-Point each miner at the port for its algorithm. The username is the worker name; `<anything>.<worker>` is shown as `<worker>`. Addresses are never displayed. Qubit (1931) and Odocrypt (1932) are validated by the node but not mined in this release.
+## Mining and rewards
 
-Block rewards pay the payout destination you choose on the Wallet page: this app's own wallet (once it is backed up and its password is set) or an external DigiByte address. You can switch between them, or turn payouts off, at any time; once the wallet has its password, every change needs it. Mining stops while payouts are off. Rewards are paid less a fixed 1% developer fee taken as a coinbase split on found blocks only (0.50%, 0.25% and 0.25% of the block reward to three developer addresses; you receive the remaining 99%). The wallet itself never pays a fee to the developer.
+SHA-256, Scrypt and Skein retain their existing independent endpoints onTCP1928/1929/1930. Use the algorithm selector to view one lane's graph, workers, hashrate and best reported shares. Scrypt uses its established pool difficulty units. Cross-algorithm hashrates and difficulties are never summed or compared as one number. Start/Pause applies to all three lanes.
 
-## Wallet (0.2.0)
+Set and confirm an external DigiByte address, then explicitly start mining once the node and fee validation are ready. Fresh installations start blank and paused; older installations also stay paused until explicitly activated through the converted interface. Existing selected external addresses are retained. The existing policy rejects a reward destination equal to a pinned developer-fee script; no developer destination is silently substituted.
 
-- **New wallets** get a 24-word recovery phrase. It is shown once; you confirm three of its words, then set the wallet password. The phrase is never shown again. It restores the wallet in this app or any wallet that supports BIP39 + BIP84 for DigiByte (`m/84'/20'/0'`).
-- **Wallets created by 0.1.x** keep their encrypted backup file and password. Nothing about them changes on update: same keys, same address, and the backup file you saved still restores them. Settings → Wallet shows the backup type.
-- **Send** shows the exact amount, network fee and total before anything is signed. The wallet password confirms it. If the app cannot tell whether a send reached the network, it says so and blocks a second send until the network answers: never resend in that case, check the wallet activity first.
-- **Forget** unloads the wallet and keeps its files on the node volume.
+The original1% fee is preserved as0.50%,0.25%,0.25% coinbase outputs, with each share rounded down and all remainders going to the miner. There is no payout scheduler, custodial balance or wallet send screen. The existing ledger uses100 confirmations for maturity.
 
-## Safe stop before down, uninstall, reinstall or a node-version change
+## Legacy wallets and storage
 
-The 5tratumOS CLI gives DigiByte Core its 10-minute stop grace on `app update`, `app down` and `app uninstall`. To confirm a clean exit before any of these, stop DigiByte Core first:
+No native-wallet, seed/phrase, key-export, restore or send routes are served. No wallet background worker runs, and the adapter's RPC permissions exclude wallet methods. Existing native wallet files, funds and metadata are left on disk; the protected update backs them up without exposing them or moving funds. Keep any existing external recovery backups.
 
-```bash
-sudo ./dgb-safe-stop.sh                  # stop the node and confirm a clean exit
-sudo ./dgb-safe-stop.sh --then reinstall # ...then uninstall (keep data) + install
-```
+The DigiByte Core9.26.7 and Stratum images, persistent paths, ports and credentials are preserved. Node startup/sync is independent of reward setup. The current prune target remains visible in Settings; pruning changes remain under node configuration, with DigiDollar block locks potentially retaining more than the target. Manual lane difficulty mutation, durable worker history, global round best and full block lookup are not exposed by this release. Unsupported figures remain unavailable rather than invented.
 
-`--then reinstall` is the supported update path for installs from a Kraskus store. It installs from the
-Kraskus Dev Store channel by default; Kraskus Store (Main) installs set the channel:
+Kraskus Pool is Under development; its page does not activate pool forwarding. Qubit and Odo remain reserved and disabled.
 
-```bash
-sudo DGB_CHANNEL=custom-kraskus-crypto-store ./dgb-safe-stop.sh --then reinstall
-```
+## Release validation
 
-`--then update` runs `5tratumos app update`, which on 5tratumOS releases before v0.8.31 refuses apps
-installed from a named custom store ("invalid channel") and leaves the app untouched.
+15 backend/HTTP/initialization tests;18 responsive page checks;12 theme/mode combinations; independent3-lane switching, worker privacy, best-share rendering, Copy and block-allocation display. A full isolated real-node regtest check uses the actual catalog bind mounts and verifies initialization, all three lane APIs, blocked native routes/RPCs, paused mining, credential persistence and legacy metadata preservation. Exact web-image serving matches the tested files. Node, lane and fee implementation changes are not introduced; no new physical-miner qualification is claimed.
 
-Never use `docker kill`, `docker rm -f` or `--purge`, and never delete `node/` or `runtime/` unless you intend to discard the chain and wallet.
-
-## Data
-
-Everything lives under the app data directory:
-
-- `node/`: chain and wallets
-- `runtime/`: app state
-- `stratum/<algorithm>/`: lane state
-- `secrets/<component>/`: RPC credentials
-
-A preserving reinstall keeps all of it. The DigiByte RPC port (14022) is never published.
+The node runs with its native wallet disabled; legacy wallet files remain preserved.

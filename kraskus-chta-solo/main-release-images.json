@@ -1,0 +1,55 @@
+{
+  "app": "chta",
+  "version": "0.6.2",
+  "refreshed_images": [
+    {
+      "app": "chta",
+      "role": "init",
+      "service": "init",
+      "version": "0.6.2",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-chta-ui",
+      "base": "ghcr.io/kraskuscrypto/kraskus-chta-solo:0.5.2@sha256:94fd7d89bba150cc08cce65e21d49fbac4e0cc1541ed0adb91f6d5979847416b",
+      "update": "all",
+      "remove_legacy_kaspactl": false,
+      "local_tag": "kraskus-main-chta-init:0.6.2",
+      "image_id": "sha256:30d107c2a5e0f08033edee6349161949bf2a60c75401f5757204f3396222b3ee",
+      "source_commit": "af1c008177a5d4231cd3123ca21aa20a638fab02",
+      "unchanged_application_files": 79,
+      "tag": "ghcr.io/kraskuscrypto/kraskus-chta-ui:init-0.6.2",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-chta-ui@sha256:29184caacc0c243369f761ed994ab41efa1f3ac1a09f82150f233106bb702dd0"
+    },
+    {
+      "app": "chta",
+      "role": "node",
+      "service": "cheetahcoin",
+      "version": "0.6.2",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-chta-ui",
+      "base": "ghcr.io/kraskuscrypto/kraskus-cheetahcoin-core:0.5.0@sha256:2a4a4d30010f04fd4304a0241d51ad0027502e59d0728d464533aad2b3e08742",
+      "update": "all",
+      "remove_legacy_kaspactl": false,
+      "local_tag": "kraskus-main-chta-node:0.6.2",
+      "image_id": "sha256:398a80dcde14fcd1db396c5fc08ff3f892b0e545e7814c6b7fbcd88ab672d9cd",
+      "source_commit": "af1c008177a5d4231cd3123ca21aa20a638fab02",
+      "unchanged_application_files": 3,
+      "tag": "ghcr.io/kraskuscrypto/kraskus-chta-ui:node-0.6.2",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-chta-ui@sha256:05542ca802f8f0295dd452d0db4afa067e6f7af404777749d00a69ff3ccccc8c"
+    },
+    {
+      "app": "chta",
+      "role": "gateway",
+      "service": "pool",
+      "version": "0.6.2",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-chta-ui",
+      "base": "ghcr.io/kraskuscrypto/kraskus-chta-ckpool:0.3.1@sha256:2355f9ca770776dcaa3f4091cb57af827b58338f80065a3d3ecf9b92c8618082",
+      "update": "all",
+      "remove_legacy_kaspactl": false,
+      "local_tag": "kraskus-main-chta-gateway:0.6.2",
+      "image_id": "sha256:e14df944a47b4e2486843bf6521a8db07730ec714b9b4a7914576aca830d1d22",
+      "source_commit": "af1c008177a5d4231cd3123ca21aa20a638fab02",
+      "unchanged_application_files": 3,
+      "tag": "ghcr.io/kraskuscrypto/kraskus-chta-ui:gateway-0.6.2",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-chta-ui@sha256:09c8ecf0168c1cb0ef8938f67b7358c2687cd98a4433c53f31537a33195ba80e"
+    }
+  ],
+  "unchanged_images": "Other recipe digests retained from qualified Dev release; full compose is authoritative."
+}

@@ -1,0 +1,71 @@
+{
+  "app": "dgb",
+  "version": "0.3.1",
+  "refreshed_images": [
+    {
+      "app": "dgb",
+      "role": "adapter",
+      "service": "init",
+      "version": "0.3.1",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-dgb-solo-ui",
+      "base": "ghcr.io/kraskuscrypto/kraskus-dgb-solo-adapter@sha256:e333bfb81c049a9e830b3bd26a16bc3576f5b27c4dd3112f37b7fcb8249463e2",
+      "update": "all",
+      "remove_legacy_kaspactl": false,
+      "local_tag": "kraskus-main-dgb-adapter:0.3.1",
+      "image_id": "sha256:bd908ee5a8f7cf2fac9a1f5382d3f0955f6b43f5819ec988d997cdabfbe889e8",
+      "source_commit": "af1c008177a5d4231cd3123ca21aa20a638fab02",
+      "unchanged_application_files": 35,
+      "tag": "ghcr.io/kraskuscrypto/kraskus-dgb-solo-ui:adapter-0.3.1",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-dgb-solo-ui@sha256:f4f64948413e6532515974587cd616a75a23e189bb23fe8afed419e06833a59a"
+    },
+    {
+      "app": "dgb",
+      "role": "node",
+      "service": "node",
+      "version": "0.3.1",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-dgb-solo-ui",
+      "base": "ghcr.io/kraskuscrypto/kraskus-dgb-solo-node:0.1.3@sha256:32efdc8ecd8c5b3866539cda24efabd0ed3cd209dc41c5d06e5fb00bc71f8a33",
+      "update": "all",
+      "remove_legacy_kaspactl": false,
+      "local_tag": "kraskus-main-dgb-node:0.3.1",
+      "image_id": "sha256:f3b1f5c6aabfff06a783501abb4398f9281ce128e5153ee4ead1958d95824fd1",
+      "source_commit": "af1c008177a5d4231cd3123ca21aa20a638fab02",
+      "unchanged_application_files": 4,
+      "tag": "ghcr.io/kraskuscrypto/kraskus-dgb-solo-ui:node-0.3.1",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-dgb-solo-ui@sha256:3cdd8eca974ab94d9ab0485475fe8880f594cc8627080a95474fe387aec5ae20"
+    },
+    {
+      "app": "dgb",
+      "role": "gateway",
+      "service": "stratum-sha256d",
+      "version": "0.3.1",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-dgb-solo-ui",
+      "base": "ghcr.io/kraskuscrypto/kraskus-dgb-solo-stratum:0.2.2@sha256:7e15f8e604ed0cdfc4577f51e8c1f3593d377665a841bc6d29f0e6b6a89c70e3",
+      "update": "all",
+      "remove_legacy_kaspactl": false,
+      "local_tag": "kraskus-main-dgb-gateway:0.3.1",
+      "image_id": "sha256:4fb9743f548d283c42e6afaec3e55ef932b4bc1d2bfc40d5fcea389b7142916e",
+      "source_commit": "af1c008177a5d4231cd3123ca21aa20a638fab02",
+      "unchanged_application_files": 21,
+      "tag": "ghcr.io/kraskuscrypto/kraskus-dgb-solo-ui:gateway-0.3.1",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-dgb-solo-ui@sha256:087a14560a2710b5ae1c3acf9d284c3426c495368354377b464ddf6f4c19afdb"
+    },
+    {
+      "app": "dgb",
+      "role": "ui",
+      "service": "ui",
+      "version": "0.3.1",
+      "repository": "ghcr.io/kraskuscrypto/kraskus-dgb-solo-ui",
+      "base": "ghcr.io/kraskuscrypto/kraskus-dgb-solo-ui@sha256:da55d8b41243758159bde143a74f320044f7250031dab20eacd7ea6ea278087f",
+      "update": "all",
+      "remove_legacy_kaspactl": false,
+      "local_tag": "kraskus-main-dgb-ui:0.3.1",
+      "image_id": "sha256:d9ac492e89912069e9f443c8d44d379a55ae0f1179557f5314246d5b52c51a2f",
+      "source_commit": "af1c008177a5d4231cd3123ca21aa20a638fab02",
+      "unchanged_application_files": 28,
+      "tag": "ghcr.io/kraskuscrypto/kraskus-dgb-solo-ui:ui-0.3.1",
+      "reference": "ghcr.io/kraskuscrypto/kraskus-dgb-solo-ui@sha256:0c2f33a30c95c7ec0aeba4f1692a25756f832c072adea8200895f6ca2ea2065f"
+    }
+  ],
+  "unchanged_images": "Other recipe digests retained from qualified Dev release; full compose is authoritative."
+}

@@ -1,0 +1,53 @@
+schemaVersion: 1
+status: approved
+appId: kraskus-btc-solo
+appVersion: 0.5.6
+reviewedAt: "2026-11-04"
+reviewedBy: "Owner-authorized Main promotion; Codex verification"
+upstream:
+  sourceUrl: https://github.com/kraskuscrypto/Kraskus-Crypto-Release-Sources/tree/main/apps/kraskus-btc-solo/0.5.0-dev
+  license: mixed
+  licenseEvidence: https://github.com/kraskuscrypto/Kraskus-Crypto-Release-Sources/tree/main/apps/kraskus-btc-solo/0.5.0-dev/THIRD-PARTY.md
+rights:
+  packageOriginal: true
+  softwareDistributionCleared: true
+  containerUseCleared: true
+  listingTextCleared: true
+  artworkCleared: true
+  noticesIncluded: true
+delivery:
+  mode: immutable-container-appliance
+  storePayload: recipe-only
+  mirrorsThirdPartyPayload: false
+compatibility:
+  osVersions:
+  - Debian-13-5tratumOS-clean-room
+  architectures:
+  - amd64
+  installTested: false
+  startTested: false
+  updateTested: false
+  uninstallTested: false
+security:
+  privileged: false
+  hostNetwork: false
+  dockerSocket: false
+  hostMountsReviewed: true
+  devicesReviewed: true
+  networkEndpointsReviewed: true
+notes: >-
+  Main promotion authorized by owner on 2026-11-04 after beta feedback.
+  Fresh bind-mounted creation, initializer, recreation and synthetic legacy-file
+  preservation passed. Application code and mining binaries match previously
+  qualified images; base packages refreshed and exact images rescanned.
+  BTC explicit Start capability approved; new installs remain paused.
+  DGB native wallet disabled; external mining lanes retain their existing rules.
+  Security exceptions are image/package-specific and documented with reachability
+  evidence, not a zero-vulnerability claim. No new physical-miner test or full
+  clean-room OS lifecycle is claimed. See MAIN-RELEASE.md.
+
+uiConsistency:
+  source: d2e118347f219f46bc27552db2a79839cc3d29c7
+  responsivePages: 18
+  bestShareFormattingCases: 9
+  runtimeChange: UI-only
