@@ -186,7 +186,7 @@
       ]
     },
     "ui": {
-      "image": "ghcr.io/kraskuscrypto/kraskus-chta-ui@sha256:516ad6b71952762c1d4ccaa0a1f47cb1248f3346bae25925301dd9fcd25349e3",
+      "image": "ghcr.io/kraskuscrypto/kraskus-chta-ui@sha256:3bbcc32242e801eac02cea9b3f08c49e9243c1c0b9d85e47d76b2d4073851cb3",
       "restart": "unless-stopped",
       "depends_on": {
         "init": {

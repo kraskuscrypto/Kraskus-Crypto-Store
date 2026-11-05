@@ -9,7 +9,7 @@ description: 'BEFORE UPDATING FROM A NATIVE-WALLET RELEASE: send all holdings to
   controls. No user-facing native wallet. Existing wallet files are preserved during migration. Mining
   starts paused; set an external payout address and wait for node readiness before choosing Start mining.
   Kraskus Pool forwarding is under development. '
-version: 0.6.3
+version: 0.6.4
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/

@@ -7,7 +7,7 @@ description: >-
   safe pruning controls. A fixed 1% developer fee is a separate output in each found
   block; the miner receives the remainder. No native wallet, seed or private-key controls.
   Start mining requires a synchronized node and confirmed external address. New installs remain paused. Kraskus Pool remains under development.
-version: 0.5.6
+version: 0.5.7
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/

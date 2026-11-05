@@ -1,0 +1,14 @@
+{
+  "app": "kraskus-xmr-solo",
+  "source_commit": "91d7b5d77b2cd799b0929e208c6a4a2859c00d3d",
+  "ui_reference": "ghcr.io/kraskuscrypto/kraskus-5trat-xmr-ui@sha256:a2d00ece622cd8c2fb5831252dd73fa9293d3e714b4c131578d73bf764044164",
+  "qualified_image_id": "sha256:9f631ea8cf5380d0bb5ed32a896fd6ece56460041e6025e8fb0ce43ee12ff3e6",
+  "base_reference": "ghcr.io/kraskuscrypto/kraskus-5trat-xmr-ui@sha256:77f8be1c4b0dc1f5b69adf4aceb36a6251a5a2290336fd1f6a91e5af8769c22b",
+  "assets": {
+    "app.js": "73ebc27e1abd657d6d67c9778ff726c77d026b1d4d540f6f514ef4fc058e6f17",
+    "app.css": "4c7bd2f3d64d5c30106cd0d7f60ce6092de7e9c7847fe9a7a03ad679a8c8e9d0",
+    "index.html": "3b2a5f0672d1df137c85c8157a80e84760a20431f1c27f0147d9b6d7df506d5e"
+  },
+  "scope": "Planned Pool introduction, layout and asset cache keys only; no mining controls or economic changes",
+  "layout_checks": "1280/375/320px; no horizontal overflow, no active Pool controls"
+}

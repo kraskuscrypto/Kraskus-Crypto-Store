@@ -25,3 +25,7 @@ Kraskus Pool is Under development; its page does not activate pool forwarding. Q
 15 backend/HTTP/initialization tests;18 responsive page checks;12 theme/mode combinations; independent3-lane switching, worker privacy, best-share rendering, Copy and block-allocation display. A full isolated real-node regtest check uses the actual catalog bind mounts and verifies initialization, all three lane APIs, blocked native routes/RPCs, paused mining, credential persistence and legacy metadata preservation. Exact web-image serving matches the tested files. Node, lane and fee implementation changes are not introduced; no new physical-miner qualification is claimed.
 
 The node runs with its native wallet disabled; legacy wallet files remain preserved.
+
+## Kraskus Pool integration — Under Development
+
+The Pool tab previews planned solo/pool switching, scheduled times with an explicit time zone, invite-only private mining groups, optional connection fallback and clear mode/fee/reward status. These controls are not implemented yet; support depends on the coin and pool. The introduction does not change current mining, payout addresses or fees. See pool-tab-update.json for the exact UI image and validation scope.

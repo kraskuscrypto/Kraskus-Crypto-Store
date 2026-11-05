@@ -197,7 +197,7 @@
       "init": true
     },
     "ui": {
-      "image": "ghcr.io/kraskuscrypto/kraskus-bsv-external-ui@sha256:b2986d8ac20fa2ed9b57877dbe896cc45cadcdb2247ca71110decd16df300c4d",
+      "image": "ghcr.io/kraskuscrypto/kraskus-bsv-external-ui@sha256:5595ab8e97f42594965c9c0404a41eb21c125eb4bbab5d6d7f7070bcb9e419ac",
       "restart": "unless-stopped",
       "depends_on": {
         "init": {

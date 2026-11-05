@@ -1,0 +1,14 @@
+{
+  "app": "kraskus-btc-blake2b-solo",
+  "source_commit": "91d7b5d77b2cd799b0929e208c6a4a2859c00d3d",
+  "ui_reference": "ghcr.io/kraskuscrypto/kraskus-xbt-ui@sha256:ff4d115afd80e0db881f249bd3d4dfaeb1d76c1e3cc86228f776ea4320315a60",
+  "qualified_image_id": "sha256:a3f3bdd24578ed21208169b8e8c2e2313403606fcced79e8a37317d7e5776099",
+  "base_reference": "ghcr.io/kraskuscrypto/kraskus-xbt-ui@sha256:8ebe33e63e134718628cd5ddc3540e34e0b396bfbb68234f3a6804cd00090fa9",
+  "assets": {
+    "app.js": "a78153d4430e64fd8227a29087a422e5bac1ae12e536ba1efd05a23a33a16abb",
+    "app.css": "fe01f4df3d31fe6a5693c77551843ee30a69b53b34a51c8012ef70aecd66a3a0",
+    "index.html": "d01521984c1edd73fc53f5c78f8a1cc34260e638bb74c89861f394e80d42933c"
+  },
+  "scope": "Planned Pool introduction, layout and asset cache keys only; no mining controls or economic changes",
+  "layout_checks": "1280/375/320px; no horizontal overflow, no active Pool controls"
+}

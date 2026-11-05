@@ -9,3 +9,7 @@ Each found block allocates 99% directly to the miner and a separate 1% developer
 Local Stratum TCP1921; P2P18080; authenticated platform UI on loopback33065. Daemon RPC is internal. Protocol-defined pruning has no arbitrary disk-size slider. The read-only mempool reader reports actual counts and byte size and has no wallet mount or published port. Kraskus Pool remains Under development.
 
 The current release is linux/amd64. See MAIN-RELEASE.md and LICENSES.md.
+
+## Kraskus Pool integration — Under Development
+
+The Pool tab previews planned solo/pool switching, scheduled times with an explicit time zone, invite-only private mining groups, optional connection fallback and clear mode/fee/reward status. These controls are not implemented yet; support depends on the coin and pool. The introduction does not change current mining, payout addresses or fees. See pool-tab-update.json for the exact UI image and validation scope.

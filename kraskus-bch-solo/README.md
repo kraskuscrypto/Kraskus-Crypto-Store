@@ -16,3 +16,7 @@ Fresh installs create their own state and token. Upgrades retain the external ad
 BCHN 29.2.0 has a recorded RPC expiry of 2027-05-15 12:00 UTC; update the node before that date. Mining rewards are probabilistic and never guaranteed.
 
 UI update 0.5.10: the header duplicates the hero coin face and the Home Node card shows current sync progress. Node, API, payout rules and fee are unchanged. UI source: https://github.com/kraskuscrypto/Kraskus-Mining-Platform/commit/ff4cf14fab1eb3a63b4e0419bdd47e018d68da37.
+
+## Kraskus Pool integration — Under Development
+
+The Pool tab previews planned solo/pool switching, scheduled times with an explicit time zone, invite-only private mining groups, optional connection fallback and clear mode/fee/reward status. These controls are not implemented yet; support depends on the coin and pool. The introduction does not change current mining, payout addresses or fees. See pool-tab-update.json for the exact UI image and validation scope.

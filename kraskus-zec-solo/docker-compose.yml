@@ -104,7 +104,7 @@
       ]
     },
     "ui": {
-      "image": "ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller@sha256:b57443ffac8e1a4b14a5f1aadf911882792592dbb490322bf636db7042a1f75a",
+      "image": "ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller@sha256:b2a490afdd1ae4808c1bed704a9e76761a1f282246986f4233ac85556cc3535a",
       "restart": "unless-stopped",
       "depends_on": {
         "zallet-init": {

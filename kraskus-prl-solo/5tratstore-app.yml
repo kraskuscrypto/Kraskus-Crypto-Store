@@ -7,7 +7,7 @@ description: >-
   interface and fixed 1% developer fee. Fresh installs start paused.
   Native-wallet access is removed; legacy data must be preserved.
   The physical GPU miner test was waived by the owner.
-version: 0.6.4
+version: 0.6.5
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/

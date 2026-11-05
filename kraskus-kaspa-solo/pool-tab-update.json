@@ -1,0 +1,14 @@
+{
+  "app": "kraskus-kaspa-solo",
+  "source_commit": "91d7b5d77b2cd799b0929e208c6a4a2859c00d3d",
+  "ui_reference": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-ui@sha256:0f52ed6c47afbd40c08fbbda357724044c37e39dfeb1a70a1fc30c6bca37f2a5",
+  "qualified_image_id": "sha256:2e4f568bf2cbcbb4a1e2d6dc393af0e1fa3f2a9d5c00e3fd6fc221db246b1dfe",
+  "base_reference": "ghcr.io/kraskuscrypto/kraskus-kaspa-solo-ui@sha256:599bc2f395c1cd1a1e901a736b9642f99b5c8bc88ec2bc09a3d295916e45e7fd",
+  "assets": {
+    "app.js": "c7d6e35bfea028ec9026a4cb1b91a845e4523671ebc857c43adc228a9f9d39d4",
+    "app.css": "3ab211eb354a3a6f3a3d0d20fda09c1e1a440d325026d445ea63d95696998234",
+    "index.html": "02084455d061a9e1d989a612da06d7f9419adf5256690010e30658ffd37875b0"
+  },
+  "scope": "Planned Pool introduction, layout and asset cache keys only; no mining controls or economic changes",
+  "layout_checks": "1280/375/320px; no horizontal overflow, no active Pool controls"
+}

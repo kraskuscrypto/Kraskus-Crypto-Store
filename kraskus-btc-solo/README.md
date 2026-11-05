@@ -11,3 +11,7 @@ Pruning starts at30000MiB of block data, excluding chainstate/indexes. Adjusting
 Software qualification:121 backend tests,12 real-node regtest checks, authenticated pruning restart and responsive/theme checks pass. Installed-platform migration is still pending. All app images are digest-pinned.
 
 UI update 0.5.4: the header duplicates the hero coin face and the Home Node card shows current sync progress. Node, API, payout rules and fee are unchanged. UI source: https://github.com/kraskuscrypto/Kraskus-Mining-Platform/commit/6de2683454de0a413f6ee70b0c6edb1462868181.
+
+## Kraskus Pool integration — Under Development
+
+The Pool tab previews planned solo/pool switching, scheduled times with an explicit time zone, invite-only private mining groups, optional connection fallback and clear mode/fee/reward status. These controls are not implemented yet; support depends on the coin and pool. The introduction does not change current mining, payout addresses or fees. See pool-tab-update.json for the exact UI image and validation scope.

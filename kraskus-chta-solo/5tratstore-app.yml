@@ -12,7 +12,7 @@ description: >-
   data and funds are retained during the protected migration. Core 2.5.0 and both
   CKPool images are unchanged. Existing storage settings are preserved; prune changes
   are not supported by this supervisor.
-version: 0.6.2
+version: 0.6.3
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/

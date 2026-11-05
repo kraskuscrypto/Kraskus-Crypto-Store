@@ -1,8 +1,8 @@
 schemaVersion: 1
 status: approved
 appId: kraskus-xmr-solo
-appVersion: 0.3.5
-reviewedAt: "2026-11-04"
+appVersion: 0.3.6
+reviewedAt: "2026-11-05"
 reviewedBy: "Owner-authorized promotion; Codex release verification"
 upstream:
   sourceUrl: https://github.com/kraskuscrypto/Kraskus-Mining-Platform/tree/119617e1956cc0d32baa78202e2c583797487e97/apps/xmr-solo

@@ -33,3 +33,7 @@ Version 0.6.2 supplies the shared external-wallet interface, truthful startup/ca
 ## Upgrade startup fix in 0.6.3
 
 Directory bind mounts can be prepared before the initializer runs. RPC credentials are mounted through their read-only parent directory, avoiding missing individual file sources during container creation. Credentials already present are preserved. An empty directory accidentally created at a runtime-file location can be replaced with the required file; a nonempty directory is refused. Legacy wallet and chain directories are retained. No images, fee values, miner ports or mining intent are changed by this recipe patch.
+
+## Kraskus Pool integration — Under Development
+
+The Pool tab previews planned solo/pool switching, scheduled times with an explicit time zone, invite-only private mining groups, optional connection fallback and clear mode/fee/reward status. These controls are not implemented yet; support depends on the coin and pool. The introduction does not change current mining, payout addresses or fees. See pool-tab-update.json for the exact UI image and validation scope.

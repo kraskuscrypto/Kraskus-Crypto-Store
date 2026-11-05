@@ -13,7 +13,7 @@ description: >-
   1 percent developer fee applies only to successfully mined blocks as
   three coinbase outputs (0.50,0.25 and0.25 percent); the miner receives
   the remaining99 percent, including rounding remainders.
-version: 0.3.1
+version: 0.3.2
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/

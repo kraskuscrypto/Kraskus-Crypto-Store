@@ -11,7 +11,7 @@ description: >-
   port 1933. Each startup is paused; save a valid external BCH payout address,
   wait for node sync, then use the authenticated Start control. Do not forward
   this miner port to the public internet.
-version: 0.5.12
+version: 0.5.13
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/

@@ -1,8 +1,8 @@
 schemaVersion: 1
 status: approved
 appId: kraskus-bch-solo
-appVersion: 0.5.12
-reviewedAt: "2026-11-04"
+appVersion: 0.5.13
+reviewedAt: "2026-11-05"
 reviewedBy: "Owner-authorized promotion; Codex release verification"
 
 upstream:

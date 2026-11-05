@@ -1,0 +1,14 @@
+{
+  "app": "kraskus-zec-solo",
+  "source_commit": "91d7b5d77b2cd799b0929e208c6a4a2859c00d3d",
+  "ui_reference": "ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller@sha256:b2a490afdd1ae4808c1bed704a9e76761a1f282246986f4233ac85556cc3535a",
+  "qualified_image_id": "sha256:c6e98db0572136e588fc961c295f850337a01cdd05143f45e21a9e3621febb2c",
+  "base_reference": "ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller@sha256:b57443ffac8e1a4b14a5f1aadf911882792592dbb490322bf636db7042a1f75a",
+  "assets": {
+    "app.js": "38ce10adac06aae8231689475dcb16a7b58227853ee871470d72e6e2f276b7d6",
+    "app.css": "386c9e5dfbe2033a94465556efbce3f5aa213bba225653c45c65687c38a8bee2",
+    "index.html": "895ab494b44f4aa97dd57fd2b20cfb861fbe9e8a93eeb0d6796b719b7ae8c055"
+  },
+  "scope": "Planned Pool introduction, layout and asset cache keys only; no mining controls or economic changes",
+  "layout_checks": "1280/375/320px; no horizontal overflow, no active Pool controls"
+}

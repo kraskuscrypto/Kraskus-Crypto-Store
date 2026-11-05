@@ -11,7 +11,7 @@ description: 'BEFORE UPDATING FROM A NATIVE-WALLET RELEASE: send all holdings to
   wallet files and funds are preserved through the protected migration. The existing 320 GiB Mainnet storage
   preflight and pre-NU7 compatibility limits remain enforced; this release does not update the node or
   add pruning. Kraskus Pool remains under development.'
-version: 0.6.1
+version: 0.6.2
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/
