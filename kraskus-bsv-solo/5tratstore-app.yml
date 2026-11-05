@@ -1,32 +1,24 @@
 id: kraskus-bsv-solo
-name: Bitcoin SV
-tagline: Bitcoin SV node and private solo mining command center
-description: >-
-  Bitcoin SV turns 5tratumOS into a self-contained BSV
-  mainnet node (SV Node 1.2.2, pruned, 10 GB excessive block size) and a
-  native GMC-to-Stratum V1 solo-mining controller on port 1922. The Kraskus
-  V3 interface shows node synchronization, one truthful mining-readiness
-  state, workers, shares and blocks confirmed by the node. Miners are refused
-  until the node is synchronized and a valid payout is configured; plain Stratum V1 miners
-  and ASICs that use version rolling (BIP310 / ASICBoost) are supported. The
-  built-in wallet receives mining payouts once you have downloaded and
-  verified an encrypted backup of the complete wallet file; the same backup
-  restores the exact wallet on any install. Wallet and settings changes are
-  made through the 5tratumOS dashboard; a wallet password you set at the end
-  of wallet set-up protects backups, Forget and payout changes. Sending from
-  the built-in wallet is not available. A required 1% developer fee is paid directly from each
-  successful block coinbase.
-version: 0.5.3
+name: Bitcoin SV by Kraskus
+tagline: External-wallet solo mining
+description: 'BEFORE UPDATING FROM A NATIVE-WALLET RELEASE: send all holdings to a wallet you control
+  and keep a verified recovery backup. Native-wallet controls are removed. Never delete legacy wallet
+  data. Bitcoin SV mainnet node and solo Stratum controller, with external payout address and a required1%
+  developer fee paid directly in the coinbase. SV Node1.2.2 and the existing chain configuration are retained.
+  Simple Home, Mining, Blocks, Blockchain and Settings pages; themes, live worker telemetry and safe pruning
+  controls. No user-facing native wallet. Existing wallet files are preserved during migration. Mining
+  starts paused; set an external payout address and wait for node readiness before choosing Start mining.
+  Kraskus Pool forwarding is under development. '
+version: 0.6.3
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/
-repo: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps
+repo: https://github.com/kraskuscrypto/Kraskus-Mining-Platform/tree/d2e118347f219f46bc27552db2a79839cc3d29c7/releases/ui-consistency-20261103/ui/bsv
 support: https://kraskuscrypto.com/
 icon: assets/bitcoin_sv.png
 port: 18422
 path: /
 uiMode: proxy
-
 services:
   app_proxy:
     environment:
