@@ -1,6 +1,6 @@
 # NU7 sync recovery candidate — 2026-11-09
 
-Status: DRAFT / NOT QUALIFIED FOR CUSTOMER INSTALLATION.
+Status: OWNER-AUTHORIZED SYNC-RECOVERY BETA for Umbrel Main. Full-chain testing is delegated to the beta tester by owner instruction on 2026-11-09. This is not a stable or fully qualified release.
 
 ## Finding
 
@@ -46,7 +46,7 @@ consensus-vector tests and physical-miner qualification. No fee changes.
 Zebra 7 upgrades state/v28 to state/v29 automatically. The move is not prevented
 by delete_old_database=false. Zebra 6 cannot read v29.
 
-Before a qualified update is installed:
+Before this beta update is installed:
 1. Stop the Zcash app cleanly through Umbrel and wait for its containers to stop.
    Do not stop unrelated apps. Do not uninstall.
 2. Locate this installation's actual APP_DATA_DIR. Copy its entire zebra/state/v28
@@ -59,7 +59,7 @@ Before a qualified update is installed:
    v28 backup verified
    This acknowledgement is required when v28 exists. It does not create a backup.
    Fresh installations with no v28 do not need it.
-4. Apply the qualified update through the normal store path, then start the app.
+4. Apply version 0.6.3 through Umbrel Main, then start the app.
    Keep mining paused. Leave the old database backup untouched.
 5. Confirm logs report Zebra 7.0.0, Mainnet and successful state migration, and
    that height advances beyond 3,543,405 toward the current chain tip.
@@ -78,23 +78,28 @@ Completed locally: six tests exercise fresh startup, backup refusal, acknowledge
 upgrade startup, wrong-network refusal, storage-gate waiting and unchanged
 persistence/security. Shell syntax passes. Public old-image metadata and official
 new-image manifest/config were inspected; registry response digests were checked.
-The local tests use a stub entrypoint, not a real Zebra process.
+The local tests use a stub entrypoint, not a real Zebra process. Docker Compose
+5.7.0 config validation passes with an injected platform app_proxy fixture. Shell
+command substitutions are escaped for Compose. No container execution is claimed.
 
-Not completed: actual Docker Compose interpolation/config validation, image
+Not completed: image
 signature/provenance verification, vulnerability qualification, exact-image
 startup/RPC/cookie test, real empty bind-directory install, stopped v28 fixture
 migration/restart/data-preservation test, and Mainnet advancement past activation.
 No Docker runtime exists locally; QA SSH to vm161 timed out. No customer host was
-accessed or changed. Do not merge or advertise this candidate until these checks
-pass. Generate Umbrel output from the final source commit after qualification.
+accessed or changed. The owner explicitly authorized publishing this sync-only beta
+to Umbrel Main without waiting for the full sync test. Remaining validation is not
+claimed complete. The beta tester must verify advancement beyond activation and
+report migration/startup failures before this can be called stable.
 Zebra 7.0.0 has a short upstream support window; recheck supported stable versions
 before publishing.
 
 ## Customer guidance now
 
 We found an outdated bundled Zcash node that cannot follow the NU7 upgrade.
-A sync-recovery update is in review and has not been released. Please do not
+Version 0.6.3 is a sync-recovery beta, with mining unavailable. Please do not
 uninstall, reset or delete blockchain data. Keep mining paused and preserve your
-wallet/recovery backups. We will provide the qualified update and the backup
-steps before asking you to update. If requested, provide only redacted app logs
+wallet/recovery backups. Before updating, stop the app, make and verify the v28 backup, and complete the
+backup acknowledgement described above. Updating alone will deliberately keep
+Zebra stopped until that acknowledgement exists. If requested, provide only redacted app logs
 and node version/height information.
