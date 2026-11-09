@@ -66,9 +66,6 @@
         "${APP_DATA_DIR}/zebra:/zebra:ro",
         "${APP_DATA_DIR}/config:/kraskus-config"
       ],
-      "ports": [
-        "3335:3335"
-      ],
       "security_opt": [
         "no-new-privileges:true"
       ],
@@ -80,19 +77,18 @@
       ]
     },
     "zebra": {
-      "image": "ghcr.io/kraskuscrypto/kraskus-zebra@sha256:abbbddd84563023df621f1eecceeb816da5c2951d9b60718133f131e1341c6d0",
+      "image": "zfnd/zebra:7.0.0@sha256:a70d2be8ffef3a4b6e37355724e36a0e6c1838e46baa28bfb216739f00cf2d34",
       "restart": "unless-stopped",
       "entrypoint": [
         "/bin/bash",
         "-c",
-        "until [ -f /kraskus-config/zebra-start-allowed ]; do sleep 10; done; exec /usr/local/bin/kraskus-zebra-supervisor"
+        "set -e\nuntil [ -f /kraskus-config/zebra-start-allowed ]; do sleep 10; done\n[ \"$(cat /kraskus-config/network)\" = Mainnet ] || { echo 'Refusing unexpected network' >&2; exit 78; }\nif [ -d /home/zebra/.cache/zebra/state/v28 ]; then\n  [ \"$(cat /kraskus-config/nu7-v28-backup-confirmed 2>/dev/null || true)\" = 'v28 backup verified' ] || {\n    echo 'Stop the app, back up Zebra state/v28, verify the backup, then follow NU7-UPGRADE.md. No migration started.' >&2\n    exit 78\n  }\nfi\nunset ZEBRA_MINING__MINER_ADDRESS CONFIG_FILE_PATH\nexport ZEBRA_NETWORK__NETWORK=Mainnet\nexport ZEBRA_STATE__DELETE_OLD_DATABASE=false\nexec /usr/local/bin/entrypoint.sh zebrad\n"
       ],
       "environment": {
         "ZEBRA_NETWORK__LISTEN_ADDR": "0.0.0.0:18233",
         "ZEBRA_RPC__LISTEN_ADDR": "0.0.0.0:18232",
         "ZEBRA_RPC__COOKIE_DIR": "/home/zebra/.cache/zebra",
         "ZEBRA_STATE__CACHE_DIR": "/home/zebra/.cache/zebra",
-        "KRASKUS_MINER_ADDRESS_FILE": "/kraskus-config/miner-address",
         "KRASKUS_NETWORK_FILE": "/kraskus-config/network"
       },
       "volumes": [
@@ -101,7 +97,8 @@
       ],
       "security_opt": [
         "no-new-privileges:true"
-      ]
+      ],
+      "stop_grace_period": "10m"
     },
     "ui": {
       "image": "ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller@sha256:b2a490afdd1ae4808c1bed704a9e76761a1f282246986f4233ac85556cc3535a",
