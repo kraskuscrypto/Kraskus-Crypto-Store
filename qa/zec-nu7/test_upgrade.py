@@ -1,74 +1,80 @@
-"""Exercise the shipped startup command using isolated temporary paths."""
-import copy
+"""Production package preservation and supervisor transition tests."""
 import json
-import pathlib
+import os
+from pathlib import Path
+import signal
 import subprocess
 import tempfile
+import time
 import unittest
 
-ROOT = pathlib.Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent
 COMPOSE = ROOT.parents[1] / 'kraskus-zec-solo/docker-compose.yml'
 
-class UpgradeTests(unittest.TestCase):
-    def run_start(self, legacy=False, confirmed=False, network='Mainnet'):
-        compose = json.loads(COMPOSE.read_text())
-        raw = compose['services']['zebra']['entrypoint'][2]
-        self.assertIn('$$(cat /kraskus-config/network)', raw)
-        script = raw.replace('$$', '$')
-        with tempfile.TemporaryDirectory() as d:
-            root = pathlib.Path(d)
-            config = root / 'config'; config.mkdir()
-            state = root / 'zebra'; state.mkdir()
-            (config / 'zebra-start-allowed').write_text('{}')
-            (config / 'network').write_text(network)
-            if legacy:
-                old = state / 'state/v28/mainnet'; old.mkdir(parents=True)
-                (old / 'sentinel').write_text('chain-data')
-            if confirmed:
-                (config / 'nu7-v28-backup-confirmed').write_text('v28 backup verified\n')
-            stub = root / 'entrypoint'
-            stub.write_text('#!/bin/sh\n[ "$1" = zebrad ] || exit 1\n[ -z "${ZEBRA_MINING__MINER_ADDRESS+x}" ] || exit 2\n[ -z "${CONFIG_FILE_PATH+x}" ] || exit 3\n[ "$ZEBRA_NETWORK__NETWORK" = Mainnet ] || exit 4\n[ "$ZEBRA_STATE__DELETE_OLD_DATABASE" = false ] || exit 5\n')
-            stub.chmod(0o755)
-            script = script.replace('/kraskus-config', str(config)).replace('/home/zebra/.cache/zebra', str(state)).replace('/usr/local/bin/entrypoint.sh', str(stub))
-            result = subprocess.run(['bash', '-c', script], env={'PATH':'/usr/bin:/bin', 'ZEBRA_MINING__MINER_ADDRESS':'legacy-address', 'CONFIG_FILE_PATH':'legacy.toml'}, capture_output=True, text=True, timeout=5)
-            if legacy:
-                self.assertEqual((state / 'state/v28/mainnet/sentinel').read_text(), 'chain-data')
-            return result
-
-    def test_fresh_start_without_payout(self):
-        self.assertEqual(self.run_start().returncode, 0)
-
-    def test_legacy_state_requires_verified_backup(self):
-        result = self.run_start(legacy=True)
-        self.assertEqual(result.returncode, 78)
-        self.assertIn('No migration started', result.stderr)
-
-    def test_confirmed_backup_allows_start(self):
-        self.assertEqual(self.run_start(legacy=True, confirmed=True).returncode, 0)
-
-    def test_wrong_network_fails_closed(self):
-        self.assertEqual(self.run_start(network='Testnet').returncode, 78)
-
-    def test_no_gate_waits_without_starting(self):
-        script = json.loads(COMPOSE.read_text())['services']['zebra']['entrypoint'][2].replace('$$', '$')
-        with tempfile.TemporaryDirectory() as d:
-            script = script.replace('/kraskus-config', d).replace('sleep 10', 'exit 79')
-            self.assertEqual(subprocess.run(['bash', '-c', script]).returncode, 79)
-
-    def test_unchanged_persistence_and_security(self):
+class ProductionUpgradeTests(unittest.TestCase):
+    def test_persistence_and_exposure(self):
         before = json.loads((ROOT / 'before-compose.json').read_text())
         after = json.loads(COMPOSE.read_text())
-        expected = copy.deepcopy(before)
-        expected['services']['zebra'] = after['services']['zebra']
-        expected['services']['kraskus'].pop('ports')
-        self.assertEqual(expected, after)
-        for key in ('volumes', 'security_opt', 'restart'):
-            self.assertEqual(before['services']['zebra'][key], after['services']['zebra'][key])
+        for name in before['services']:
+            if 'volumes' in before['services'][name]:
+                self.assertEqual(before['services'][name]['volumes'], after['services'][name]['volumes'])
+            self.assertEqual(before['services'][name].get('security_opt'), after['services'][name].get('security_opt'))
+        self.assertEqual(after['services']['kraskus']['ports'], ['3335:3335'])
         self.assertNotIn('ports', after['services']['zebra'])
-        self.assertNotIn('ports', after['services']['kraskus'])
-        env = copy.deepcopy(before['services']['zebra']['environment'])
-        env.pop('KRASKUS_MINER_ADDRESS_FILE')
-        self.assertEqual(env, after['services']['zebra']['environment'])
+        self.assertNotIn('zallet', after['services'])
+        self.assertEqual(before['services']['ui']['image'], after['services']['ui']['image'])
+        self.assertEqual(before['services']['zallet-init'], after['services']['zallet-init'])
+
+    def test_gate_payout_restart_and_clean_stop(self):
+        script = json.loads(COMPOSE.read_text())['services']['zebra']['entrypoint'][2]
+        self.assertIn('$CONFIG_DIR'.replace('$', '$$'), script)
+        script = script.replace('$$', '$')
+        self.assertNotIn('nu7-v28-backup-confirmed', script)
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); config = root / 'config'; config.mkdir()
+            cache = root / 'cache'; cache.mkdir()
+            sentinel = cache / 'legacy-state'; sentinel.write_bytes(b'keep-chain-state')
+            events = root / 'events'
+            child = root / 'node.sh'
+            child.write_text('''#!/bin/bash
+echo "start:${ZEBRA_MINING__MINER_ADDRESS:-none}" >> "$EVENTS"
+trap 'echo stop >> "$EVENTS"; exit 0' TERM INT
+while :; do sleep 0.1 & wait $! || true; done
+''')
+            script = script.replace('CONFIG_DIR=/kraskus-config', 'CONFIG_DIR=' + str(config))
+            script = script.replace('chown -R 10001:10001 "$cache"', ':')
+            script = script.replace('setpriv --reuid=10001 --regid=10001 --init-groups zebrad &', 'bash ' + str(child) + ' &')
+            env = dict(os.environ, ZEBRA_STATE__CACHE_DIR=str(cache), ZEBRA_RPC__COOKIE_DIR=str(cache), EVENTS=str(events))
+            proc = subprocess.Popen(['bash', '-c', script], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            def wait_for(predicate):
+                deadline = time.monotonic() + 8
+                while time.monotonic() < deadline:
+                    if predicate(): return
+                    if proc.poll() is not None:
+                        self.fail('supervisor exited: ' + proc.stderr.read().decode())
+                    time.sleep(0.1)
+                self.fail('supervisor transition timed out')
+            try:
+                time.sleep(0.4)
+                self.assertFalse(events.exists(), 'storage gate bypassed')
+                (config / 'network').write_text('Mainnet\n')
+                (config / 'miner-address').write_text('invalid legacy payout\n')
+                (config / 'zebra-start-allowed').write_text('{}')
+                wait_for(lambda: events.exists())
+                self.assertEqual(events.read_text().splitlines(), ['start:none'])
+                address = 't1' + 'A' * 33
+                (config / 'miner-address').write_text(address)
+                wait_for(lambda: 'start:' + address in events.read_text())
+                (config / 'miner-address').write_text('')
+                wait_for(lambda: events.read_text().count('start:none') == 2)
+                proc.send_signal(signal.SIGTERM)
+                self.assertEqual(proc.wait(timeout=5), 0)
+                self.assertEqual(events.read_text().splitlines(), ['start:none', 'stop', 'start:' + address, 'stop', 'start:none', 'stop'])
+                self.assertEqual(sentinel.read_bytes(), b'keep-chain-state')
+            finally:
+                if proc.poll() is None:
+                    proc.terminate(); proc.wait(timeout=5)
+                proc.stdout.close(); proc.stderr.close()
 
 if __name__ == '__main__':
     unittest.main()

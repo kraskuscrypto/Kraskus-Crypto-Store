@@ -1,105 +1,65 @@
-# NU7 sync recovery candidate — 2026-11-09
+# Zcash 0.6.4 — NU7 node and mining update
 
-Status: OWNER-AUTHORIZED SYNC-RECOVERY BETA for Umbrel Main. Full-chain testing is delegated to the beta tester by owner instruction on 2026-11-09. This is not a stable or fully qualified release.
+This update replaces the sync-only 0.6.3 package. It uses Zebra 7.0.0 and the
+matching zebra-chain 15.0.0 coinbase library. The helper rebuilds transactions
+through the production librustzcash API, preserving version, consensus branch,
+inputs, protocol allocations and authorizing-data commitment. It applies the
+existing floor(1%) developer allocation only to the miner-controlled output.
 
-## Finding
+External payout settings and saved Start/Stop intent are retained. New installs
+remain paused. A valid confirmed transparent P2PKH address, synchronized node,
+storage preflight and explicit Start remain required. Node synchronization does
+not depend on payout setup. Port 3335 is restored for Equihash miners.
 
-Kraskus Zcash 0.6.2 in Crypto Main and generated Umbrel Main uses
-ghcr.io/kraskuscrypto/kraskus-zebra@sha256:abbbddd84563023df621f1eecceeb816da5c2951d9b60718133f131e1341c6d0.
-The registry image configuration labels it Zebra 6.2.3 (upstream revision
-7121c82ba6795a151523d5b308a19743f4a1ade7). Its supervisor runs zebrad,
-not zcashd. The same node digest also appears in both Dev catalogs.
+The node supervisor waits for the existing storage gate, refuses unknown or
+changed networks, runs zebrad as uid/gid 10001, forwards clean shutdowns, and
+restarts Zebra when the controller's external payout projection changes. Missing
+or malformed payout text does not block non-authoring synchronization. It never
+reads legacy wallet records or starts Zallet. Cookie credentials are read from
+the existing shared node mount. RPC is not published on the host.
 
-The reported stopping height 3,543,404 is immediately before NU7 at 3,543,405.
-Upstream Zebra 7.0.0 is the first stable Mainnet NU7 release.
-This establishes a packaged compatibility defect and a strong explanation for
-the report; customer logs and installed image inspection are still needed to
-confirm that customer's exact failure.
+## Installation and preservation
 
-Sources:
+Use the normal Umbrel Main Update action for version 0.6.4. There is no manual
+backup acknowledgement file to create. The 0.6.3 acknowledgement file, if one was
+created, is left untouched and no longer used. Preserve existing recovery backups.
+
+Zebra performs its supported v28-to-v29 database migration on first start. The
+same chain mount and existing state are reused; this update does not reset,
+prune, delete, manually rename or symlink the database. A stopped-node v28 backup
+before upgrading is recommended by upstream, particularly if rollback is needed.
+Zebra 6 cannot read v29; do not downgrade it onto migrated data. Retain any v28
+backup separately. Keep legacy wallet files and recovery backups; no user-facing
+native wallet is provided.
+
+After updating, confirm that the node progresses beyond height 3,543,405. When
+synchronization completes, use the existing confirmed external payout address
+and Start mining. If it was intentionally stopped, the update does not start it.
+Check worker connections, accepted/rejected shares and actual mining-ready status.
+If startup or mining fails, provide redacted node/controller/gateway logs, app
+version, node height, peers, disk availability and miner model. Do not send wallet
+files, seeds, private keys, RPC cookies or app tokens. Do not uninstall or delete
+chain data to troubleshoot.
+
+## Evidence and limits
+
+Local helper checks: 95 independent vectors, including real NU7 Testnet coinbases,
+unknown branch rejection, canonical digests and fee/output preservation. The real
+gateway/helper contract includes full job construction and tampered/missing/hung
+helper rejection: 142 checks passed. Linux exact-image checks and image scan are
+recorded by the qualification workflow and release payload; consult that run for
+its final result rather than treating this document as a passed check.
+
+The owner delegated full-chain synchronization to the tester. A populated v28
+migration and physical Equihash hardware run are not claimed complete. Neither
+the absence of a long sync run nor a package version proves that a miner has found
+an accepted Mainnet block. These remaining checks must be reported honestly.
+
+Upstream:
 - https://github.com/ZcashFoundation/zebra/releases/tag/v7.0.0
 - https://github.com/ZcashFoundation/zebra/releases/tag/v7.0.0-rc.0
-- https://zfnd.org/zebra-7-0-0-release/
 
-## Candidate scope
-
-Uses the official zfnd/zebra:7.0.0 multi-platform index pinned to
-sha256:a70d2be8ffef3a4b6e37355724e36a0e6c1838e46baa28bfb216739f00cf2d34.
-Registry labels identify upstream revision e8db87eb69254e0d4eedd058eadd48bdfa09065a.
-Index contains linux/amd64 and linux/arm64; app-level ARM qualification is not claimed.
-
-Retains every existing bind mount, app image, RPC cookie location, legacy wallet
-directory, external payout record and storage gate. Waits for the existing
-storage gate and requires Mainnet. Extends shutdown grace to ten minutes.
-Does not run Zallet or zcashd, prune, reset, delete, rename or resync chain data.
-
-This is intentionally sync-only. The existing native coinbase helper uses
-zebra-chain 11.3.0 and its recorded NU7 vectors fail on the new branch ID.
-The candidate supplies no mining address to Zebra and removes the public
-Stratum port. Stored mining intent and payout addresses are not rewritten.
-The unchanged UI can still show saved mining intent; it is not evidence that
-NU7 mining works. Full mining support needs a separate helper/backend update,
-consensus-vector tests and physical-miner qualification. No fee changes.
-
-## Backup and migration
-
-Zebra 7 upgrades state/v28 to state/v29 automatically. The move is not prevented
-by delete_old_database=false. Zebra 6 cannot read v29.
-
-Before this beta update is installed:
-1. Stop the Zcash app cleanly through Umbrel and wait for its containers to stop.
-   Do not stop unrelated apps. Do not uninstall.
-2. Locate this installation's actual APP_DATA_DIR. Copy its entire zebra/state/v28
-   directory to a separate backup location with sufficient space while Zebra is
-   stopped. Preserve ownership, permissions and file contents; verify the copy.
-   Retain config, kraskus, legacy wallet files and existing recovery backups too.
-   Never send wallet files, seeds, private keys, RPC cookies or app tokens to support.
-3. Only after verifying that backup, create the plain-text file
-   APP_DATA_DIR/config/nu7-v28-backup-confirmed with exactly this line:
-   v28 backup verified
-   This acknowledgement is required when v28 exists. It does not create a backup.
-   Fresh installations with no v28 do not need it.
-4. Apply version 0.6.3 through Umbrel Main, then start the app.
-   Keep mining paused. Leave the old database backup untouched.
-5. Confirm logs report Zebra 7.0.0, Mainnet and successful state migration, and
-   that height advances beyond 3,543,405 toward the current chain tip.
-   A 99.9% label alone is not validation.
-6. If migration or syncing fails, stop the app and collect redacted logs, node
-   version, heights, peers and available disk space. Do not delete any database.
-
-Rollback requires a stopped node and the separate verified v28 backup, with the
-old and migrated databases retained separately. Do not launch Zebra 6 against
-v29 or rename/symlink v29 to v28. An old node cannot follow NU7, so rollback is
-for investigation/data recovery, not a way to resume current-chain operation.
-
-## Validation and release gates
-
-Completed locally: six tests exercise fresh startup, backup refusal, acknowledged
-upgrade startup, wrong-network refusal, storage-gate waiting and unchanged
-persistence/security. Shell syntax passes. Public old-image metadata and official
-new-image manifest/config were inspected; registry response digests were checked.
-The local tests use a stub entrypoint, not a real Zebra process. Docker Compose
-5.7.0 config validation passes with an injected platform app_proxy fixture. Shell
-command substitutions are escaped for Compose. No container execution is claimed.
-
-Not completed: image
-signature/provenance verification, vulnerability qualification, exact-image
-startup/RPC/cookie test, real empty bind-directory install, stopped v28 fixture
-migration/restart/data-preservation test, and Mainnet advancement past activation.
-No Docker runtime exists locally; QA SSH to vm161 timed out. No customer host was
-accessed or changed. The owner explicitly authorized publishing this sync-only beta
-to Umbrel Main without waiting for the full sync test. Remaining validation is not
-claimed complete. The beta tester must verify advancement beyond activation and
-report migration/startup failures before this can be called stable.
-Zebra 7.0.0 has a short upstream support window; recheck supported stable versions
-before publishing.
-
-## Customer guidance now
-
-We found an outdated bundled Zcash node that cannot follow the NU7 upgrade.
-Version 0.6.3 is a sync-recovery beta, with mining unavailable. Please do not
-uninstall, reset or delete blockchain data. Keep mining paused and preserve your
-wallet/recovery backups. Before updating, stop the app, make and verify the v28 backup, and complete the
-backup acknowledgement described above. Updating alone will deliberately keep
-Zebra stopped until that acknowledgement exists. If requested, provide only redacted app logs
-and node version/height information.
+Exact-image qualification passed in run 42667728639: 95 vectors, 142 gateway/job
+checks, 63 app regressions, node startup/authentication/non-root/restart checks,
+and a security scan with no reported high/critical vulnerabilities or secrets.
+Exact-image publication passed in run 42668758474; no rebuild occurred.

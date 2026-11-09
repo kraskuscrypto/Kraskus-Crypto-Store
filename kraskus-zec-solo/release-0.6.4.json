@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "app": "kraskus-zec-solo",
+  "version": "0.6.4",
+  "runtime_source_commit": "18f16b1babdc2761652a93a6e3253cc27c851832",
+  "source_pr": "https://github.com/kraskuscrypto/Kraskus-Mining-Platform/pull/21",
+  "backend": {
+    "app": "zec",
+    "role": "backend",
+    "repository": "ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller",
+    "version": "0.6.4",
+    "image_id": "sha256:f799e4feb728c62d76261717e41d632f48a314dc6659c37093ff0575119e7847",
+    "source_commit": "18f16b1babdc2761652a93a6e3253cc27c851832",
+    "reference": "ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller@sha256:c4feeac65b00521ff4c59b4e7e77f6addf73f073b70b1d2b50b07a1eb621392d",
+    "tag": "ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller:0.6.4"
+  },
+  "node": {
+    "version": "7.0.0",
+    "reference": "zfnd/zebra:7.0.0@sha256:a70d2be8ffef3a4b6e37355724e36a0e6c1838e46baa28bfb216739f00cf2d34",
+    "state_database_format": 29
+  },
+  "ui": {
+    "reference": "ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller@sha256:b2a490afdd1ae4808c1bed704a9e76761a1f282246986f4233ac85556cc3535a",
+    "carried_forward": true
+  },
+  "developer_fee_bps": 100,
+  "qualification_run": 42667728639,
+  "publication_run": 42668758474,
+  "checks": {
+    "checks": [
+      "coinbase-vectors",
+      "gateway-helper-contract",
+      "backend-regressions",
+      "supervisor-syntax",
+      "node-version",
+      "empty-bind-node-gate-cookie-rpc-restart-persistence",
+      "backend-security-scan",
+      "backend-helper-digest"
+    ],
+    "source_commit": "18f16b1babdc2761652a93a6e3253cc27c851832",
+    "full_sync": "delegated to owner tester; not run",
+    "physical_miner": "not available; not claimed",
+    "populated_v28_migration": "not run; upstream supported migration"
+  },
+  "preservation": "Existing chain, wallet, payout and Start/Stop records retained; supported Zebra database migration; no reset or manual acknowledgement file"
+}

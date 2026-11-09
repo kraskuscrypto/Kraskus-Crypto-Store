@@ -1,8 +1,8 @@
 id: kraskus-zec-solo
 name: Zcash by Kraskus
-tagline: NU7 sync-recovery beta - mining unavailable
-description: 'BETA sync-recovery update: Zebra 7.0.0 for NU7. Mining is unavailable in this sync-only beta. Existing chain and legacy wallet data are preserved. A stopped-node, verified v28 database backup is required before migration; see NU7-UPGRADE.md. Full-chain validation is delegated to the beta tester; sync recovery is not yet confirmed. External payout records and the fixed fee policy remain unchanged. No built-in wallet or pruning.'
-version: 0.6.3
+tagline: Zcash full node and solo mining pool
+description: 'Run a Zcash full node and solo mine to your external wallet. Version 0.6.4 updates Zebra to 7.0.0 and the coinbase helper for NU7 synchronization and mining. Existing blockchain data, legacy wallet files, payout settings and saved mining intent are preserved. No backup acknowledgement file is required. New installations remain paused until you confirm a transparent P2PKH (t1) payout address, synchronize the node and explicitly start mining. Connect Equihash (200,9) miners on port 3335. The fixed 1% developer fee applies only to the miner-controlled reward; required network allocations remain unchanged. No built-in wallet, seed prompt, send function, automatic shielding or pruning is provided. Preserve recovery backups when upgrading from a native-wallet release. The existing Mainnet storage preflight remains enforced. Kraskus Pool integration remains under development.'
+version: 0.6.4
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/
