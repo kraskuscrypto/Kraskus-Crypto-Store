@@ -1,0 +1,158 @@
+{
+  "services": {
+    "app_proxy": {
+      "environment": {
+        "APP_HOST": "ui",
+        "APP_PORT": 8080
+      }
+    },
+    "zallet-init": {
+      "image": "ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller:0.5.2@sha256:51c9eda6c7b601e200593f6a7b1cfab70f5fc31838508db88737f83038d1f157",
+      "user": "0:0",
+      "entrypoint": [
+        "/bin/sh",
+        "-c"
+      ],
+      "command": [
+        "mkdir -p /var/lib/zallet\nchown 10001:10001 /var/lib/zallet\nchmod 700 /var/lib/zallet\nmkdir -p /kraskus-config/app-token\nchown 0:0 /kraskus-config/app-token\nchmod 700 /kraskus-config/app-token\n"
+      ],
+      "volumes": [
+        "${APP_DATA_DIR}/kraskus/zallet:/var/lib/zallet",
+        "${APP_DATA_DIR}/config:/kraskus-config"
+      ],
+      "restart": "no",
+      "network_mode": "none",
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "cap_drop": [
+        "ALL"
+      ],
+      "cap_add": [
+        "CHOWN",
+        "DAC_OVERRIDE",
+        "FOWNER"
+      ]
+    },
+    "kraskus": {
+      "image": "ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller@sha256:a68b413b4d09d0fd56e33afd82b6a093ef7c4fea0f1b434bdc092da239f4669e",
+      "restart": "unless-stopped",
+      "depends_on": {
+        "zallet-init": {
+          "condition": "service_completed_successfully"
+        },
+        "zebra": {
+          "condition": "service_started"
+        }
+      },
+      "environment": {
+        "KRASKUS_BASE": "/data",
+        "KRASKUS_PACKAGED_MODE": "1",
+        "KRASKUS_ZEBRA_RPC_URL": "http://zebra:18232",
+        "KRASKUS_ZEBRA_COOKIE_FILE": "/zebra/.cookie",
+        "KRASKUS_ZALLET_RPC_URL": "http://127.0.0.1:28232",
+        "KRASKUS_ZALLET_SUPERVISOR_URL": "http://127.0.0.1:28233",
+        "KRASKUS_MINER_ADDRESS_FILE": "/kraskus-config/miner-address",
+        "KRASKUS_NETWORK_FILE": "/kraskus-config/network",
+        "KRASKUS_STRATUM_HOST": "0.0.0.0",
+        "KRASKUS_STRATUM_PORT": 3335,
+        "KRASKUS_STRATUM_HEALTH_HOST": "127.0.0.1",
+        "KRASKUS_STRATUM_HEALTH_PORT": 18402,
+        "KRASKUS_STRATUM_STATUS_URL": "http://127.0.0.1:18402/status",
+        "KRASKUS_APP_TOKEN_FILE": "/kraskus-config/app-token/token"
+      },
+      "volumes": [
+        "${APP_DATA_DIR}/kraskus:/data",
+        "${APP_DATA_DIR}/zebra:/zebra:ro",
+        "${APP_DATA_DIR}/config:/kraskus-config"
+      ],
+      "ports": [
+        "3335:3335"
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "cap_drop": [
+        "ALL"
+      ],
+      "cap_add": [
+        "DAC_OVERRIDE"
+      ]
+    },
+    "zebra": {
+      "image": "ghcr.io/kraskuscrypto/kraskus-zebra@sha256:abbbddd84563023df621f1eecceeb816da5c2951d9b60718133f131e1341c6d0",
+      "restart": "unless-stopped",
+      "entrypoint": [
+        "/bin/bash",
+        "-c",
+        "until [ -f /kraskus-config/zebra-start-allowed ]; do sleep 10; done; exec /usr/local/bin/kraskus-zebra-supervisor"
+      ],
+      "environment": {
+        "ZEBRA_NETWORK__LISTEN_ADDR": "0.0.0.0:18233",
+        "ZEBRA_RPC__LISTEN_ADDR": "0.0.0.0:18232",
+        "ZEBRA_RPC__COOKIE_DIR": "/home/zebra/.cache/zebra",
+        "ZEBRA_STATE__CACHE_DIR": "/home/zebra/.cache/zebra",
+        "KRASKUS_MINER_ADDRESS_FILE": "/kraskus-config/miner-address",
+        "KRASKUS_NETWORK_FILE": "/kraskus-config/network"
+      },
+      "volumes": [
+        "${APP_DATA_DIR}/zebra:/home/zebra/.cache/zebra",
+        "${APP_DATA_DIR}/config:/kraskus-config:ro"
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ]
+    },
+    "ui": {
+      "image": "ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller@sha256:b2a490afdd1ae4808c1bed704a9e76761a1f282246986f4233ac85556cc3535a",
+      "restart": "unless-stopped",
+      "depends_on": {
+        "zallet-init": {
+          "condition": "service_completed_successfully"
+        },
+        "kraskus": {
+          "condition": "service_started"
+        }
+      },
+      "environment": {
+        "ADAPTER_HOST": "kraskus"
+      },
+      "ports": [
+        "127.0.0.1:33062:8080/tcp"
+      ],
+      "volumes": [
+        "${APP_DATA_DIR}/config/app-token:/run/kraskus-app-token:ro"
+      ],
+      "stop_grace_period": "5s",
+      "healthcheck": {
+        "test": [
+          "CMD-SHELL",
+          "wget -q --spider http://127.0.0.1:8080/index.html"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "10s"
+      },
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "cap_drop": [
+        "ALL"
+      ],
+      "cap_add": [
+        "CHOWN",
+        "SETGID",
+        "SETUID"
+      ]
+    }
+  },
+  "x-5tratumos-secure-proxy": {
+    "version": 1,
+    "ui_service": "ui",
+    "ui_port": 8080,
+    "token_services": [
+      "kraskus"
+    ]
+  }
+}
