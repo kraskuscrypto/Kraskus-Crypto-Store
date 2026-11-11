@@ -130,7 +130,7 @@ services:
     - xmr_core
     - xmr_private
   ui:
-    image: "ghcr.io/kraskuscrypto/kraskus-5trat-xmr-ui@sha256:a2d00ece622cd8c2fb5831252dd73fa9293d3e714b4c131578d73bf764044164"
+    image: "ghcr.io/kraskuscrypto/kraskus-5trat-xmr-ui@sha256:9eebdf4da3f1171cf6f3141c0bd2dc175c8d16d28ce118f0c6ecf70568f5ea10"
     restart: unless-stopped
     depends_on:
       adapter:

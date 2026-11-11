@@ -1,7 +1,7 @@
 schemaVersion: 1
 status: approved
 appId: kraskus-xmr-solo
-appVersion: 0.3.6
+appVersion: 0.3.7
 reviewedAt: "2026-11-05"
 reviewedBy: "Owner-authorized promotion; Codex release verification"
 upstream:
