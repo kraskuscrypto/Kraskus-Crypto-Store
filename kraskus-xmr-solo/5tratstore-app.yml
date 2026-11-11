@@ -15,7 +15,7 @@ description: >-
   Native-wallet access is removed. Existing wallet files are preserved during
   an upgrade; they are never deleted, automatically swept or exposed by this app.
   Kraskus Pool remains under development.
-version: 0.3.6
+version: 0.3.7
 category: Mining
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/

@@ -1,0 +1,15 @@
+{
+  "version": "0.3.7",
+  "source_commit": "049a7fd25b9d3263618a7c0d1291f444b1cdf848",
+  "ui_reference": "ghcr.io/kraskuscrypto/kraskus-5trat-xmr-ui@sha256:9eebdf4da3f1171cf6f3141c0bd2dc175c8d16d28ce118f0c6ecf70568f5ea10",
+  "scope": "Natural displayed worker-name ordering in live list and history; no gateway, node, wallet or reward changes",
+  "tests": [
+    "natural numeric and case-insensitive labels",
+    "wallet prefix independent ordering",
+    "deterministic duplicate-label ties",
+    "unchanged input records",
+    "live and history integrations",
+    "exact shipped assets",
+    "base runtime unchanged"
+  ]
+}
