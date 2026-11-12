@@ -10,7 +10,7 @@
       ]
     },
     "init": {
-      "image": "ghcr.io/kraskuscrypto/kraskus-bsv-external-backend@sha256:b0fe13d0a00213e52622ce08033421342dcc34ff70fb916a372138080fec8908",
+      "image": "ghcr.io/kraskuscrypto/kraskus-bsv-external-backend@sha256:b17e565e8d8c4be8e621233bae2a8d71c5e28554a2549b481c6db070671fea2d",
       "restart": "no",
       "user": "0:0",
       "command": [
@@ -79,7 +79,7 @@
       "cpus": 2
     },
     "controller": {
-      "image": "ghcr.io/kraskuscrypto/kraskus-bsv-external-backend@sha256:b0fe13d0a00213e52622ce08033421342dcc34ff70fb916a372138080fec8908",
+      "image": "ghcr.io/kraskuscrypto/kraskus-bsv-external-backend@sha256:b17e565e8d8c4be8e621233bae2a8d71c5e28554a2549b481c6db070671fea2d",
       "restart": "unless-stopped",
       "user": "10001:10001",
       "command": [
@@ -136,7 +136,7 @@
       "init": true
     },
     "api": {
-      "image": "ghcr.io/kraskuscrypto/kraskus-bsv-external-backend@sha256:668cbc477cc806a60c03715a91eb308a057aca6e5b191e115e3b4f08bdb8a2fc",
+      "image": "ghcr.io/kraskuscrypto/kraskus-bsv-external-backend@sha256:9958c3fb0e704ca3842d0c86a1fd4d395219e42565d82c024fe89a7f25f31051",
       "restart": "unless-stopped",
       "user": "10001:10001",
       "command": [
