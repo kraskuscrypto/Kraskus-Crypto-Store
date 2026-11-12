@@ -10,7 +10,7 @@
       ]
     },
     "runtime-init": {
-      "image": "ghcr.io/kraskuscrypto/kraskus-xbt-ui@sha256:bcbdb6a0151c839c908263cde1ca93bddeba9c28626656acadb498a9de50de4c",
+      "image": "ghcr.io/kraskuscrypto/kraskus-xbt-ui@sha256:3f9385b7c4dd2028bfafb941a8ad3b998b46d83122d055426070d209eef7f65a",
       "restart": "no",
       "security_opt": [
         "no-new-privileges:true"
@@ -70,7 +70,7 @@
       }
     },
     "datum": {
-      "image": "ghcr.io/kraskuscrypto/kraskus-xbt-ui@sha256:ffa7b4e81acaebb1f4bc8321a80333758c7181108f0e267f26455c833c993316",
+      "image": "ghcr.io/kraskuscrypto/kraskus-xbt-ui@sha256:f8cda2ae748eb7de4e7d50c932688791d33343ac944d9183d114ae5c301abe87",
       "restart": "unless-stopped",
       "security_opt": [
         "no-new-privileges:true"
@@ -124,7 +124,7 @@
       }
     },
     "adapter": {
-      "image": "ghcr.io/kraskuscrypto/kraskus-xbt-ui@sha256:d8d3dbf3e1d00fa4595f331659f65419eaa942a6369b0b46de3196d22bf9e83b",
+      "image": "ghcr.io/kraskuscrypto/kraskus-xbt-ui@sha256:3f9385b7c4dd2028bfafb941a8ad3b998b46d83122d055426070d209eef7f65a",
       "restart": "unless-stopped",
       "security_opt": [
         "no-new-privileges:true"
