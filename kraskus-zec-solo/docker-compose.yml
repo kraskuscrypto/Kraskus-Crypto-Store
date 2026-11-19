@@ -105,7 +105,7 @@
       "stop_grace_period": "10m"
     },
     "ui": {
-      "image": "ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller@sha256:b2a490afdd1ae4808c1bed704a9e76761a1f282246986f4233ac85556cc3535a",
+      "image": "ghcr.io/kraskuscrypto/kraskus-zec-solo-wallet-controller@sha256:94701d197792a48fe871c9b47e00ef6147b83a4a953a5667325c63805f704f7b",
       "restart": "unless-stopped",
       "depends_on": {
         "zallet-init": {

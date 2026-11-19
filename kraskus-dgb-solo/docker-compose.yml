@@ -272,7 +272,7 @@ services:
       - dgb_private
 
   ui:
-    image: "ghcr.io/kraskuscrypto/kraskus-dgb-solo-ui@sha256:dec49aee468dfc1c5b57f2dea659d4f03a8081edacf02320da421415ee1a4da0"
+    image: "ghcr.io/kraskuscrypto/kraskus-dgb-solo-ui@sha256:dd7fe787567b642ee1cbe05c4e8ba60a3b7cc03119806c563a4324688d983f7a"
     pull_policy: missing
     restart: unless-stopped
     depends_on:

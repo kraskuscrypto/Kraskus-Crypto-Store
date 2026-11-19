@@ -185,7 +185,7 @@
       }
     },
     "ui": {
-      "image": "ghcr.io/kraskuscrypto/kraskus-xbt-ui@sha256:ff4d115afd80e0db881f249bd3d4dfaeb1d76c1e3cc86228f776ea4320315a60",
+      "image": "ghcr.io/kraskuscrypto/kraskus-xbt-ui@sha256:8a35b2bd3fba6d765ca3280fcede4e582a1e1af90f5b086a930da000906ba231",
       "restart": "unless-stopped",
       "security_opt": [
         "no-new-privileges:true"

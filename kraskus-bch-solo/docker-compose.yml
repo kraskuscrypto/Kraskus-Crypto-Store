@@ -73,7 +73,7 @@ services:
     stop_grace_period: 30s
 
   ui:
-    image: "ghcr.io/kraskuscrypto/kraskus-bch-solo-ui@sha256:48533ec8df9e055ca8b7584c01009539c637c111c04269dc585ceff3ebfb8436"
+    image: "ghcr.io/kraskuscrypto/kraskus-bch-solo-ui@sha256:548c6c3aa8c3d2e0477510e8dcd2406ae2304a0d729f83243c17aa79b651d30c"
     cap_drop: [ALL]
     cap_add: [CHOWN, SETGID, SETUID, DAC_READ_SEARCH]
     security_opt: ['no-new-privileges:true']
