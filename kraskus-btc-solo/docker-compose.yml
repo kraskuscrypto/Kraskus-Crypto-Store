@@ -107,7 +107,7 @@ services:
       start_period: 10s
     stop_grace_period: 30s
   ui:
-    image: "ghcr.io/kraskuscrypto/kraskus-btc-solo-ui@sha256:54e9c74f2b5bf9da6bb26cd20f268497ee0337c7cd0bb073c528077e76adc373"
+    image: "ghcr.io/kraskuscrypto/kraskus-btc-solo-ui@sha256:e8588124405e1afa5356c0f068d04cccf41069ded408bd92dbd02e5ebeee2f84"
     cap_drop:
     - ALL
     cap_add:

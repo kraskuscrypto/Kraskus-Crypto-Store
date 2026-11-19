@@ -283,7 +283,7 @@
         ],
         "timeout": "10s"
       },
-      "image": "ghcr.io/kraskuscrypto/kraskus-prl-solo-ui@sha256:69271100ffcab4a32362c2cb716c2c26cf04030dad755e94f599badae9dd93fe",
+      "image": "ghcr.io/kraskuscrypto/kraskus-prl-solo-ui@sha256:81c64a7904e6151dc0847ac90d8b8b57abcbf447fbfce6a22ac81b5826d6db29",
       "networks": {
         "internal": null,
         "public": null

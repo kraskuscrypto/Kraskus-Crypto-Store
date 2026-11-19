@@ -15,3 +15,8 @@ Source: https://github.com/kraskuscrypto/Kraskus-Mining-Platform/tree/fc34e8511d
 ## Kraskus Pool integration — Under Development
 
 The Pool tab previews planned solo/pool switching, scheduled times with an explicit time zone, invite-only private mining groups, optional connection fallback and clear mode/fee/reward status. These controls are not implemented yet; support depends on the coin and pool. The introduction does not change current mining, payout addresses or fees. See pool-tab-update.json for the exact UI image and validation scope.
+
+
+## Community links
+
+This UI update adds [Discord](https://discord.gg/P8qb9PXG7) and [X](https://x.com/KraskusCrypto) to the app header. Links open in a separate tab. Mining, wallets, fees and payout behavior are unchanged. Existing app data is retained.

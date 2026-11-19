@@ -1,0 +1,15 @@
+Community header update — 0.5.14
+
+Discord: https://discord.gg/P8qb9PXG7
+X: https://x.com/KraskusCrypto
+
+Header links only. Desktop, 375px and 320px layouts in light/dark modes passed.
+All original image filesystem layers and runtime settings remain unchanged; only
+the allowlisted frontend assets are added or replaced. No miner protocol, wallet,
+fee, payout, storage, network, authentication or startup setting changes.
+No node or mining service was started to qualify this UI update. Prior lifecycle
+and coin-specific test evidence applies to the preserved base; no new hardware
+or full OS lifecycle qualification is claimed. Use the ordinary app update path.
+
+Exact source base: ghcr.io/kraskuscrypto/kraskus-bch-solo-ui@sha256:48533ec8df9e055ca8b7584c01009539c637c111c04269dc585ceff3ebfb8436
+Header source: https://github.com/kraskuscrypto/Kraskus-Mining-Platform/tree/ui/social-links-20261119/releases/app-social-links-20261119/contexts/943c25f6bec7

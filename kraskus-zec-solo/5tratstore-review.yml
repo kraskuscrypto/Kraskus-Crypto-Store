@@ -8,7 +8,7 @@ notes: External-payout template:63 exact-code runtime checks,98 real coinbase-he
   wallet reconciliation/shielding or native payout adoption. No new physical Equihash
   miner, independent full-chain lifecycle or NU7 qualification claimed. Protected
   root migration required for existing wallets.
-appVersion: 0.6.2
+appVersion: 0.6.5
 releaseNotes:
 - 0.6.0 adopts the external-payout template and removes native wallet controls. Legacy
   wallet files and funds are retained; the daemon is retired through a protected migration.
